@@ -226,7 +226,7 @@ const App: React.FC = () => {
     let mounted = true;
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/samples/');
+        const res = await fetch('/genetics/samples/');
         if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
         const data: Sample[] = await res.json();
         if (!mounted) return;
