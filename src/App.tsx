@@ -8,6 +8,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Chart as ChartJS, Tooltip, ArcElement } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import mainLogo from '/iranicdna/logo.jpg';
+
 
 ChartJS.register(Tooltip, ArcElement);
 
@@ -49,9 +51,7 @@ const Header: React.FC = () => (
     <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center ring-1 ring-white/10">
-          <svg viewBox="0 0 24 24" className="w-7 h-7 text-white/90" fill="none" stroke="currentColor">
-            <path d="M12 2v20M2 12h20" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <img src={mainLogo} alt="IranicDNA" />
         </div>
         <div>
           <h1 className="text-xl md:text-2xl font-semibold">Iranic DNA</h1>
