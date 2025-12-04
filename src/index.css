@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Iranic/Persian Color Palette:
+- Deep background blue (Lapis Lazuli)
+- Gold/Saffron accent
+- Warmer header/card color
+*/
+:root {
+  --color-bg: #0b1424;      /* Very Dark Blue/Lapis Lazuli base */
+  --color-card: #152238;    /* Slightly lighter for cards (Midnight Blue) */
+  --color-header: #1e3355;  /* Deeper blue for header/borders */
+  --color-accent: #d4af37;  /* Gold/Saffron for primary accent */
+  --color-secondary: #f4d03f; /* Lighter Gold for subtle highlights */
+  --color-border: #1e3355;
+  --color-text: #ffffff;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+}
