@@ -12,15 +12,15 @@ interface Sample {
 }
 
 const PALETTE = [
-  '#D97706',
-  '#F59E0B',
-  '#C2410C',
-  '#78350F',
-  '#92400E',
-  '#FFD700',
-  '#A55E2E',
-  '#8B4513',
-  '#B45309',
+  '#D97706', // amber-500 (warm gold)
+  '#C2410C', // orange-600 (rich terracotta)
+  '#A55E2E', // Deep terracotta (mid-tone brown)
+  '#8B4513', // SaddleBrown (deep but not black)
+  '#B45309', // orange-700 (warm accent)
+  '#F59E0B', // amber-400 (softer gold)
+  '#92400E', // amber-700 (balanced brown)
+  '#78350F', // amber-900 (deep, but not pure black)
+  '#FFD700', // Gold (used sparingly for highlights)
   '#D97706',
 ];
 
@@ -33,7 +33,7 @@ const colorFor = (key: string) => {
 const fmt = (n: number) => n.toLocaleString();
 
 const Header: React.FC = () => (
-  <header className="bg-gradient-to-r from-amber-900 to-orange-900 text-slate-50 shadow-sm">
+  <header className="bg-gradient-to-r from-amber-800 to-orange-700 text-slate-50 shadow-sm">
     <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center ring-1 ring-white/10">
@@ -96,7 +96,7 @@ const ProvinceSelector: React.FC<{
         <select
           value={value ?? ''}
           onChange={(e) => onChange(e.target.value || null)}
-          className="w-full rounded-lg bg-amber-950 text-amber-100 px-4 py-2 border border-amber-700"
+          className="w-full rounded-lg bg-amber-900 text-amber-100 px-4 py-2 border border-amber-600"
         >
           <option value="">All Provinces</option>
           {provinces.map((p) => (
@@ -107,7 +107,7 @@ const ProvinceSelector: React.FC<{
         <div className="relative">
           <button
             onClick={() => onChange(value === null ? '' : null)}
-            className="w-full text-left rounded-lg px-4 py-3 bg-amber-950 text-amber-100 flex justify-between items-center ring-1 ring-amber-700 hover:ring-amber-500"
+            className="w-full text-left rounded-lg px-4 py-3 bg-amber-900 text-amber-100 flex justify-between items-center ring-1 ring-amber-600 hover:ring-amber-500"
             aria-expanded="false"
           >
             <span>{value ?? 'All Provinces'}</span>
@@ -116,13 +116,13 @@ const ProvinceSelector: React.FC<{
           <div className="mt-2 grid grid-cols-3 gap-2 p-2">
             <button
               onClick={() => onChange(null)}
-              className="col-span-3 text-sm rounded-md px-3 py-2 bg-amber-900 text-amber-100"
+              className="col-span-3 text-sm rounded-md px-3 py-2 bg-amber-800 text-amber-100"
             >All Provinces</button>
             {provinces.map((p) => (
               <button
                 key={p}
                 onClick={() => onChange(p)}
-                className={`text-sm rounded-md px-3 py-2 text-left truncate ${value === p ? 'bg-amber-600 text-white' : 'bg-amber-900 text-amber-100'}`}
+                className={`text-sm rounded-md px-3 py-2 text-left truncate ${value === p ? 'bg-amber-600 text-white' : 'bg-amber-800 text-amber-100'}`}
                 title={p}
               >
                 {p}
@@ -149,7 +149,7 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
         data: values,
         backgroundColor: colors,
         borderWidth: 2,
-        borderColor: '#1c1917',
+        borderColor: '#3f271b',
       },
     ],
   };
@@ -165,7 +165,7 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
   };
 
   return (
-    <div className="rounded-2xl p-5 bg-gradient-to-b from-amber-950/60 to-stone-950/60 ring-1 ring-amber-700/30 shadow-md">
+    <div className="rounded-2xl p-5 bg-gradient-to-b from-amber-900/60 to-stone-800/60 ring-1 ring-amber-600/30 shadow-md">
       <h3 className="text-lg font-semibold text-amber-100 mb-3">{title}</h3>
       <div className="flex items-center gap-6 flex-col md:flex-row">
         <div className="w-48 h-48">
@@ -174,7 +174,7 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-2">
             {labels.map((label, idx) => (
-              <div key={label} className="flex items-center justify-between bg-amber-950/40 px-3 py-2 rounded-md">
+              <div key={label} className="flex items-center justify-between bg-amber-900/40 px-3 py-2 rounded-md">
                 <div className="flex items-center gap-3">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx] }} />
                   <div className="truncate">
@@ -195,11 +195,11 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
 const SubcladeList: React.FC<{ title: string; items: [string, number][] }> = ({ title, items }) => {
   if (items.length === 0) return null;
   return (
-    <div className="rounded-2xl p-5 bg-amber-950/60 ring-1 ring-amber-700/30 shadow-sm">
+    <div className="rounded-2xl p-5 bg-amber-900/60 ring-1 ring-amber-600/30 shadow-sm">
       <h3 className="text-lg font-semibold text-amber-100 mb-3">{title}</h3>
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
         {items.map(([name, count]) => (
-          <div key={name} className="flex items-center justify-between p-2 rounded-md bg-amber-950/40">
+          <div key={name} className="flex items-center justify-between p-2 rounded-md bg-amber-900/40">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: `${colorFor(name)}22` }}>
                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: colorFor(name) }} />
@@ -274,16 +274,16 @@ const App: React.FC = () => {
   const mSub = Object.entries(subMap('mt_dna')).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 
   if (loading) return (
-    <div className="min-h-screen bg-stone-950 text-amber-100 flex items-center justify-center">
+    <div className="min-h-screen bg-stone-800 text-amber-100 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-pulse mb-4 text-lg">Loading genetic data...</div>
-        <div className="text-sm text-amber-400">This will fetch from <code className="bg-stone-900 px-2 py-1 rounded">/api/samples/</code></div>
+        <div className="text-sm text-amber-400">This will fetch from <code className="bg-stone-700 px-2 py-1 rounded">/api/samples/</code></div>
       </div>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen bg-stone-950 text-amber-100 flex items-center justify-center">
+    <div className="min-h-screen bg-stone-800 text-amber-100 flex items-center justify-center">
       <div className="max-w-xl text-center">
         <h2 className="text-2xl font-semibold mb-2">Error loading data</h2>
         <p className="text-sm text-amber-400">{error}</p>
@@ -296,11 +296,11 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen text-amber-100 relative overflow-hidden">
       <div
-        className="fixed inset-0 z-[-1] bg-[#1c1917]"
+        className="fixed inset-0 z-[-1]"
         style={{
-          background: `linear-gradient(125deg, #1c1917 0%, #D97706 50%, #FFD700 100%)`,
+          background: `linear-gradient(125deg, #3f271b 0%, #D97706 50%, #F59E0B 100%)`,
           backgroundSize: '400% 400%',
-          animation: 'gradientShift 12s ease infinite',
+          animation: 'gradientShift 15s ease infinite',
         }}
       ></div>
 
@@ -328,7 +328,7 @@ const App: React.FC = () => {
         </section>
 
         {!hasAny ? (
-          <div className="rounded-2xl p-8 bg-stone-900/40 text-center">
+          <div className="rounded-2xl p-8 bg-stone-700/40 text-center">
             <p className="text-amber-400">No haplogroup data available for the selected filter.</p>
           </div>
         ) : (
@@ -343,7 +343,7 @@ const App: React.FC = () => {
         )}
 
         <section id="about" className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 rounded-2xl p-6 bg-stone-900/40">
+          <div className="md:col-span-2 rounded-2xl p-6 bg-stone-700/40">
             <h3 className="text-xl font-semibold">About the Project</h3>
             <p className="mt-2 text-amber-400">Iranic DNA is a community‑driven project to document and visualise the genetic diversity across Iranian provinces. Contributors can upload haplogroup assignments and metadata which help researchers visualize regional patterns.</p>
             <ul className="mt-3 text-amber-400 list-disc pl-5 space-y-1">
@@ -352,15 +352,15 @@ const App: React.FC = () => {
               <li>Province-level filtering and downloadable CSV</li>
             </ul>
           </div>
-          <div id="contact" className="rounded-2xl p-6 bg-gradient-to-t from-amber-900/40 to-stone-900/20">
+          <div id="contact" className="rounded-2xl p-6 bg-gradient-to-t from-amber-700/40 to-stone-700/20">
             <h4 className="text-lg font-semibold">Want to contribute?</h4>
             <p className="text-amber-200 text-sm mt-2">Get in touch or upload your anonymized data to improve coverage.</p>
-            <a href="https://t.me/Iranic_DNA" className="inline-block mt-4 px-4 py-2 rounded-md bg-amber-950/30 hover:bg-amber-950/50">Contact Us</a>
+            <a href="https://t.me/Iranic_DNA" className="inline-block mt-4 px-4 py-2 rounded-md bg-amber-800/30 hover:bg-amber-800/50">Contact Us</a>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stone-800/60 py-6">
+      <footer className="border-t border-stone-700/60 py-6">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-amber-400">© {new Date().getFullYear()} Iranic DNA Project — Preserving genetic heritage</p>
           <p className="text-sm text-amber-400">Designed by <a href="https://qizilbash.ir" target="_blank" rel="noreferrer" className="underline">Qızılbaş</a></p>
