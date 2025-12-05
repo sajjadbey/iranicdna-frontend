@@ -5,7 +5,6 @@ import mainLogo from './assets/logo.png';
 
 // Lucide Icons
 import {
-  MapPin,
   Dna,
   Filter,
   ChevronDown,
@@ -396,8 +395,7 @@ const App: React.FC = () => {
             © {new Date().getFullYear()} <span className="font-bold">Iranic DNA</span> — Preserving genetic identity
           </p>
           <div className="flex items-center gap-2 text-sm text-teal-400">
-            <MapPin size={14} />
-            <span>Tabriz · East Azerbaijan</span>
+            <p>Designed by <a href="https://qizilbash.ir" target="_blank" rel="noreferrer" className="font-bold underline">Qızılbaş</a></p>
           </div>
         </div>
       </footer>
