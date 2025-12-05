@@ -47,32 +47,34 @@ const fmt = (n: number) => n.toLocaleString();
 
 // -------------------- Header --------------------
 const Header: React.FC = () => (
-  <header className="bg-gradient-to-r from-cyan-600 to-indigo-700 text-slate-50">
-    <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center ring-1 ring-white/10">
-          <img src={mainLogo} alt="IranicDNA" />
-        </div>
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold">Iranic DNA</h1>
-          <p className="text-xs text-white/80">Mapping Y‑DNA & mtDNA haplogroups across Iranian provinces</p>
-        </div>
+  <header className="bg-gradient-to-r from-cyan-600 to-indigo-700 text-slate-50 shadow-sm">
+  <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center ring-1 ring-white/10">
+        <img src={mainLogo} className="h-12 w-12 object-contain" alt="IranicDNA" />
       </div>
-
-      <nav className="flex items-center gap-4">
-        <a className="text-sm font-medium hover:underline" href="#about">About</a>
-        <a className="text-sm font-medium hover:underline" href="#contact">Contact</a>
-        <a
-          href="https://qizilbash.ir"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-md text-sm hover:bg-white/20"
-        >
-          Qızılbaş
-        </a>
-      </nav>
+      <div>
+        <h1 className="text-lg font-bold tracking-tight">Iranic DNA</h1>
+        <p className="text-[0.65rem] text-white/70 mt-0.5">Y-DNA & mtDNA across Iranian provinces</p>
+      </div>
     </div>
-  </header>
+
+    <nav className="flex items-center gap-3">
+      <a
+        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
+        href="#about"
+      >
+        About
+      </a>
+      <a
+        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
+        href="#contact"
+      >
+        Contact
+      </a>
+    </nav>
+  </div>
+</header>
 );
 
 // -------------------- Province Selector (responsive) --------------------
