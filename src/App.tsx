@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Chart as ChartJS, Tooltip, ArcElement } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import mainLogo from '/logo.jpg';
+import mainLogo from './assets/logo.png';
 
 
 ChartJS.register(Tooltip, ArcElement);
