@@ -145,7 +145,11 @@ const ProvinceSelector: React.FC<{
   );
 };
 
-const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = ({ title, dataMap }) => {
+const DonutCard: React.FC<{ 
+  title: string; 
+  dataMap: Record<string, number>;
+  total: number;
+}> = ({ title, dataMap, total }) => {
   const labels = Object.keys(dataMap);
   const values = Object.values(dataMap);
   if (labels.length === 0) return null;
@@ -177,7 +181,7 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
   return (
     <div className="rounded-2xl p-5 bg-gradient-to-b from-teal-900/60 to-slate-900/70 ring-1 ring-teal-600/40 shadow-lg">
       <h3 className="text-lg font-semibold text-teal-100 mb-3 flex items-center gap-2">
-        <Dna size={18} /> {title}
+        <Dna size={18} /> {title} <span className="text-teal-300 ml-2">(n = {fmt(total)})</span>
       </h3>
       <div className="flex items-center gap-6 flex-col md:flex-row">
         <div className="w-48 h-48">
@@ -185,18 +189,22 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-2">
-            {labels.map((label, idx) => (
-              <div key={label} className="flex items-center justify-between bg-teal-900/40 px-3 py-2 rounded-md">
-                <div className="flex items-center gap-3">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx] }} />
-                  <div className="truncate">
-                    <div className="text-sm text-teal-200 truncate">{label}</div>
-                    <div className="text-xs text-teal-400">{values[idx]} sample{values[idx] > 1 ? 's' : ''}</div>
+            {labels.map((label, idx) => {
+              const value = values[idx];
+              const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+              return (
+                <div key={label} className="flex items-center justify-between bg-teal-900/40 px-3 py-2 rounded-md">
+                  <div className="flex items-center gap-3">
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx] }} />
+                    <div className="truncate">
+                      <div className="text-sm text-teal-200 truncate">{label}</div>
+                      <div className="text-xs text-teal-400">{value} sample{value > 1 ? 's' : ''} ({pct}%)</div>
+                    </div>
                   </div>
+                  <div className="text-sm font-medium text-teal-100">{fmt(value)}</div>
                 </div>
-                <div className="text-sm font-medium text-teal-100">{fmt(values[idx])}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -204,26 +212,35 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
   );
 };
 
-const SubcladeList: React.FC<{ title: string; items: [string, number][] }> = ({ title, items }) => {
+const SubcladeList: React.FC<{ title: string; items: [string, number][]; total: number }> = ({ 
+  title, 
+  items,
+  total 
+}) => {
   if (items.length === 0) return null;
   return (
     <div className="rounded-2xl p-5 bg-teal-900/60 ring-1 ring-teal-600/40 shadow-sm">
-      <h3 className="text-lg font-semibold text-teal-100 mb-3">{title}</h3>
+      <h3 className="text-lg font-semibold text-teal-100 mb-3">
+        {title} <span className="text-teal-300 ml-2">(n = {fmt(total)})</span>
+      </h3>
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
-        {items.map(([name, count]) => (
-          <div key={name} className="flex items-center justify-between p-2 rounded-md bg-teal-900/40">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: `${colorFor(name)}22` }}>
-                <Dna size={15} style={{ color: colorFor(name) }} />
+        {items.map(([name, count]) => {
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          return (
+            <div key={name} className="flex items-center justify-between p-2 rounded-md bg-teal-900/40">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: `${colorFor(name)}22` }}>
+                  <Dna size={15} style={{ color: colorFor(name) }} />
+                </div>
+                <div className="truncate">
+                  <div className="text-sm text-teal-100 font-mono truncate">{name}</div>
+                  <div className="text-xs text-teal-300">{count} sample{count > 1 ? 's' : ''} ({pct}%)</div>
+                </div>
               </div>
-              <div className="truncate">
-                <div className="text-sm text-teal-100 font-mono truncate">{name}</div>
-                <div className="text-xs text-teal-300">{count} sample{count > 1 ? 's' : ''}</div>
-              </div>
+              <div className="text-sm font-semibold text-teal-100">{count}</div>
             </div>
-            <div className="text-sm font-semibold text-teal-100">{count}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -276,6 +293,10 @@ const App: React.FC = () => {
   const yRoot = countMap('y_dna');
   const mRoot = countMap('mt_dna');
 
+  // Compute totals
+  const yTotal = Object.values(yRoot).reduce((sum, n) => sum + n, 0);
+  const mTotal = Object.values(mRoot).reduce((sum, n) => sum + n, 0);
+
   const subMap = (field: 'y_dna' | 'mt_dna') => {
     return filtered.reduce((acc: Record<string, number>, s) => {
       const v = s[field];
@@ -287,8 +308,14 @@ const App: React.FC = () => {
     }, {});
   };
 
-  const ySub = Object.entries(subMap('y_dna')).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  const mSub = Object.entries(subMap('mt_dna')).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const ySubObj = subMap('y_dna');
+  const mSubObj = subMap('mt_dna');
+  const ySub = Object.entries(ySubObj).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const mSub = Object.entries(mSubObj).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+  // Subclade totals (same as root totals since same data source)
+  const ySubTotal = Object.values(ySubObj).reduce((sum, n) => sum + n, 0);
+  const mSubTotal = Object.values(mSubObj).reduce((sum, n) => sum + n, 0);
 
   if (loading) return (
     <div className="min-h-screen bg-slate-900 text-teal-100 flex flex-col items-center justify-center">
@@ -347,11 +374,11 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <DonutCard title="Y‑DNA Root Haplogroups" dataMap={yRoot} />
-            <DonutCard title="mtDNA Root Haplogroups" dataMap={mRoot} />
+            <DonutCard title="Y‑DNA Root Haplogroups" dataMap={yRoot} total={yTotal} />
+            <DonutCard title="mtDNA Root Haplogroups" dataMap={mRoot} total={mTotal} />
             <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SubcladeList title="Y‑DNA Subclades" items={ySub} />
-              <SubcladeList title="mtDNA Subclades" items={mSub} />
+              <SubcladeList title="Y‑DNA Subclades" items={ySub} total={ySubTotal} />
+              <SubcladeList title="mtDNA Subclades" items={mSub} total={mSubTotal} />
             </div>
           </div>
         )}
