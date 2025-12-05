@@ -1,10 +1,3 @@
-// IranicDNA_Redesign.tsx
-// Single-file React + TypeScript redesign using TailwindCSS
-// - Modern responsive UI/UX tailored for a DNA haplogroup project
-// - Replaces CSS variables with Tailwind utility classes
-// - Includes components: Header, ProvinceSelector, DonutChart, Subclade lists, Footer
-// - Keep your existing API endpoint; drop-in replacement for src/App.tsx
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { Chart as ChartJS, Tooltip, ArcElement } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
@@ -12,40 +5,33 @@ import mainLogo from './assets/logo.png';
 
 ChartJS.register(Tooltip, ArcElement);
 
-// -------------------- Types --------------------
 interface Sample {
   province: string;
   y_dna: { root_haplogroup: string; name: string } | null;
   mt_dna: { root_haplogroup: string; name: string } | null;
 }
 
-// -------------------- Utilities --------------------
-// Deterministic pastel-ish color palette (tailwind-friendly hexes)
-// This palette is now inspired by the logo's warm, earthy tones.
 const PALETTE = [
-  '#D97706', // amber-500 (main gold)
-  '#F59E0B', // amber-400 (brighter gold)
-  '#C2410C', // orange-600 (deep amber)
-  '#78350F', // amber-900 (dark brown)
-  '#92400E', // amber-700 (rich brown)
-  '#FFD700', // Gold (for accents)
-  '#A55E2E', // Deep terracotta
-  '#8B4513', // SaddleBrown (for depth)
-  '#B45309', // orange-700 (warm accent)
+  '#D97706',
+  '#F59E0B',
+  '#C2410C',
+  '#78350F',
+  '#92400E',
+  '#FFD700',
+  '#A55E2E',
+  '#8B4513',
+  '#B45309',
   '#D97706',
 ];
 
 const colorFor = (key: string) => {
-  // deterministic mapping
   let hash = 0;
   for (let i = 0; i < key.length; i++) hash = (hash << 5) - hash + key.charCodeAt(i);
   return PALETTE[Math.abs(hash) % PALETTE.length];
 };
 
-// Format number (simple)
 const fmt = (n: number) => n.toLocaleString();
 
-// -------------------- Header --------------------
 const Header: React.FC = () => (
   <header className="bg-gradient-to-r from-amber-900 to-orange-900 text-slate-50 shadow-sm">
     <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -58,7 +44,6 @@ const Header: React.FC = () => (
           <p className="text-[0.65rem] text-white/70 mt-0.5">Y-DNA & mtDNA across Iranian provinces</p>
         </div>
       </div>
-
       <nav className="flex items-center gap-3">
         <a
           href="#about"
@@ -97,13 +82,11 @@ const Header: React.FC = () => (
   </header>
 );
 
-// -------------------- Province Selector (responsive) --------------------
 const ProvinceSelector: React.FC<{
   provinces: string[];
   value: string | null;
   onChange: (p: string | null) => void;
 }> = ({ provinces, value, onChange }) => {
-  // Use native select on small screens, custom dropdown for larger screens
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
 
   return (
@@ -152,7 +135,6 @@ const ProvinceSelector: React.FC<{
   );
 };
 
-// -------------------- Donut Chart --------------------
 const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = ({ title, dataMap }) => {
   const labels = Object.keys(dataMap);
   const values = Object.values(dataMap);
@@ -210,7 +192,6 @@ const DonutCard: React.FC<{ title: string; dataMap: Record<string, number> }> = 
   );
 };
 
-// -------------------- Subclade List --------------------
 const SubcladeList: React.FC<{ title: string; items: [string, number][] }> = ({ title, items }) => {
   if (items.length === 0) return null;
   return (
@@ -236,7 +217,6 @@ const SubcladeList: React.FC<{ title: string; items: [string, number][] }> = ({ 
   );
 };
 
-// -------------------- Main App --------------------
 const App: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [provinces, setProvinces] = useState<string[]>([]);
@@ -267,7 +247,6 @@ const App: React.FC = () => {
 
   const filtered = useMemo(() => (selected ? samples.filter(s => s.province === selected) : samples), [samples, selected]);
 
-  // Root haplogroup counts
   const countMap = (field: 'y_dna' | 'mt_dna') => {
     return filtered.reduce((acc: Record<string, number>, s) => {
       const v = s[field];
@@ -281,7 +260,6 @@ const App: React.FC = () => {
   const yRoot = countMap('y_dna');
   const mRoot = countMap('mt_dna');
 
-  // Subclade maps
   const subMap = (field: 'y_dna' | 'mt_dna') => {
     return filtered.reduce((acc: Record<string, number>, s) => {
       const v = s[field];
@@ -316,32 +294,21 @@ const App: React.FC = () => {
   const hasAny = Object.keys(yRoot).length > 0 || Object.keys(mRoot).length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-950 via-amber-900 to-stone-950 text-amber-100">
-      {/* Animated Gradient Background */}
+    <div className="min-h-screen text-amber-100 relative overflow-hidden">
       <div
-        className="fixed inset-0 -z-10"
+        className="fixed inset-0 z-[-1] bg-[#1c1917]"
         style={{
-          background: `
-            radial-gradient(circle at 20% 20%, #1c1917 0%, #1c1917 25%, transparent 25%),
-            radial-gradient(circle at 80% 80%, #FFD700 0%, #FFD700 25%, transparent 25%),
-            radial-gradient(circle at 50% 50%, #D97706 0%, #D97706 25%, transparent 25%),
-            linear-gradient(to bottom right, #1c1917, #D97706, #FFD700)
-          `,
-          animation: 'gradientShift 15s ease infinite',
+          background: `linear-gradient(125deg, #1c1917 0%, #D97706 50%, #FFD700 100%)`,
+          backgroundSize: '400% 400%',
+          animation: 'gradientShift 12s ease infinite',
         }}
       ></div>
 
       <style>{`
         @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
 
@@ -375,7 +342,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* About & CTA */}
         <section id="about" className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 rounded-2xl p-6 bg-stone-900/40">
             <h3 className="text-xl font-semibold">About the Project</h3>
