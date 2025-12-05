@@ -52,8 +52,8 @@ const Header: React.FC = () => (
   <header className="bg-gradient-to-r from-teal-900/90 to-amber-800/90 text-slate-50 shadow-sm backdrop-blur-md sticky top-0 z-40">
     <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-md bg-white/10 flex items-center justify-center ring-1 ring-white/20">
-          <img src={mainLogo} className="h-8 w-8 object-contain" alt="IranicDNA" />
+        <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+          <img src={mainLogo} className="h-12 w-12 object-contain" alt="IranicDNA" />
         </div>
         <div>
           <h1 className="text-lg font-bold tracking-tight flex items-center gap-1">
