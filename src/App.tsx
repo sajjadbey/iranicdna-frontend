@@ -22,6 +22,7 @@ interface Sample {
   province: string;
   y_dna: { root_haplogroup: string; name: string } | null;
   mt_dna: { root_haplogroup: string; name: string } | null;
+  count: number;
 }
 
 // Color Palette (turquoise + warm amber, not too saturated)
@@ -265,7 +266,8 @@ const App: React.FC = () => {
     return filtered.reduce((acc: Record<string, number>, s) => {
       const v = s[field];
       if (v && v.root_haplogroup) {
-        acc[v.root_haplogroup] = (acc[v.root_haplogroup] || 0) + 1;
+        const increment = field === 'y_dna' ? (s.count ?? 1) : 1;
+        acc[v.root_haplogroup] = (acc[v.root_haplogroup] || 0) + increment;
       }
       return acc;
     }, {});
@@ -278,7 +280,8 @@ const App: React.FC = () => {
     return filtered.reduce((acc: Record<string, number>, s) => {
       const v = s[field];
       if (v && v.name) {
-        acc[v.name] = (acc[v.name] || 0) + 1;
+        const increment = field === 'y_dna' ? (s.count ?? 1) : 1;
+        acc[v.name] = (acc[v.name] || 0) + increment;
       }
       return acc;
     }, {});
