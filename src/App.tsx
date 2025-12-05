@@ -213,7 +213,7 @@ const SubcladeList: React.FC<{ title: string; items: [string, number][] }> = ({ 
           <div key={name} className="flex items-center justify-between p-2 rounded-md bg-teal-900/40">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ backgroundColor: `${colorFor(name)}22` }}>
-                <Dna size={10} style={{ color: colorFor(name) }} />
+                <Dna size={15} style={{ color: colorFor(name) }} />
               </div>
               <div className="truncate">
                 <div className="text-sm text-teal-100 font-mono truncate">{name}</div>
