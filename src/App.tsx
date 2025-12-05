@@ -325,7 +325,7 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-2">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
-                Genetic Heritage of Iranian Provinces
+                Analytics
               </h2>
               <p className="mt-3 text-teal-300/80">
                 Explore Y-DNA and mtDNA haplogroup distributions with interactive maps and subclade data.
