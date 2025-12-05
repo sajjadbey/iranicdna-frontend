@@ -61,14 +61,34 @@ const Header: React.FC = () => (
 
     <nav className="flex items-center gap-3">
       <a
-        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
         href="#about"
+        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
+        onClick={(e) => {
+          e.preventDefault();
+          const target = document.querySelector('#about') as HTMLElement | null;
+          if (target) {
+            window.scrollTo({
+              top: target.offsetTop - 80, // Adjust for fixed header height if needed
+              behavior: 'smooth',
+            });
+          }
+        }}
       >
         About
       </a>
       <a
-        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
         href="#contact"
+        className="text-[0.8125rem] font-medium text-white/90 hover:text-white transition-colors"
+        onClick={(e) => {
+          e.preventDefault();
+          const target = document.querySelector('#contact') as HTMLElement | null;
+          if (target) {
+            window.scrollTo({
+              top: target.offsetTop - 80,
+              behavior: 'smooth',
+            });
+          }
+        }}
       >
         Contact
       </a>
