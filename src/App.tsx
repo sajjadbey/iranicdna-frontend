@@ -316,7 +316,35 @@ const App: React.FC = () => {
   const hasAny = Object.keys(yRoot).length > 0 || Object.keys(mRoot).length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950 text-amber-100">
+    <div className="min-h-screen bg-gradient-to-br from-stone-950 via-amber-900 to-stone-950 text-amber-100">
+      {/* Animated Gradient Background */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(circle at 20% 20%, #1c1917 0%, #1c1917 25%, transparent 25%),
+            radial-gradient(circle at 80% 80%, #FFD700 0%, #FFD700 25%, transparent 25%),
+            radial-gradient(circle at 50% 50%, #D97706 0%, #D97706 25%, transparent 25%),
+            linear-gradient(to bottom right, #1c1917, #D97706, #FFD700)
+          `,
+          animation: 'gradientShift 15s ease infinite',
+        }}
+      ></div>
+
+      <style>{`
+        @keyframes gradientShift {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+      `}</style>
+
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
