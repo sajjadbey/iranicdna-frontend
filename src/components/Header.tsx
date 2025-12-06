@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Dna, Info, Send } from 'lucide-react';
 import mainLogo from '../assets/logo.png';
 
@@ -11,7 +12,10 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-gradient-to-r from-teal-900/90 to-amber-800/90 text-slate-50 shadow-sm backdrop-blur-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link 
+          to="/" 
+          className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+        >
           <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center ring-1 ring-white/20">
             <img src={mainLogo} className="h-12 w-12 object-contain" alt="IranicDNA" />
           </div>
@@ -23,7 +27,7 @@ export const Header: React.FC = () => {
               <Dna size={10} /> Y-DNA & mtDNA by Province
             </p>
           </div>
-        </div>
+        </Link>
         <nav className="flex items-center gap-4">
           <a
             href="#about"
@@ -33,7 +37,7 @@ export const Header: React.FC = () => {
             <Info size={14} /> About
           </a>
           <a
-            href="https://t.me/Iranic_DNA"
+            href="https://t.me/Iranic_DNA "
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1"
