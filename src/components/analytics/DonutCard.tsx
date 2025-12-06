@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Chart as ChartJS, Tooltip, ArcElement } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { Dna } from 'lucide-react';
-import { colorFor, fmt } from '../../utils/colors';
+import { fmt, generateUniqueColors } from '../../utils/colors';
 
 ChartJS.register(Tooltip, ArcElement);
 
@@ -15,16 +15,19 @@ interface Props {
 export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
   const labels = Object.keys(dataMap);
   const values = Object.values(dataMap);
-  if (labels.length === 0) return null;
+  
+  // Generate unique colors for each label (no duplicates within this dataset)
+  // NOTE: useMemo must be called BEFORE any early return!
+  const colorMap = useMemo(() => generateUniqueColors(labels), [labels]);
 
-  const colors = labels.map((l) => colorFor(l));
+  if (labels.length === 0) return null;
 
   const chartData = {
     labels,
     datasets: [
       {
         data: values,
-        backgroundColor: colors,
+        backgroundColor: labels.map(label => colorMap[label]),
         borderWidth: 2,
         borderColor: '#004d40',
       },
@@ -58,7 +61,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
               return (
                 <div key={label} className="flex items-center justify-between bg-teal-900/40 px-3 py-2 rounded-md">
                   <div className="flex items-center gap-3">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx] }} />
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colorMap[label] }} />
                     <div className="truncate">
                       <div className="text-sm text-teal-200 truncate">{label}</div>
                       <div className="text-xs text-teal-400">

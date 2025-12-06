@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dna } from 'lucide-react';
-import { colorFor, fmt } from '../../utils/colors';
+import { fmt, generateUniqueColors } from '../../utils/colors';
 
 interface Props {
   title: string;
@@ -9,7 +9,13 @@ interface Props {
 }
 
 export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
+  // Extract names and generate unique colors for each item
+  // NOTE: useMemo must be called BEFORE any early return!
+  const itemNames = useMemo(() => items.map(([name]) => name), [items]);
+  const colorMap = useMemo(() => generateUniqueColors(itemNames), [itemNames]);
+
   if (items.length === 0) return null;
+
   return (
     <div className="rounded-2xl p-5 bg-teal-900/60 ring-1 ring-teal-600/40 shadow-sm">
       <h3 className="text-lg font-semibold text-teal-100 mb-3">
@@ -18,14 +24,16 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
         {items.map(([name, count]) => {
           const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          const color = colorMap[name];
+          
           return (
             <div key={name} className="flex items-center justify-between p-2 rounded-md bg-teal-900/40">
               <div className="flex items-center gap-3">
                 <div
                   className="w-8 h-8 rounded-md flex items-center justify-center"
-                  style={{ backgroundColor: `${colorFor(name)}22` }}
+                  style={{ backgroundColor: `${color}22` }}
                 >
-                  <Dna size={15} style={{ color: colorFor(name) }} />
+                  <Dna size={15} style={{ color }} />
                 </div>
                 <div className="truncate">
                   <div className="text-sm text-teal-100 font-mono truncate">{name}</div>

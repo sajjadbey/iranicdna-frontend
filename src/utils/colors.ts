@@ -1,16 +1,50 @@
+// src/utils/colors.ts
+
 export const PALETTE = [
-  '#26A69A', // Teal-400 (primary)
-  '#0288D1', // Cyan Blue - clearly distinct from teal
-  '#7B1FA2', // Deep Purple - adds warm contrast
-  '#FFA000', // Amber-700 (accent)
-  '#D84315', // Deep Orange - vibrant, distinct from amber
-  '#4CAF50', // Fresh Green - completely different family
-  '#5E35B1', // Indigo - blue-purple, distinct from other blues
-  '#8D6E63', // Brown - neutral tone
-  '#E64A19', // Orange-Red - bold accent
-  '#0097A7', // Dark Cyan - teal variant but distinct enough
+  '#26A69A', // Teal
+  '#0288D1', // Cyan Blue
+  '#7B1FA2', // Deep Purple
+  '#FFA000', // Amber
+  '#D84315', // Deep Orange
+  '#4CAF50', // Green
+  '#5E35B1', // Indigo
+  '#8D6E63', // Brown
+  '#E64A19', // Orange-Red
+  '#0097A7', // Dark Cyan
+  '#C2185B', // Pink
+  '#689F38', // Light Green
 ];
 
+// NEW: Generate unique colors for a dataset (no duplicates)
+export const generateUniqueColors = (keys: string[]): Record<string, string> => {
+  const assignments: Record<string, string> = {};
+  const usedIndices = new Set<number>();
+  
+  // Sort keys for consistent assignment order
+  const sortedKeys = [...keys].sort();
+  
+  for (const key of sortedKeys) {
+    // Calculate base index from hash
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = (hash << 5) - hash + key.charCodeAt(i);
+    const baseIndex = Math.abs(hash) % PALETTE.length;
+    
+    // Find next available index if base is taken
+    let finalIndex = baseIndex;
+    let offset = 0;
+    while (usedIndices.has(finalIndex) && offset < PALETTE.length) {
+      offset++;
+      finalIndex = (baseIndex + offset) % PALETTE.length;
+    }
+    
+    assignments[key] = PALETTE[finalIndex];
+    usedIndices.add(finalIndex);
+  }
+  
+  return assignments;
+};
+
+// Legacy function (kept for backward compatibility)
 export const colorFor = (key: string): string => {
   let hash = 0;
   for (let i = 0; i < key.length; i++) hash = (hash << 5) - hash + key.charCodeAt(i);
