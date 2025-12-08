@@ -1,3 +1,5 @@
+// MapCard.tsx
+
 import React, { useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { MapPin } from 'lucide-react';
