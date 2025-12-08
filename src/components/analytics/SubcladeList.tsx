@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Dna } from 'lucide-react';
 import { fmt, generateUniqueColors } from '../../utils/colors';
+import { motion } from 'framer-motion';
 
 interface Props {
   title: string;
@@ -28,16 +29,28 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
 
   return (
     <div className="rounded-2xl p-5 bg-teal-900/60 ring-1 ring-teal-600/40 shadow-sm">
-      <h3 className="text-lg font-semibold text-teal-100 mb-3">
+      <motion.h3
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        className="text-lg font-semibold text-teal-100 mb-3"
+      >
         {title} <span className="text-teal-300 ml-2">(n = {fmt(total)})</span>
-      </h3>
+      </motion.h3>
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
-        {items.map(([name, count]) => {
+        {items.map(([name, count], index) => {
           const pctStr = formatPercent(count, total);
           const color = colorMap[name];
           
           return (
-            <div key={name} className="flex items-center justify-between p-2 rounded-md bg-teal-900/40">
+            <motion.div
+              key={name}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.02 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              className="flex items-center justify-between p-2 rounded-md bg-teal-900/40"
+            >
               <div className="flex items-center gap-3">
                 <div
                   className="w-8 h-8 rounded-md flex items-center justify-center"
@@ -53,7 +66,7 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
                 </div>
               </div>
               <div className="text-sm font-semibold text-teal-100">{count}</div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
