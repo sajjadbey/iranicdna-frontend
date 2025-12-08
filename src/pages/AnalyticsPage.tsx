@@ -7,6 +7,7 @@ import { Layout } from '../components/Layout';
 import { LocationSelector } from '../components/analytics/LocationSelector';
 import { DonutCard } from '../components/analytics/DonutCard';
 import { SubcladeList } from '../components/analytics/SubcladeList';
+import { MapCard } from '../components/analytics/MapCard';
 import { Globe, Send, ExternalLink, Info } from 'lucide-react';
 
 const API_BASE = 'https://qizilbash.ir/genetics';
@@ -157,14 +158,11 @@ export const AnalyticsPage: React.FC = () => {
     };
   }, [selectedCountry, selectedProvince, selectedEthnicity]);
 
-  // All memoized calculations remain the same
+  // Y-DNA calculations
   const yRoot = useMemo(() => countMap(samples, 'y_dna'), [samples]);
-  const mRoot = useMemo(() => countMap(samples, 'mt_dna'), [samples]);
   const yTotal = useMemo(() => Object.values(yRoot).reduce((sum, n) => sum + n, 0), [yRoot]);
-  const mTotal = useMemo(() => Object.values(mRoot).reduce((sum, n) => sum + n, 0), [mRoot]);
 
   const ySubObj = useMemo(() => subMap(samples, 'y_dna'), [samples]);
-  const mSubObj = useMemo(() => subMap(samples, 'mt_dna'), [samples]);
   const ySub = useMemo(
     () =>
       Object.entries(ySubObj).sort(
@@ -172,26 +170,15 @@ export const AnalyticsPage: React.FC = () => {
       ),
     [ySubObj]
   );
-  const mSub = useMemo(
-    () =>
-      Object.entries(mSubObj).sort(
-        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
-      ),
-    [mSubObj]
-  );
 
   const ySubTotal = useMemo(
     () => Object.values(ySubObj).reduce((sum, n) => sum + n, 0),
     [ySubObj]
   );
-  const mSubTotal = useMemo(
-    () => Object.values(mSubObj).reduce((sum, n) => sum + n, 0),
-    [mSubObj]
-  );
 
   const hasAny = useMemo(
-    () => Object.keys(yRoot).length > 0 || Object.keys(mRoot).length > 0,
-    [yRoot, mRoot]
+    () => Object.keys(yRoot).length > 0,
+    [yRoot]
   );
 
   if (loading)
@@ -230,7 +217,7 @@ export const AnalyticsPage: React.FC = () => {
               Analytics
             </h2>
             <p className="mt-3 text-teal-300/80">
-              Explore Y-DNA and mtDNA haplogroup distributions with interactive maps and subclade data.
+              Explore Y-DNA haplogroup distributions with interactive maps and subclade data.
             </p>
           </div>
           <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row gap-4">
@@ -265,12 +252,15 @@ export const AnalyticsPage: React.FC = () => {
           <p className="text-teal-400">No haplogroup data available for the selected filter.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DonutCard title="Y‑DNA Root Haplogroups" dataMap={yRoot} total={yTotal} />
-          <DonutCard title="mtDNA Root Haplogroups" dataMap={mRoot} total={mTotal} />
-          <div className="md:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MapCard 
+            samples={samples} 
+            selectedProvince={selectedProvince}
+            onProvinceClick={setSelectedProvince}
+          />
+          <div className="lg:col-span-2">
             <SubcladeList title="Y‑DNA Subclades" items={ySub} total={ySubTotal} />
-            <SubcladeList title="mtDNA Subclades" items={mSub} total={mSubTotal} />
           </div>
         </div>
       )}
