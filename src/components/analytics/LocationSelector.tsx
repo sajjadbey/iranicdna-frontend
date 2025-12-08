@@ -2,12 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Filter, ChevronDown } from 'lucide-react';
 
 interface Props {
-  provinces: string[];
+  label: string;
+  options: string[];
   value: string | null;
-  onChange: (p: string | null) => void;
+  onChange: (value: string | null) => void;
+  placeholder?: string;
 }
 
-export const ProvinceSelector: React.FC<Props> = ({ provinces, value, onChange }) => {
+export const LocationSelector: React.FC<Props> = ({ 
+  label, 
+  options, 
+  value, 
+  onChange, 
+  placeholder = 'All' 
+}) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -18,9 +26,9 @@ export const ProvinceSelector: React.FC<Props> = ({ provinces, value, onChange }
   }, []);
 
   return (
-    <div className="max-w-md mx-auto w-full">
+    <div className="w-full">
       <label className="block text-sm font-medium text-teal-200 mb-2 flex items-center gap-1">
-        <Filter size={14} /> Filter by Province
+        <Filter size={14} /> {label}
       </label>
       {isMobile ? (
         <select
@@ -28,10 +36,10 @@ export const ProvinceSelector: React.FC<Props> = ({ provinces, value, onChange }
           onChange={(e) => onChange(e.target.value || null)}
           className="w-full rounded-lg bg-teal-900/70 text-teal-100 px-4 py-2 border border-teal-600 focus:ring-2 focus:ring-amber-500"
         >
-          <option value="">All Provinces</option>
-          {provinces.map((p) => (
-            <option key={p} value={p}>
-              {p}
+          <option value="">{placeholder}</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
             </option>
           ))}
         </select>
@@ -41,7 +49,7 @@ export const ProvinceSelector: React.FC<Props> = ({ provinces, value, onChange }
             onClick={() => onChange(null)}
             className="w-full text-left rounded-lg px-4 py-3 bg-teal-900/70 text-teal-100 flex justify-between items-center ring-1 ring-teal-600 hover:ring-teal-500"
           >
-            <span>{value ?? 'All Provinces'}</span>
+            <span>{value ?? placeholder}</span>
             <ChevronDown size={16} className="text-teal-300" />
           </button>
           <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 p-2 max-h-60 overflow-y-auto bg-teal-950/80 rounded-lg border border-teal-700">
@@ -49,18 +57,18 @@ export const ProvinceSelector: React.FC<Props> = ({ provinces, value, onChange }
               onClick={() => onChange(null)}
               className="col-span-full text-sm rounded-md px-3 py-2 bg-amber-800/80 text-white font-medium"
             >
-              All Provinces
+              {placeholder}
             </button>
-            {provinces.map((p) => (
+            {options.map((option) => (
               <button
-                key={p}
-                onClick={() => onChange(p)}
+                key={option}
+                onClick={() => onChange(option)}
                 className={`text-sm rounded-md px-2 py-2 text-left truncate ${
-                  value === p ? 'bg-amber-700 text-white' : 'bg-teal-800/60 text-teal-100'
+                  value === option ? 'bg-amber-700 text-white' : 'bg-teal-800/60 text-teal-100'
                 }`}
-                title={p}
+                title={option}
               >
-                {p}
+                {option}
               </button>
             ))}
           </div>
