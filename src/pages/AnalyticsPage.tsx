@@ -9,7 +9,7 @@ import { DonutCard } from '../components/analytics/DonutCard';
 import { SubcladeList } from '../components/analytics/SubcladeList';
 import { Globe, Send, ExternalLink, Info } from 'lucide-react';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://qizlbash.ir/genetics';
 
 // API DTOs
 interface CountryDTO { name: string }
