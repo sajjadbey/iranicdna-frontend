@@ -12,12 +12,28 @@ interface Props {
   total: number;
 }
 
-export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
-  const labels = Object.keys(dataMap);
-  const values = Object.values(dataMap);
+const formatPercent = (count: number, total: number): string => {
+  if (total === 0) return '0.0';
+  const rawPct = (count / total) * 100;
   
-  // Generate unique colors for each label (no duplicates within this dataset)
-  // NOTE: useMemo must be called BEFORE any early return!
+  if (rawPct > 0 && rawPct < 0.1) {
+    return '<0.1';
+  }
+  
+  return rawPct.toFixed(1);
+};
+
+
+export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
+  
+  const sortedItems = useMemo(() => {
+    return Object.entries(dataMap)
+      .sort((a, b) => b[1] - a[1]);
+  }, [dataMap]);
+
+  const labels = useMemo(() => sortedItems.map(([label]) => label), [sortedItems]);
+  const values = useMemo(() => sortedItems.map(([, value]) => value), [sortedItems]);
+  
   const colorMap = useMemo(() => generateUniqueColors(labels), [labels]);
 
   if (labels.length === 0) return null;
@@ -55,9 +71,9 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-2">
-            {labels.map((label, idx) => {
-              const value = values[idx];
-              const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+            {sortedItems.map(([label, value]) => {
+              const pctStr = formatPercent(value, total);
+              
               return (
                 <div key={label} className="flex items-center justify-between bg-teal-900/40 px-3 py-2 rounded-md">
                   <div className="flex items-center gap-3">
@@ -65,7 +81,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                     <div className="truncate">
                       <div className="text-sm text-teal-200 truncate">{label}</div>
                       <div className="text-xs text-teal-400">
-                        {value} sample{value > 1 ? 's' : ''} ({pct}%)
+                        {value} sample{value > 1 ? 's' : ''} ({pctStr}%)
                       </div>
                     </div>
                   </div>

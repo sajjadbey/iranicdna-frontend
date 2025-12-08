@@ -8,9 +8,19 @@ interface Props {
   total: number;
 }
 
+const formatPercent = (count: number, total: number): string => {
+  if (total === 0) return '0.0';
+  const rawPct = (count / total) * 100;
+  
+  if (rawPct > 0 && rawPct < 0.1) {
+    return '<0.1';
+  }
+  
+  return rawPct.toFixed(1);
+};
+
+
 export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
-  // Extract names and generate unique colors for each item
-  // NOTE: useMemo must be called BEFORE any early return!
   const itemNames = useMemo(() => items.map(([name]) => name), [items]);
   const colorMap = useMemo(() => generateUniqueColors(itemNames), [itemNames]);
 
@@ -23,7 +33,7 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
       </h3>
       <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
         {items.map(([name, count]) => {
-          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+          const pctStr = formatPercent(count, total);
           const color = colorMap[name];
           
           return (
@@ -38,7 +48,7 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
                 <div className="truncate">
                   <div className="text-sm text-teal-100 font-mono truncate">{name}</div>
                   <div className="text-xs text-teal-300">
-                    {count} sample{count > 1 ? 's' : ''} ({pct}%)
+                    {count} sample{count > 1 ? 's' : ''} ({pctStr}%)
                   </div>
                 </div>
               </div>
