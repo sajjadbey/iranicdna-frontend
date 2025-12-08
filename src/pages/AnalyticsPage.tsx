@@ -1,3 +1,5 @@
+// AnalyticsPage.tsx
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Dna } from 'lucide-react';
 import { type Sample } from '../types';
@@ -7,12 +9,12 @@ import { DonutCard } from '../components/analytics/DonutCard';
 import { SubcladeList } from '../components/analytics/SubcladeList';
 import { Globe, Send, ExternalLink, Info } from 'lucide-react';
 
-const API_BASE = 'https://qizilbash.ir/genetics';
+const API_BASE = 'http://127.0.0.1:8000/api';
 
 // API DTOs
 interface CountryDTO { name: string }
 interface ProvinceDTO { name: string }
-interface CityDTO { name: string }
+interface EthnicityDTO { name: string }
 
 // Helper functions remain unchanged
 const countMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, number> => {
@@ -41,11 +43,11 @@ export const AnalyticsPage: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [provinces, setProvinces] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [ethnicities, setEthnicities] = useState<string[]>([]);
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedEthnicity, setSelectedEthnicity] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +73,8 @@ export const AnalyticsPage: React.FC = () => {
       if (!selectedCountry) {
         setProvinces([]);
         setSelectedProvince(null);
-        setCities([]);
-        setSelectedCity(null);
+        setEthnicities([]);
+        setSelectedEthnicity(null);
         return;
       }
       
@@ -92,29 +94,29 @@ export const AnalyticsPage: React.FC = () => {
     fetchProvinces();
   }, [selectedCountry]);
 
-  // Fetch cities when province changes
+  // Fetch Ethnicities when province changes
   useEffect(() => {
-    const fetchCities = async () => {
+    const fetchEthnicities = async () => {
       if (!selectedProvince) {
-        setCities([]);
-        setSelectedCity(null);
+        setEthnicities([]);
+        setSelectedEthnicity(null);
         return;
       }
       
       try {
         const res = await fetch(
-          `${API_BASE}/cities/?province=${encodeURIComponent(selectedProvince)}`
+          `${API_BASE}/ethnicities/?province=${encodeURIComponent(selectedProvince)}`
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: CityDTO[] = await res.json();
-        setCities(data.map((c) => c.name).sort());
+        const data: EthnicityDTO[] = await res.json();
+        setEthnicities(data.map((c) => c.name).sort());
       } catch (err) {
-        console.error('Failed to fetch cities:', err);
-        setCities([]);
+        console.error('Failed to fetch ethnicities:', err);
+        setEthnicities([]);
       }
     };
     
-    fetchCities();
+    fetchEthnicities();
   }, [selectedProvince]);
 
   // Fetch samples with filters
@@ -128,7 +130,7 @@ export const AnalyticsPage: React.FC = () => {
         const params = new URLSearchParams();
         if (selectedCountry) params.append('country', selectedCountry);
         if (selectedProvince) params.append('province', selectedProvince);
-        if (selectedCity) params.append('city', selectedCity);
+        if (selectedEthnicity) params.append('ethnicity', selectedEthnicity);
         
         const url = `${API_BASE}/samples/?${params.toString()}`;
         const res = await fetch(url);
@@ -153,7 +155,7 @@ export const AnalyticsPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [selectedCountry, selectedProvince, selectedCity]);
+  }, [selectedCountry, selectedProvince, selectedEthnicity]);
 
   // All memoized calculations remain the same
   const yRoot = useMemo(() => countMap(samples, 'y_dna'), [samples]);
@@ -247,11 +249,11 @@ export const AnalyticsPage: React.FC = () => {
               placeholder="All Provinces"
             />
             <LocationSelector
-              label="City"
-              options={cities}
-              value={selectedCity}
-              onChange={setSelectedCity}
-              placeholder="All Cities"
+              label="Ethnicity"
+              options={ethnicities}
+              value={selectedEthnicity}
+              onChange={setSelectedEthnicity}
+              placeholder="All Ethnicities"
             />
           </div>
         </div>
