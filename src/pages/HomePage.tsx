@@ -10,14 +10,14 @@ export const HomePage: React.FC = () => {
       <section className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="w-20 h-20 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+            <div className="w-16 h- rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-white/20">
               <img src={mainLogo} className="h-16 w-16 object-contain" alt="IranicDNA" />
             </div>
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
                 Iranic<span className="text-amber-300">DNA</span>
               </h1>
-              <p className="text-xl text-teal-300/80 mt-2">Mapping Genetic Diversity of Iranian Peoples</p>
+              <p className="text-sm text-teal-300/80 mt-2">Mapping Genetic Diversity of Iranian Peoples</p>
             </div>
           </div>
           
