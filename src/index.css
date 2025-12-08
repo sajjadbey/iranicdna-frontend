@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import 'leaflet/dist/leaflet.css';
 
 /* Iranic/Persian Color Palette:
 - Deep background blue (Lapis Lazuli)
@@ -26,4 +27,36 @@ body {
   color: var(--color-text);
   font-family: 'Roboto', sans-serif;
   line-height: 1.6;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 166, 0.3);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 166, 0.5);
+}
+
+/* Pie chart marker styles */
+.pie-chart-marker {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pie-chart-marker:hover {
+  transform: scale(1.1);
+  z-index: 1000 !important;
 }
