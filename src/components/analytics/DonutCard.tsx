@@ -106,9 +106,9 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative w-full max-w-[350px] aspect-square"
+          className="relative w-full max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none"
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
             <PieChart>
               <Pie
                 data={chartData}
