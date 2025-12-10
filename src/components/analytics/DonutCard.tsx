@@ -120,6 +120,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                 innerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
+                paddingAngle={2}
                 animationBegin={0}
                 animationDuration={1000}
                 animationEasing="ease-in-out"
