@@ -32,20 +32,20 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
     <div className="w-full max-w-5xl mx-auto">
       <div className="bg-slate-900/40 rounded-2xl border-2 border-teal-600/30 backdrop-blur-sm overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="bg-gradient-to-r from-teal-900/60 to-cyan-900/60 px-6 py-4 border-b-2 border-teal-600/30">
-          <div className="flex items-center gap-3">
-            <Crown className="text-teal-300" size={24} />
-            <h2 className="text-xl font-bold text-teal-100">
+        <div className="bg-gradient-to-r from-teal-900/60 to-cyan-900/60 px-3 sm:px-6 py-3 sm:py-4 border-b-2 border-teal-600/30">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Crown className="text-teal-300 flex-shrink-0" size={20} />
+            <h2 className="text-base sm:text-xl font-bold text-teal-100 truncate">
               Tribes & Clans from Iran
             </h2>
-            <div className="ml-auto text-sm text-teal-300/80">
+            <div className="ml-auto text-xs sm:text-sm text-teal-300/80 whitespace-nowrap">
               {tribes.length} tribes, {Object.values(clansByTribe).flat().length} clans
             </div>
           </div>
         </div>
 
         {/* Tree Content */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="p-3 sm:p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           {tribes.length === 0 ? (
             <div className="text-center py-12 text-teal-400/60">
               No tribes available
@@ -67,10 +67,10 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                   >
                     {/* Tribe Row */}
                     <div className="group">
-                      <div className="flex items-center gap-2 px-4 py-3 rounded-xl hover:bg-teal-900/30 transition-all border border-transparent hover:border-teal-600/40">
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-xl hover:bg-teal-900/30 transition-all border border-transparent hover:border-teal-600/40">
                         {/* Tribe Icon */}
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-700/50 to-teal-900/50 flex items-center justify-center flex-shrink-0">
-                          <Crown className="text-teal-300" size={18} />
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-teal-700/50 to-teal-900/50 flex items-center justify-center flex-shrink-0">
+                          <Crown className="text-teal-300" size={16} />
                         </div>
 
                         {/* Expand/Collapse Icon */}
@@ -86,7 +86,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                               animate={{ rotate: isExpanded ? 90 : 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              <ChevronRight className="text-teal-400 hover:text-teal-300" size={18} />
+                              <ChevronRight className="text-teal-400 hover:text-teal-300" size={16} />
                             </motion.div>
                           </div>
                         )}
@@ -97,36 +97,39 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           className="flex-1 min-w-0 cursor-pointer"
                           onClick={() => onTribeClick(tribe)}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-base font-semibold text-teal-100 group-hover:text-teal-50 transition-colors hover:underline">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+                            <span className="text-sm sm:text-base font-semibold text-teal-100 group-hover:text-teal-50 transition-colors hover:underline truncate">
                               {tribe.name}
                             </span>
                             {tribe.ethnicity && (
-                              <span className="text-xs text-teal-400/70 italic">
+                              <span className="text-xs text-teal-400/70 italic truncate">
                                 ({tribe.ethnicity})
                               </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Sample Count Badge */}
-                        {tribe.sample_count !== undefined && tribe.sample_count > 0 && (
-                          <div className="px-3 py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1.5">
-                            <Dna className="text-amber-300" size={14} />
-                            <span className="text-xs font-semibold text-amber-300">
-                              {tribe.sample_count}
-                            </span>
-                          </div>
-                        )}
+                        {/* Badges Container */}
+                        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                          {/* Sample Count Badge */}
+                          {tribe.sample_count !== undefined && tribe.sample_count > 0 && (
+                            <div className="px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1 sm:gap-1.5">
+                              <Dna className="text-amber-300" size={14} />
+                              <span className="text-xs font-semibold text-amber-300">
+                                {tribe.sample_count}
+                              </span>
+                            </div>
+                          )}
 
-                        {/* Clan Count Badge */}
-                        {hasClan && (
-                          <div className="px-3 py-1 rounded-lg bg-teal-900/40 border border-teal-600/30">
-                            <span className="text-xs font-semibold text-teal-300">
-                              {tribeClans.length} {tribeClans.length === 1 ? 'clan' : 'clans'}
-                            </span>
-                          </div>
-                        )}
+                          {/* Clan Count Badge */}
+                          {hasClan && (
+                            <div className="px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-teal-900/40 border border-teal-600/30">
+                              <span className="text-xs font-semibold text-teal-300">
+                                {tribeClans.length} {tribeClans.length === 1 ? 'clan' : 'clans'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Clans List */}
@@ -152,7 +155,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                             }}
                             className="overflow-hidden"
                           >
-                            <div className="ml-7 mt-1 space-y-1 border-l-2 border-teal-700/30 pl-4">
+                            <div className="ml-4 sm:ml-7 mt-1 space-y-1 border-l-2 border-teal-700/30 pl-2 sm:pl-4">
                               {tribeClans.map((clan, clanIndex) => (
                                 <motion.div
                                   key={clan.name}
@@ -179,20 +182,20 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                                     e.stopPropagation();
                                     onClanClick(clan);
                                   }}
-                                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg hover:bg-cyan-900/20 transition-all cursor-pointer group/clan border border-transparent hover:border-cyan-600/30"
+                                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-cyan-900/20 transition-all cursor-pointer group/clan border border-transparent hover:border-cyan-600/30"
                                 >
                                   {/* Clan Icon */}
-                                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-800/40 to-teal-800/40 flex items-center justify-center border border-cyan-600/20">
-                                    <Users2 className="text-cyan-400" size={14} />
+                                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gradient-to-br from-cyan-800/40 to-teal-800/40 flex items-center justify-center border border-cyan-600/20 flex-shrink-0">
+                                    <Users2 className="text-cyan-400" size={12} />
                                   </div>
 
                                   {/* Clan Name */}
                                   <div className="flex-1 min-w-0">
-                                    <div className="text-sm font-medium text-cyan-100 group-hover/clan:text-cyan-50 transition-colors">
+                                    <div className="text-xs sm:text-sm font-medium text-cyan-100 group-hover/clan:text-cyan-50 transition-colors truncate">
                                       {clan.name}
                                     </div>
                                     {clan.common_ancestor && (
-                                      <div className="text-xs text-cyan-400/60 truncate">
+                                      <div className="text-xs text-cyan-400/60 truncate hidden sm:block">
                                         Ancestor: {clan.common_ancestor}
                                       </div>
                                     )}
@@ -200,7 +203,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
 
                                   {/* Sample Count Badge */}
                                   {clan.sample_count !== undefined && clan.sample_count > 0 && (
-                                    <div className="px-2.5 py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1.5">
+                                    <div className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
                                       <Dna className="text-amber-300" size={12} />
                                       <span className="text-xs font-semibold text-amber-300">
                                         {clan.sample_count}
@@ -209,7 +212,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                                   )}
 
                                   {/* Info indicator */}
-                                  <div className="text-xs text-cyan-400/40 group-hover/clan:text-cyan-400/70 transition-colors">
+                                  <div className="text-xs text-cyan-400/40 group-hover/clan:text-cyan-400/70 transition-colors flex-shrink-0">
                                     →
                                   </div>
                                 </motion.div>
@@ -227,10 +230,10 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-gradient-to-r from-teal-900/40 to-cyan-900/40 px-6 py-3 border-t-2 border-teal-600/30">
-          <div className="flex items-center justify-between text-xs text-teal-300/70">
-            <span>Click on tribes to expand/collapse clans</span>
-            <span>Click on items for details</span>
+        <div className="bg-gradient-to-r from-teal-900/40 to-cyan-900/40 px-3 sm:px-6 py-2 sm:py-3 border-t-2 border-teal-600/30">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-0 text-xs text-teal-300/70">
+            <span className="hidden sm:block">Click on tribes to expand/collapse clans</span>
+            <span className="text-center">Click on items for details</span>
           </div>
         </div>
       </div>
