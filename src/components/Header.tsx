@@ -100,53 +100,109 @@ export const Header: React.FC = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ 
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1],
+                delay: 0.25
+              }}
               className="md:hidden overflow-hidden"
             >
-              <div className="pt-4 pb-2 space-y-2">
-                <Link
-                  to="/analytics"
-                  onClick={closeMobileMenu}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
-                    isActive('/analytics')
-                      ? 'bg-white/10 text-white'
-                      : 'text-teal-100/90 hover:text-white hover:bg-white/5'
-                  }`}
+              <motion.div 
+                className="pt-4 pb-2 space-y-2"
+                initial="closed"
+                animate="open"
+                exit="closed"
+                variants={{
+                  open: {
+                    transition: {
+                      staggerChildren: 0.08,
+                      delayChildren: 0.1
+                    }
+                  },
+                  closed: {
+                    transition: {
+                      staggerChildren: 0.06,
+                      staggerDirection: -1,
+                      delayChildren: 0
+                    }
+                  }
+                }}
+              >
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <BarChart3 size={18} />
-                  <span className="font-medium">Analytics</span>
-                </Link>
-                <Link
-                  to="/communities"
-                  onClick={closeMobileMenu}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
-                    isActive('/communities')
-                      ? 'bg-white/10 text-white'
-                      : 'text-teal-100/90 hover:text-white hover:bg-white/5'
-                  }`}
+                  <Link
+                    to="/analytics"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                      isActive('/analytics')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <BarChart3 size={18} />
+                    <span className="font-medium">Analytics</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <Users size={18} />
-                  <span className="font-medium">Communities</span>
-                </Link>
-                <a
-                  href="#about"
-                  onClick={scrollToAbout}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                  <Link
+                    to="/communities"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                      isActive('/communities')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Users size={18} />
+                    <span className="font-medium">Communities</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <Info size={18} />
-                  <span className="font-medium">About</span>
-                </a>
-                <a
-                  href="https://t.me/Iranic_DNA "
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={closeMobileMenu}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                  <a
+                    href="#about"
+                    onClick={scrollToAbout}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <Info size={18} />
+                    <span className="font-medium">About</span>
+                  </a>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <Send size={18} />
-                  <span className="font-medium">Join</span>
-                </a>
-              </div>
+                  <a
+                    href="https://t.me/Iranic_DNA "
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <Send size={18} />
+                    <span className="font-medium">Join</span>
+                  </a>
+                </motion.div>
+              </motion.div>
             </motion.nav>
           )}
         </AnimatePresence>

@@ -1,6 +1,7 @@
 // LocationSelector.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Filter, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
     label: string;
@@ -82,34 +83,50 @@ export const LocationSelector: React.FC<Props> = ({
                         />
                     </button>
 
-                    {isOpen && (
-                        <div 
-                            
-                            className="absolute z-10 w-full mt-2 flex flex-col space-y-1 p-2
-                            bg-teal-950/95 shadow-2xl rounded-lg border border-teal-700 backdrop-blur-sm"
-                        >
-
-                            <button
-                                onClick={() => handleSelect(null)}
-                                className="text-sm rounded-md px-3 py-2 bg-amber-800/80 text-white font-medium hover:bg-amber-700 transition-colors"
+                    <AnimatePresence>
+                        {isOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                transition={{ 
+                                    duration: 0.2,
+                                    ease: [0.4, 0, 0.2, 1]
+                                }}
+                                className="absolute z-10 w-full mt-2 flex flex-col space-y-1 p-2
+                                bg-teal-950/95 shadow-2xl rounded-lg border border-teal-700 backdrop-blur-sm origin-top"
                             >
-                                {placeholder}
-                            </button>
-                            
-                            {options.map((option) => (
-                                <button
-                                    key={option}
-                                    onClick={() => handleSelect(option)}
-                                    className={`text-sm rounded-md px-3 py-2 w-full text-left truncate transition-colors ${
-                                        value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
-                                    }`}
-                                    title={option}
+                                <motion.button
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.05, duration: 0.2 }}
+                                    onClick={() => handleSelect(null)}
+                                    className="text-sm rounded-md px-3 py-2 bg-amber-800/80 text-white font-medium hover:bg-amber-700 transition-colors"
                                 >
-                                    {option}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                                    {placeholder}
+                                </motion.button>
+                                
+                                {options.map((option, index) => (
+                                    <motion.button
+                                        key={option}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ 
+                                            delay: 0.05 + (index + 1) * 0.03,
+                                            duration: 0.2 
+                                        }}
+                                        onClick={() => handleSelect(option)}
+                                        className={`text-sm rounded-md px-3 py-2 w-full text-left truncate transition-colors ${
+                                            value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
+                                        }`}
+                                        title={option}
+                                    >
+                                        {option}
+                                    </motion.button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             )}
         </div>
