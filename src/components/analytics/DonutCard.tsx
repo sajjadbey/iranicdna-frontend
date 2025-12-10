@@ -66,7 +66,12 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
   const renderCustomLabel = (entry: any) => {
     const { cx, cy, midAngle, outerRadius, percentage, name } = entry;
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 30;
+    
+    // Responsive radius - smaller on mobile
+    const isMobile = window.innerWidth < 640;
+    const labelOffset = isMobile ? 20 : 30;
+    const radius = outerRadius + labelOffset;
+    
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -82,7 +87,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
         fill="#99f6e4"
         textAnchor={textAnchor}
         dominantBaseline="central"
-        className="text-xs font-semibold"
+        className="text-[10px] sm:text-xs font-semibold"
+        style={{ pointerEvents: 'none' }}
       >
         {name} {percentage}%
       </text>
@@ -106,7 +112,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative w-full max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none"
+          className="relative w-full max-w-[280px] sm:max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none"
         >
           <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
             <PieChart>
@@ -116,8 +122,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                 cy="50%"
                 labelLine={false}
                 label={renderCustomLabel}
-                outerRadius={100}
-                innerRadius={70}
+                outerRadius={window.innerWidth < 640 ? 80 : 100}
+                innerRadius={window.innerWidth < 640 ? 56 : 70}
                 fill="#8884d8"
                 dataKey="value"
                 paddingAngle={2}
@@ -145,7 +151,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-3xl font-bold text-teal-100"
+              className="text-2xl font-bold text-teal-100"
             >
               {fmt(total)}
             </motion.div>
