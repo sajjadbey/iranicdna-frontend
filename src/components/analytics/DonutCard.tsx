@@ -123,8 +123,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                 animationBegin={0}
                 animationDuration={1000}
                 animationEasing="ease-in-out"
-                stroke="#004d40"
-                strokeWidth={2}
+                stroke="transparent"
+                strokeWidth={0}
               >
                 {chartData.map((entry, index) => (
                   <Cell 
