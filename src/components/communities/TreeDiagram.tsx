@@ -16,7 +16,6 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
   onTribeClick,
   onClanClick,
 }) => {
-  // Calculate node sizes based on clan count
   const getNodeSize = (clanCount: number) => {
     const minSize = 240;
     const maxSize = 380;
@@ -26,12 +25,12 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
     return minSize + (maxSize - minSize) * ratio;
   };
 
-  // Calculate initial zoom based on content and screen
   const calculateInitialZoom = () => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     
-    // Calculate total width needed
+    if (tribes.length === 0) return 1;
+    
     let totalContentWidth = 0;
     let maxContentHeight = 0;
     
@@ -40,39 +39,44 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
       const clanCount = tribeClans.length;
       const tribeNodeWidth = getNodeSize(clanCount);
       
-      // Clans width: 240px per clan + 32px gap between clans (gap-8)
       const clansWidth = clanCount > 0 ? clanCount * 240 + (clanCount - 1) * 32 : 0;
-      
-      // Take the maximum of tribe width and clans width
       const sectionWidth = Math.max(tribeNodeWidth, clansWidth);
       totalContentWidth += sectionWidth;
       
-      // Add gap between tribes (80px = gap-20)
       if (index < tribes.length - 1) {
         totalContentWidth += 80;
       }
       
-      // Calculate height: tribe card (180px) + gap (24*4=96px) + connection (20*4=80px) + clans (if any)
-      const sectionHeight = 180 + 96 + (clanCount > 0 ? 80 + 160 : 0); // 160px for clan cards
+      // More accurate height calculation with buffer
+      const tribeSectionHeight = 180 + 32 + 96; // card + padding + gaps
+      const clansSectionHeight = clanCount > 0 ? 80 + 160 + 40 : 0; // connection + clan cards + buffer
+      const sectionHeight = tribeSectionHeight + clansSectionHeight;
+      
       maxContentHeight = Math.max(maxContentHeight, sectionHeight);
     });
     
-    // Add padding
-    const horizontalPadding = screenWidth < 768 ? 80 : 160;
-    const verticalPadding = 200; // Top and bottom padding
+    // REDUCED padding for better fit on small screens
+    const horizontalPadding = screenWidth < 768 ? 60 : 120; // Reduced from 80/160
+    const verticalPadding = 120; // Reduced from 200 - KEY CHANGE
     
     const availableWidth = screenWidth - horizontalPadding;
     const availableHeight = screenHeight - verticalPadding;
     
-    // Calculate zoom to fit both width and height
     const widthZoom = totalContentWidth > availableWidth ? availableWidth / totalContentWidth : 1;
     const heightZoom = maxContentHeight > availableHeight ? availableHeight / maxContentHeight : 1;
     
-    // Use the smaller zoom to ensure everything fits
+    // Allow more aggressive zoom-out (min 0.15) for very large diagrams
     const calculatedZoom = Math.min(widthZoom, heightZoom, 1);
     
-    // No minimum zoom limit - allow zooming out as much as needed
-    return calculatedZoom;
+    // Debug log to see what's happening
+    console.log('TreeDiagram Zoom Calculation:', {
+      screen: `${screenWidth}x${screenHeight}`,
+      content: `${totalContentWidth.toFixed(0)}x${maxContentHeight}`,
+      available: `${availableWidth.toFixed(0)}x${availableHeight}`,
+      zoom: { width: widthZoom.toFixed(2), height: heightZoom.toFixed(2), final: Math.max(0.15, calculatedZoom).toFixed(2) }
+    });
+    
+    return Math.max(0.15, calculatedZoom); // Lower minimum zoom
   };
 
   const [zoom, setZoom] = useState(() => calculateInitialZoom());
@@ -82,16 +86,10 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
   const [hoveredTribe, setHoveredTribe] = useState<string | null>(null);
   const [hoveredClan, setHoveredClan] = useState<string | null>(null);
 
-  const handleZoomIn = () => {
-    setZoom((prev) => Math.min(prev + 0.2, 2));
-  };
-
-  const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.2, 0.1)); // Allow zooming out to 10%
-  };
-
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 2));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 0.15));
   const handleResetZoom = () => {
-    setZoom(1);
+    setZoom(calculateInitialZoom());
     setPanOffset({ x: 0, y: 0 });
   };
 
@@ -111,30 +109,33 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
     }
   };
 
-  const handleMouseUp = () => {
-    setIsPanning(false);
-  };
+  const handleMouseUp = () => setIsPanning(false);
 
   const handleWheel = (e: React.WheelEvent) => {
-    // Only zoom if Ctrl key is pressed, otherwise allow normal scrolling
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom((prev) => Math.max(0.1, Math.min(2, prev + delta)));
+      setZoom(prev => Math.max(0.15, Math.min(2, prev + delta)));
     }
   };
 
   useEffect(() => {
     const handleResize = () => {
       setZoom(calculateInitialZoom());
+      setPanOffset({ x: 0, y: 0 }); // Reset pan on resize
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [tribes, clansByTribe]);
 
+  // Recalculate zoom when data changes
+  useEffect(() => {
+    setZoom(calculateInitialZoom());
+  }, [tribes, clansByTribe]);
+
   return (
-    <div className="relative">
+    <div className="relative w-full overflow-hidden" style={{ minHeight: '100vh' }}>
       {/* Decorative Background Pattern */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute inset-0" style={{
@@ -144,7 +145,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
       </div>
 
       {/* Zoom Controls */}
-      <div className="absolute top-6 right-6 z-10 flex flex-col gap-3">
+      <div className="absolute top-6 right-6 z-50 flex flex-col gap-3">
         <motion.button
           whileHover={{ scale: 1.1, y: -2 }}
           whileTap={{ scale: 0.95 }}
@@ -176,22 +177,22 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
 
       {/* Zoomable Container */}
       <div
-        className={`overflow-hidden ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`relative w-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
-        style={{ minHeight: '700px' }}
+        style={{ height: '100vh', overflow: 'hidden' }}
       >
         <motion.div
           style={{
             transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
-            transformOrigin: 'center top',
+            transformOrigin: 'center center',
           }}
-          className="py-16"
+          className="w-full h-full flex items-center justify-center"
         >
-          <div className="flex gap-20 justify-center items-start px-8">
+          <div className="flex gap-20 justify-center items-start px-8 py-16">
             {tribes.map((tribe, tribeIndex) => {
               const tribeClans = clansByTribe[tribe.name] || [];
               const clanCount = tribeClans.length;
@@ -216,7 +217,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                       onMouseLeave={() => setHoveredTribe(null)}
                       className="relative cursor-pointer group"
                     >
-                      {/* Animated glow effect - only on hover */}
+                      {/* Animated glow effect */}
                       <motion.div
                         animate={{
                           opacity: isHovered ? [0.3, 0.6, 0.3] : 0,
@@ -229,7 +230,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                         className="absolute inset-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-600 rounded-3xl blur-2xl"
                       />
 
-                      {/* Crown icon - positioned above card */}
+                      {/* Crown icon */}
                       <motion.div
                         animate={{ rotate: isHovered ? [0, -10, 10, 0] : 0 }}
                         transition={{ duration: 0.5 }}
@@ -243,12 +244,12 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                         className="relative bg-gradient-to-br from-teal-900/95 via-cyan-900/95 to-teal-950/95 rounded-3xl px-8 py-10 shadow-2xl backdrop-blur-sm border-2 border-teal-600/40 overflow-hidden"
                         style={{ minWidth: `${nodeSize}px`, minHeight: '180px' }}
                       >
-                        {/* Decorative pattern overlay */}
+                        {/* Decorative pattern */}
                         <div className="absolute inset-0 opacity-5" style={{
                           backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, #14b8a6 10px, #14b8a6 11px)`
                         }} />
 
-                        {/* Decorative corner ornaments - inside card */}
+                        {/* Corner ornaments */}
                         <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-teal-500/40" />
                         <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-teal-500/40" />
                         <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-teal-500/40" />
@@ -290,7 +291,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                       </div>
                     </motion.div>
 
-                    {/* Connection line down from tribe */}
+                    {/* Connection line */}
                     {clanCount > 0 && (
                       <div className="absolute left-1/2 -bottom-24 w-0.5 h-24 bg-teal-500 -translate-x-px" />
                     )}
@@ -300,9 +301,8 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                   {clanCount > 0 && (
                     <div className="relative w-full flex justify-center">
                       <div className="relative inline-flex gap-8">
-                        {/* Connection lines container */}
+                        {/* Connection lines */}
                         <div className="absolute left-0 right-0 top-0 h-20 pointer-events-none">
-                          {/* Horizontal line */}
                           {clanCount > 1 && (
                             <div
                               className="absolute h-0.5 bg-teal-500 top-0"
@@ -312,8 +312,6 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                               }}
                             />
                           )}
-
-                          {/* Vertical lines to each clan */}
                           {tribeClans.map((_, index) => {
                             const offset = (index - (clanCount - 1) / 2) * 248;
                             return (
@@ -349,7 +347,7 @@ export const TreeDiagram: React.FC<TreeDiagramProps> = ({
                                   onMouseLeave={() => setHoveredClan(null)}
                                   className="relative cursor-pointer group w-[240px]"
                                 >
-                                  {/* Glow effect - only on hover */}
+                                  {/* Glow effect */}
                                   <motion.div
                                     animate={{
                                       opacity: isClanHovered ? [0.2, 0.4, 0.2] : 0,
