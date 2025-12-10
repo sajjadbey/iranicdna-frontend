@@ -36,7 +36,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
           <div className="flex items-center gap-3">
             <Crown className="text-teal-300" size={24} />
             <h2 className="text-xl font-bold text-teal-100">
-              Iranian Tribes & Clans
+              Tribes & Clans from Iran
             </h2>
             <div className="ml-auto text-sm text-teal-300/80">
               {tribes.length} tribes, {Object.values(clansByTribe).flat().length} clans
