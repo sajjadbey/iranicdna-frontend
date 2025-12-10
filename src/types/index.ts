@@ -40,3 +40,15 @@ export interface City {
 export interface Ethnicity {
     name: string;
 }
+
+export interface Tribe {
+    name: string;
+    ethnicity: string | null;
+    historical_note: string;
+}
+
+export interface Clan {
+    name: string;
+    tribe: string;
+    common_ancestor: string;
+}

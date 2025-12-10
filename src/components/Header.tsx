@@ -1,13 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Dna, Info, Send } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Dna, Info, Send, BarChart3, Users } from 'lucide-react';
 import mainLogo from '../assets/logo.png';
 
 export const Header: React.FC = () => {
+  const location = useLocation();
+  
   const scrollToAbout = (e: React.MouseEvent) => {
     e.preventDefault();
     document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <header className="bg-gradient-to-r from-teal-900/90 to-amber-800/90 text-slate-50 shadow-sm backdrop-blur-md sticky top-0 z-40">
@@ -28,10 +32,30 @@ export const Header: React.FC = () => {
             </p>
           </div>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-3">
+          <Link
+            to="/analytics"
+            className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+              isActive('/analytics')
+                ? 'bg-white/10 text-white'
+                : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <BarChart3 size={14} /> Analytics
+          </Link>
+          <Link
+            to="/communities"
+            className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+              isActive('/communities')
+                ? 'bg-white/10 text-white'
+                : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Users size={14} /> Communities
+          </Link>
           <a
             href="#about"
-            className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1"
+            className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
             onClick={scrollToAbout}
           >
             <Info size={14} /> About
@@ -40,7 +64,7 @@ export const Header: React.FC = () => {
             href="https://t.me/Iranic_DNA "
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1"
+            className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
           >
             <Send size={14} /> Join
           </a>
