@@ -6,7 +6,7 @@ import { FolderTree } from '../components/communities/FolderTree';
 import { TribeDetailModal } from '../components/communities/TribeDetailModal';
 import type { Tribe, Clan } from '../types';
 
-const API_BASE = 'http://127.0.0.1:8000/genetics';
+const API_BASE = 'https://qizilbash.ir/genetics';
 
 export const CommunitiesPage: React.FC = () => {
   const [tribes, setTribes] = useState<Tribe[]>([]);
