@@ -2,7 +2,7 @@ import React from 'react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-slate-800 py-6 relative z-10">
+    <footer className="border-t border-slate-800 py-6 relative z-0">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-sm text-teal-400">
           © {new Date().getFullYear()} <span className="font-bold">Iranic DNA</span> — Preserving genetic identity
