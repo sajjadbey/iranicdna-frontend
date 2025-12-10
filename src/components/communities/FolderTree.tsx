@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Users2, Crown } from 'lucide-react';
+import { ChevronRight, Users2, Crown, Dna } from 'lucide-react';
 import type { Tribe, Clan } from '../../types';
 
 interface FolderTreeProps {
@@ -109,6 +109,16 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           </div>
                         </div>
 
+                        {/* Sample Count Badge */}
+                        {tribe.sample_count !== undefined && tribe.sample_count > 0 && (
+                          <div className="px-3 py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1.5">
+                            <Dna className="text-amber-300" size={14} />
+                            <span className="text-xs font-semibold text-amber-300">
+                              {tribe.sample_count}
+                            </span>
+                          </div>
+                        )}
+
                         {/* Clan Count Badge */}
                         {hasClan && (
                           <div className="px-3 py-1 rounded-lg bg-teal-900/40 border border-teal-600/30">
@@ -158,6 +168,16 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                                       </div>
                                     )}
                                   </div>
+
+                                  {/* Sample Count Badge */}
+                                  {clan.sample_count !== undefined && clan.sample_count > 0 && (
+                                    <div className="px-2.5 py-1 rounded-lg bg-amber-900/40 border border-amber-600/30 flex items-center gap-1.5">
+                                      <Dna className="text-amber-300" size={12} />
+                                      <span className="text-xs font-semibold text-amber-300">
+                                        {clan.sample_count}
+                                      </span>
+                                    </div>
+                                  )}
 
                                   {/* Info indicator */}
                                   <div className="text-xs text-cyan-400/40 group-hover/clan:text-cyan-400/70 transition-colors">

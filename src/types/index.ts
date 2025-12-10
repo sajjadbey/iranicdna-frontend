@@ -45,10 +45,12 @@ export interface Tribe {
     name: string;
     ethnicity: string | null;
     historical_note: string;
+    sample_count?: number;
 }
 
 export interface Clan {
     name: string;
     tribe: string;
     common_ancestor: string;
+    sample_count?: number;
 }

@@ -18,7 +18,7 @@ export const CommunitiesPage: React.FC = () => {
   const [selectedClan, setSelectedClan] = useState<Clan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch tribes and clans
+  // Fetch tribes and clans with sample counts
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -37,8 +37,42 @@ export const CommunitiesPage: React.FC = () => {
         const tribesData: Tribe[] = await tribesRes.json();
         const clansData: Clan[] = await clansRes.json();
 
-        setTribes(tribesData || []);
-        setClans(clansData || []);
+        // Fetch sample counts for each tribe
+        const tribesWithCounts = await Promise.all(
+          tribesData.map(async (tribe) => {
+            try {
+              const samplesRes = await fetch(`${API_BASE}/samples/?tribe=${encodeURIComponent(tribe.name)}`);
+              if (samplesRes.ok) {
+                const samples = await samplesRes.json();
+                const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
+                return { ...tribe, sample_count: totalCount };
+              }
+            } catch {
+              // If fetch fails, return tribe without count
+            }
+            return tribe;
+          })
+        );
+
+        // Fetch sample counts for each clan
+        const clansWithCounts = await Promise.all(
+          clansData.map(async (clan) => {
+            try {
+              const samplesRes = await fetch(`${API_BASE}/samples/?clan=${encodeURIComponent(clan.name)}`);
+              if (samplesRes.ok) {
+                const samples = await samplesRes.json();
+                const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
+                return { ...clan, sample_count: totalCount };
+              }
+            } catch {
+              // If fetch fails, return clan without count
+            }
+            return clan;
+          })
+        );
+
+        setTribes(tribesWithCounts || []);
+        setClans(clansWithCounts || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load communities');
       } finally {
