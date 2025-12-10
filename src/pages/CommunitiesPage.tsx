@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
 import { FolderTree } from '../components/communities/FolderTree';
 import { TribeDetailModal } from '../components/communities/TribeDetailModal';
+import { AboutContribute } from '../components/AboutContribute';
 import type { Tribe, Clan } from '../types';
 
 const API_BASE = 'https://qizilbash.ir/genetics';
@@ -259,6 +260,9 @@ export const CommunitiesPage: React.FC = () => {
         clan={selectedClan}
         apiBase={API_BASE}
       />
+
+      {/* About & Contribute Section */}
+      <AboutContribute />
     </Layout>
   );
 };

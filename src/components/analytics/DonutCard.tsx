@@ -63,37 +63,6 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
     return null;
   };
 
-  const renderCustomLabel = (entry: any) => {
-    const { cx, cy, midAngle, outerRadius, percentage, name } = entry;
-    const RADIAN = Math.PI / 180;
-    
-    // Responsive radius - smaller on mobile
-    const isMobile = window.innerWidth < 640;
-    const labelOffset = isMobile ? 20 : 30;
-    const radius = outerRadius + labelOffset;
-    
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    // Only show label if percentage is significant enough
-    if (parseFloat(percentage) < 3) return null;
-
-    const textAnchor = x > cx ? 'start' : 'end';
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="#99f6e4"
-        textAnchor={textAnchor}
-        dominantBaseline="central"
-        className="text-[10px] sm:text-xs font-semibold"
-        style={{ pointerEvents: 'none' }}
-      >
-        {name} {percentage}%
-      </text>
-    );
-  };
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30 flex flex-col h-full">
@@ -121,7 +90,6 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={renderCustomLabel}
                 outerRadius={window.innerWidth < 640 ? 80 : 100}
                 innerRadius={window.innerWidth < 640 ? 56 : 70}
                 fill="#8884d8"
@@ -170,8 +138,6 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
         <div className="w-full overflow-hidden">
           <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar">
             {sortedItems.map(([label, value], index) => {
-              const pctStr = formatPercent(value, total);
-              
               return (
                 <motion.div
                   key={label}
@@ -185,12 +151,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                       className="w-4 h-4 rounded-full flex-shrink-0 ring-2 ring-slate-900" 
                       style={{ backgroundColor: colorMap[label] }} 
                     />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium text-teal-100 truncate">{label}</div>
-                      <div className="text-xs text-teal-400/80">
-                        {pctStr}%
-                      </div>
-                    </div>
+                    <div className="text-sm font-medium text-teal-100 truncate">{label}</div>
                   </div>
                   <div className="text-base font-semibold text-teal-200 ml-3">{fmt(value)}</div>
                 </motion.div>

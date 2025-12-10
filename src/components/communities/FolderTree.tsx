@@ -130,22 +130,51 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                       </div>
 
                       {/* Clans List */}
-                      <AnimatePresence>
+                      <AnimatePresence mode="wait">
                         {isExpanded && hasClan && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
+                            animate={{ 
+                              height: 'auto', 
+                              opacity: 1,
+                              transition: {
+                                height: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                                opacity: { duration: 0.3, delay: 0.1 }
+                              }
+                            }}
+                            exit={{ 
+                              height: 0, 
+                              opacity: 0,
+                              transition: {
+                                height: { duration: 0.3, ease: [0.4, 0, 0.2, 1], delay: 0.1 },
+                                opacity: { duration: 0.2 }
+                              }
+                            }}
                             className="overflow-hidden"
                           >
                             <div className="ml-7 mt-1 space-y-1 border-l-2 border-teal-700/30 pl-4">
                               {tribeClans.map((clan, clanIndex) => (
                                 <motion.div
                                   key={clan.name}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: clanIndex * 0.05, duration: 0.2 }}
+                                  initial={{ opacity: 0, x: 30 }}
+                                  animate={{ 
+                                    opacity: 1, 
+                                    x: 0,
+                                    transition: {
+                                      delay: clanIndex * 0.08,
+                                      duration: 0.4,
+                                      ease: [0.4, 0, 0.2, 1]
+                                    }
+                                  }}
+                                  exit={{ 
+                                    opacity: 0, 
+                                    x: 30,
+                                    transition: {
+                                      delay: (tribeClans.length - clanIndex - 1) * 0.05,
+                                      duration: 0.3,
+                                      ease: [0.4, 0, 1, 1]
+                                    }
+                                  }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onClanClick(clan);
