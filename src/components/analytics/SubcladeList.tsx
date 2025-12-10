@@ -37,7 +37,7 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
       >
         {title} <span className="text-teal-300 ml-2">(n = {fmt(total)})</span>
       </motion.h3>
-      <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
+      <div className="space-y-2 max-h-72 overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar">
         {items.map(([name, count], index) => {
           const pctStr = formatPercent(count, total);
           const color = colorMap[name];
@@ -48,8 +48,7 @@ export const SubcladeList: React.FC<Props> = ({ title, items, total }) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.02 }}
-              whileHover={{ scale: 1.02, x: 4 }}
-              className="flex items-center justify-between p-2 rounded-md bg-teal-900/40"
+              className="flex items-center justify-between p-2 rounded-md bg-teal-900/40 hover:bg-teal-900/60 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div

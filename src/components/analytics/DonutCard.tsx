@@ -1,11 +1,8 @@
 import React, { useMemo } from 'react';
-import { Chart as ChartJS, Tooltip, ArcElement } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Dna } from 'lucide-react';
 import { fmt, generateUniqueColors } from '../../utils/colors';
 import { motion } from 'framer-motion';
-
-ChartJS.register(Tooltip, ArcElement);
 
 interface Props {
   title: string;
@@ -24,6 +21,12 @@ const formatPercent = (count: number, total: number): string => {
   return rawPct.toFixed(1);
 };
 
+interface ChartDataItem {
+  name: string;
+  value: number;
+  percentage: string;
+  [key: string]: string | number;
+}
 
 export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
   
@@ -33,48 +36,57 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
   }, [dataMap]);
 
   const labels = useMemo(() => sortedItems.map(([label]) => label), [sortedItems]);
-  const values = useMemo(() => sortedItems.map(([, value]) => value), [sortedItems]);
-  
   const colorMap = useMemo(() => generateUniqueColors(labels), [labels]);
+
+  const chartData: ChartDataItem[] = useMemo(() => {
+    return sortedItems.map(([name, value]) => ({
+      name,
+      value,
+      percentage: formatPercent(value, total)
+    }));
+  }, [sortedItems, total]);
 
   if (labels.length === 0) return null;
 
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        data: values,
-        backgroundColor: labels.map(label => colorMap[label]),
-        borderWidth: 2,
-        borderColor: '#004d40',
-      },
-    ],
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-slate-800/95 border border-teal-700/50 rounded-lg px-3 py-2 shadow-xl">
+          <p className="text-teal-100 font-medium text-sm">{data.name}</p>
+          <p className="text-teal-300 text-sm">
+            {fmt(data.value)} ({data.percentage}%)
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
-  const options = {
-    plugins: {
-      legend: { display: false },
-      tooltip: { 
-        enabled: true,
-        callbacks: {
-          label: (context: any) => {
-            const label = context.label || '';
-            const value = context.parsed || 0;
-            const pct = formatPercent(value, total);
-            return `${label}: ${fmt(value)} (${pct}%)`;
-          }
-        }
-      },
-    },
-    cutout: '70%',
-    maintainAspectRatio: true,
-    responsive: true,
-    animation: {
-      animateRotate: true,
-      animateScale: true,
-      duration: 1000,
-      easing: 'easeInOutQuart' as const,
-    },
+  const renderCustomLabel = (entry: any) => {
+    const { cx, cy, midAngle, outerRadius, percentage, name } = entry;
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 30;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    // Only show label if percentage is significant enough
+    if (parseFloat(percentage) < 3) return null;
+
+    const textAnchor = x > cx ? 'start' : 'end';
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#99f6e4"
+        textAnchor={textAnchor}
+        dominantBaseline="central"
+        className="text-xs font-semibold"
+      >
+        {name} {percentage}%
+      </text>
+    );
   };
 
   return (
@@ -94,9 +106,38 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative w-full max-w-[280px] aspect-square"
+          className="relative w-full max-w-[350px] aspect-square"
         >
-          <Doughnut data={chartData} options={options} />
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={renderCustomLabel}
+                outerRadius={100}
+                innerRadius={70}
+                fill="#8884d8"
+                dataKey="value"
+                animationBegin={0}
+                animationDuration={1000}
+                animationEasing="ease-in-out"
+                stroke="#004d40"
+                strokeWidth={2}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={colorMap[entry.name]}
+                    className="hover:opacity-80 transition-opacity cursor-pointer"
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+          
           {/* Center text showing total */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <motion.div
@@ -119,8 +160,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
         </motion.div>
         
         {/* Legend Section */}
-        <div className="w-full">
-          <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="w-full overflow-hidden">
+          <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar">
             {sortedItems.map(([label, value], index) => {
               const pctStr = formatPercent(value, total);
               
@@ -130,8 +171,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-700/40 hover:bg-slate-700/60 transition-colors border border-teal-700/20"
+                  className="flex items-center justify-between p-3 rounded-lg bg-slate-700/40 hover:bg-slate-700/60 transition-colors border border-teal-700/20 cursor-pointer"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span 
