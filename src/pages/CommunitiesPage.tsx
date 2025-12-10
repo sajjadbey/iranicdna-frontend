@@ -151,18 +151,18 @@ export const CommunitiesPage: React.FC = () => {
           </div>
           <div className="flex items-center justify-end gap-8">
             <div className="px-6 py-3 rounded-xl bg-gradient-to-br from-teal-900/40 to-cyan-900/40 border-2 border-teal-600/30 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-teal-300" style={{ fontFamily: 'Cinzel, serif' }}>
+              <div className="text-2xl font-bold text-teal-300">
                 {tribes.length}
               </div>
-              <div className="text-xs text-teal-400/80" style={{ fontFamily: 'Lato, sans-serif' }}>
+              <div className="text-xs text-teal-400/80">
                 Tribes
               </div>
             </div>
             <div className="px-6 py-3 rounded-xl bg-gradient-to-br from-teal-900/40 to-cyan-900/40 border-2 border-teal-600/30 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-teal-300" style={{ fontFamily: 'Cinzel, serif' }}>
+              <div className="text-2xl font-bold text-teal-300">
                 {clans.length}
               </div>
-              <div className="text-xs text-teal-400/80" style={{ fontFamily: 'Lato, sans-serif' }}>
+              <div className="text-xs text-teal-400/80">
                 Clans
               </div>
             </div>

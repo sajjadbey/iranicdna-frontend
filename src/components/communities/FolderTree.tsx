@@ -35,7 +35,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
         <div className="bg-gradient-to-r from-teal-900/60 to-cyan-900/60 px-6 py-4 border-b-2 border-teal-600/30">
           <div className="flex items-center gap-3">
             <Crown className="text-teal-300" size={24} />
-            <h2 className="text-xl font-bold text-teal-100" style={{ fontFamily: 'Cinzel, serif' }}>
+            <h2 className="text-xl font-bold text-teal-100">
               Iranian Tribes & Clans
             </h2>
             <div className="ml-auto text-sm text-teal-300/80">
@@ -98,7 +98,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           onClick={() => onTribeClick(tribe)}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-base font-semibold text-teal-100 group-hover:text-teal-50 transition-colors hover:underline" style={{ fontFamily: 'Cinzel, serif' }}>
+                            <span className="text-base font-semibold text-teal-100 group-hover:text-teal-50 transition-colors hover:underline">
                               {tribe.name}
                             </span>
                             {tribe.ethnicity && (
