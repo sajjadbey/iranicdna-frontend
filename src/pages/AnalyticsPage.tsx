@@ -8,6 +8,7 @@ import { LocationSelector } from '../components/analytics/LocationSelector';
 import { DonutCard } from '../components/analytics/DonutCard';
 import { SubcladeList } from '../components/analytics/SubcladeList';
 import { MapCard } from '../components/analytics/MapCard';
+import { HeatmapCard } from '../components/analytics/HeatmapCard';
 import { AboutContribute } from '../components/AboutContribute';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -355,7 +356,7 @@ export const AnalyticsPage: React.FC = () => {
           <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row gap-4">
             <LocationSelector
               label="Ethnicity"
-              options={filteredEthnicities} // Using dynamically filtered ethnicities
+              options={filteredEthnicities}
               value={selectedEthnicity}
               onChange={setSelectedEthnicity}
               placeholder="All Ethnicities"
@@ -438,6 +439,17 @@ export const AnalyticsPage: React.FC = () => {
               className="lg:col-span-2"
             >
               <SubcladeList title="Y‑DNA Subclades" items={ySub} total={ySubTotal} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="lg:col-span-2"
+            >
+              <HeatmapCard
+                selectedCountry={selectedCountry}
+                selectedEthnicity={selectedEthnicity}
+              />
             </motion.div>
           </motion.div>
         )}

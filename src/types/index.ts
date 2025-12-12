@@ -54,3 +54,26 @@ export interface Clan {
     common_ancestor: string;
     sample_count?: number;
 }
+
+export interface HaplogroupNode {
+    name: string;
+    root_haplogroup: string | null;
+    children: HaplogroupNode[];
+}
+
+export interface HaplogroupCount {
+    haplogroup: string;
+    total_count: number;
+    direct_count: number;
+    subclade_count: number;
+    subclades: string[];
+}
+
+export interface HeatmapPoint {
+    province: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    sample_count: number;
+    haplogroup?: string;
+}
