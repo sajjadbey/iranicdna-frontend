@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import { HeatmapLayer } from 'react-leaflet-heatmap-layer-v3';
-import { MapPin, Flame } from 'lucide-react';
+import { MapContainer, TileLayer, useMap, CircleMarker, Popup } from 'react-leaflet';
+import { MapPin, Flame, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { HaplogroupSelector } from './HaplogroupSelector';
 import 'leaflet/dist/leaflet.css';
@@ -31,12 +30,31 @@ const MapViewController: React.FC<{ center: [number, number]; zoom: number }> = 
   return null;
 };
 
+// Normal CDF approximation for p-value calculation
+const normalCDF = (x: number): number => {
+  const t = 1 / (1 + 0.2316419 * Math.abs(x));
+  const d = 0.3989423 * Math.exp(-x * x / 2);
+  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return x > 0 ? 1 - p : p;
+};
+
+// Color scale based on shrunk frequency
+const getColor = (shrunkFreq: number): string => {
+  if (shrunkFreq >= 0.7) return '#dc2626'; // High
+  if (shrunkFreq >= 0.5) return '#f59e0b'; // Medium-high
+  if (shrunkFreq >= 0.3) return '#fbbf24'; // Medium
+  if (shrunkFreq >= 0.15) return '#5eead4'; // Medium-low
+  if (shrunkFreq >= 0.05) return '#14b8a6'; // Low
+  return '#0d9488'; // Very low
+};
+
 export const HeatmapCard: React.FC<Props> = ({ 
   selectedCountry, 
   selectedEthnicity 
 }) => {
   const [selectedHaplogroup, setSelectedHaplogroup] = useState<string | null>(null);
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
+  const [totalData, setTotalData] = useState<HeatmapPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,20 +65,34 @@ export const HeatmapCard: React.FC<Props> = ({
       setError(null);
       
       try {
-        const params = new URLSearchParams();
-        if (selectedHaplogroup) params.append('haplogroup', selectedHaplogroup);
-        if (selectedCountry) params.append('country', selectedCountry);
-        if (selectedEthnicity) params.append('ethnicity', selectedEthnicity);
+        // Fetch haplogroup-specific data
+        const haplogroupParams = new URLSearchParams();
+        if (selectedHaplogroup) haplogroupParams.append('haplogroup', selectedHaplogroup);
+        if (selectedCountry) haplogroupParams.append('country', selectedCountry);
+        if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
         
-        const url = `${API_BASE}/haplogroup/heatmap/?${params.toString()}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: HeatmapPoint[] = await res.json();
-        setHeatmapData(data || []);
+        const haplogroupUrl = `${API_BASE}/haplogroup/heatmap/?${haplogroupParams.toString()}`;
+        const haplogroupRes = await fetch(haplogroupUrl);
+        if (!haplogroupRes.ok) throw new Error(`HTTP ${haplogroupRes.status}`);
+        const haplogroupData: HeatmapPoint[] = await haplogroupRes.json();
+        
+        // Fetch total data (without haplogroup filter) for percentage calculation
+        const totalParams = new URLSearchParams();
+        if (selectedCountry) totalParams.append('country', selectedCountry);
+        if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
+        
+        const totalUrl = `${API_BASE}/haplogroup/heatmap/?${totalParams.toString()}`;
+        const totalRes = await fetch(totalUrl);
+        if (!totalRes.ok) throw new Error(`HTTP ${totalRes.status}`);
+        const totalDataResult: HeatmapPoint[] = await totalRes.json();
+        
+        setHeatmapData(haplogroupData || []);
+        setTotalData(totalDataResult || []);
       } catch (err) {
         console.error('Failed to fetch heatmap data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load heatmap data');
         setHeatmapData([]);
+        setTotalData([]);
       } finally {
         setLoading(false);
       }
@@ -69,31 +101,127 @@ export const HeatmapCard: React.FC<Props> = ({
     fetchData();
   }, [selectedHaplogroup, selectedCountry, selectedEthnicity]);
 
-  // Convert data to heatmap format
-  const heatmapPoints = useMemo(() => {
-    return heatmapData.map(point => ({
-      lat: point.latitude,
-      lng: point.longitude,
-      intensity: point.sample_count
-    }));
-  }, [heatmapData]);
+  // Calculate Empirical Bayes shrunk frequencies and statistics
+  const statisticalData = useMemo(() => {
+    if (!selectedHaplogroup) {
+      return [];
+    }
+    
+    if (heatmapData.length === 0 || totalData.length === 0) {
+      return [];
+    }
+    
+    // Create a map of location to total samples
+    const totalByLocation = new Map<string, number>();
+    totalData.forEach(point => {
+      const key = `${point.province}-${point.country}`;
+      totalByLocation.set(key, point.sample_count);
+    });
+    
+    // Calculate raw frequencies
+    const rawData = heatmapData.map(point => {
+      const key = `${point.province}-${point.country}`;
+      const total = totalByLocation.get(key) || point.sample_count;
+      const frequency = total > 0 ? point.sample_count / total : 0;
+      
+      return {
+        ...point,
+        totalSamples: total,
+        rawFrequency: frequency,
+        successes: point.sample_count,
+        trials: total
+      };
+    }).filter(p => p.totalSamples > 0);
+    
+    if (rawData.length === 0) return [];
+    
+    // Estimate global parameters for Beta prior using method of moments
+    const globalMean = rawData.reduce((sum, p) => sum + p.rawFrequency, 0) / rawData.length;
+    const globalVariance = rawData.reduce((sum, p) => 
+      sum + Math.pow(p.rawFrequency - globalMean, 2), 0
+    ) / rawData.length;
+    
+    // Prevent division by zero and ensure valid parameters
+    const safeMean = Math.max(0.001, Math.min(0.999, globalMean));
+    const safeVariance = Math.max(0.0001, Math.min(safeMean * (1 - safeMean) * 0.9, globalVariance));
+    
+    // Calculate Beta parameters: α and β
+    const temp = safeMean * (1 - safeMean) / safeVariance - 1;
+    const alpha = Math.max(0.5, safeMean * temp);
+    const beta = Math.max(0.5, (1 - safeMean) * temp);
+    
+    // Calculate shrunk frequencies and confidence intervals
+    return rawData.map(point => {
+      // Empirical Bayes shrunk estimate (posterior mean)
+      const shrunkFrequency = (point.successes + alpha) / (point.trials + alpha + beta);
+      
+      // Wilson score confidence interval (95%)
+      const z = 1.96; // 95% CI
+      const p = point.rawFrequency;
+      const n = point.trials;
+      
+      if (n === 0) {
+        return {
+          ...point,
+          shrunkFrequency: 0,
+          lowerCI: 0,
+          upperCI: 0,
+          pValue: 1,
+          isSignificant: false,
+          uncertainty: 1
+        };
+      }
+      
+      const denominator = 1 + z * z / n;
+      const center = (p + z * z / (2 * n)) / denominator;
+      const margin = z * Math.sqrt((p * (1 - p) / n + z * z / (4 * n * n))) / denominator;
+      
+      const lowerCI = Math.max(0, center - margin);
+      const upperCI = Math.min(1, center + margin);
+      
+      // Two-tailed binomial test p-value (approximate using normal approximation)
+      const expectedSuccesses = n * globalMean;
+      const stdDev = Math.sqrt(n * globalMean * (1 - globalMean));
+      const zScore = stdDev > 0 ? Math.abs(point.successes - expectedSuccesses) / stdDev : 0;
+      const pValue = 2 * (1 - normalCDF(zScore));
+      
+      const isSignificant = pValue < 0.05;
+      
+      // Uncertainty measure: width of confidence interval
+      const uncertainty = upperCI - lowerCI;
+      
+      return {
+        ...point,
+        shrunkFrequency,
+        lowerCI,
+        upperCI,
+        pValue,
+        isSignificant,
+        uncertainty
+      };
+    });
+  }, [heatmapData, totalData, selectedHaplogroup]);
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalSamples = heatmapData.reduce((sum, point) => sum + point.sample_count, 0);
-    const maxSamples = Math.max(...heatmapData.map(p => p.sample_count), 0);
-    const locations = heatmapData.length;
+    const totalSamples = statisticalData.reduce((sum, point) => sum + point.sample_count, 0);
+    const maxShrunkFreq = Math.max(...statisticalData.map(p => p.shrunkFrequency), 0);
+    const avgShrunkFreq = statisticalData.length > 0 
+      ? statisticalData.reduce((sum, p) => sum + p.shrunkFrequency, 0) / statisticalData.length 
+      : 0;
+    const locations = statisticalData.length;
+    const significantLocations = statisticalData.filter(p => p.isSignificant).length;
     
-    return { totalSamples, maxSamples, locations };
-  }, [heatmapData]);
+    return { totalSamples, maxShrunkFreq, avgShrunkFreq, locations, significantLocations };
+  }, [statisticalData]);
 
   // Calculate map center based on data
   const mapCenter = useMemo((): [number, number] => {
-    if (heatmapData.length === 0) {
+    if (statisticalData.length === 0) {
       return [32.4279, 53.6880]; // Default to Iran center
     }
     
-    const validPoints = heatmapData.filter(p => 
+    const validPoints = statisticalData.filter(p => 
       !isNaN(p.latitude) && !isNaN(p.longitude) && 
       isFinite(p.latitude) && isFinite(p.longitude)
     );
@@ -111,7 +239,7 @@ export const HeatmapCard: React.FC<Props> = ({
     }
     
     return [avgLat, avgLng];
-  }, [heatmapData]);
+  }, [statisticalData]);
 
   const formatCount = (count: number): string => count.toLocaleString();
 
@@ -157,7 +285,6 @@ export const HeatmapCard: React.FC<Props> = ({
         transition={{ duration: 0.3, delay: 0.1 }}
         className="flex items-center justify-between mb-4"
       >
-        
         {loading && (
           <motion.div
             animate={{ rotate: 360 }}
@@ -173,10 +300,12 @@ export const HeatmapCard: React.FC<Props> = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-3 gap-4 mb-4"
+        className="grid grid-cols-4 gap-4 mb-4"
       >
         <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
-          <div className="text-xs text-teal-300 mb-1">Total Samples</div>
+          <div className="text-xs text-teal-300 mb-1">
+            {selectedHaplogroup ? `${selectedHaplogroup} Samples` : 'Total Samples'}
+          </div>
           <div className="text-lg font-bold text-teal-100">{formatCount(stats.totalSamples)}</div>
         </div>
         <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
@@ -184,12 +313,34 @@ export const HeatmapCard: React.FC<Props> = ({
           <div className="text-lg font-bold text-teal-100">{stats.locations}</div>
         </div>
         <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
-          <div className="text-xs text-teal-300 mb-1">Max Samples</div>
-          <div className="text-lg font-bold text-teal-100">{formatCount(stats.maxSamples)}</div>
+          <div className="text-xs text-teal-300 mb-1">Avg Frequency</div>
+          <div className="text-lg font-bold text-teal-100">
+            {(stats.avgShrunkFreq * 100).toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
+          <div className="text-xs text-teal-300 mb-1">Significant</div>
+          <div className="text-lg font-bold text-teal-100 flex items-center gap-1">
+            <TrendingUp size={16} className="text-amber-400" />
+            {stats.significantLocations}
+          </div>
         </div>
       </motion.div>
 
-      {heatmapData.length === 0 || loading ? (
+      {!selectedHaplogroup ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-16 text-teal-400 bg-slate-700/30 rounded-xl border border-teal-700/20"
+        >
+          <Flame className="mx-auto mb-4 text-teal-500" size={56} />
+          <p className="text-lg font-semibold mb-2">Select a Haplogroup</p>
+          <p className="text-sm text-teal-500">
+            Choose a haplogroup from the selector above to view its geographic distribution
+          </p>
+        </motion.div>
+      ) : statisticalData.length === 0 || loading ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -200,9 +351,7 @@ export const HeatmapCard: React.FC<Props> = ({
           <p>
             {loading 
               ? 'Loading heatmap data...'
-              : selectedHaplogroup 
-                ? `No geographic data available for ${selectedHaplogroup}` 
-                : 'Select a haplogroup to view heatmap'}
+              : `No geographic data available for ${selectedHaplogroup}`}
           </p>
         </motion.div>
       ) : (
@@ -227,56 +376,125 @@ export const HeatmapCard: React.FC<Props> = ({
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             
-            {/* Heatmap layer */}
-            {heatmapPoints.length > 0 && (
-              <HeatmapLayer
-                points={heatmapPoints}
-                longitudeExtractor={(point: any) => point.lng}
-                latitudeExtractor={(point: any) => point.lat}
-                intensityExtractor={(point: any) => point.intensity}
-                radius={25}
-                blur={15}
-                max={stats.maxSamples}
-                gradient={{
-                  0.0: '#0d9488',
-                  0.3: '#14b8a6',
-                  0.5: '#fbbf24',
-                  0.7: '#f59e0b',
-                  1.0: '#dc2626'
-                }}
-              />
-            )}
+            {/* Circle markers colored by shrunk frequency, sized by sample count */}
+            {statisticalData.map((point) => {
+              const radius = Math.max(5, Math.min(30, Math.sqrt(point.totalSamples) * 2));
+              const color = getColor(point.shrunkFrequency);
+              const opacity = Math.max(0.3, 1 - point.uncertainty);
+              
+              return (
+                <CircleMarker
+                  key={`${point.province}-${point.country}`}
+                  center={[point.latitude, point.longitude]}
+                  radius={radius}
+                  pathOptions={{
+                    fillColor: color,
+                    fillOpacity: opacity,
+                    color: point.isSignificant ? '#fbbf24' : color,
+                    weight: point.isSignificant ? 3 : 1,
+                    opacity: 0.8
+                  }}
+                >
+                  <Popup>
+                    <div className="text-slate-900 p-2 min-w-[250px]">
+                      <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                        <MapPin size={16} />
+                        {point.province}, {point.country}
+                      </h4>
+                      
+                      <div className="space-y-1 text-sm">
+                        <p>
+                          <strong>Raw Frequency:</strong> {(point.rawFrequency * 100).toFixed(2)}%
+                        </p>
+                        <p>
+                          <strong>Adjusted Frequency:</strong>{' '}
+                          <span className="font-semibold" style={{ color }}>
+                            {(point.shrunkFrequency * 100).toFixed(2)}%
+                          </span>
+                        </p>
+                        <p>
+                          <strong>95% CI:</strong> [{(point.lowerCI * 100).toFixed(2)}%, {(point.upperCI * 100).toFixed(2)}%]
+                        </p>
+                        <p>
+                          <strong>Sample Size:</strong> {formatCount(point.sample_count)} / {formatCount(point.totalSamples)}
+                        </p>
+                        <p>
+                          <strong>P-value:</strong> {point.pValue < 0.001 ? '<0.001' : point.pValue.toFixed(3)}
+                          {point.isSignificant && (
+                            <span className="ml-2 px-2 py-0.5 bg-amber-400 text-white text-xs rounded font-semibold">
+                              Significant
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-2 pt-2 border-t border-slate-300 text-xs text-slate-600">
+                        <p>Circle size = sample count</p>
+                        <p>Color = adjusted frequency</p>
+                        <p>Opacity = confidence (lower = more uncertain)</p>
+                        {point.isSignificant && <p className="text-amber-600 font-semibold">Gold border = statistically significant</p>}
+                      </div>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
           </MapContainer>
         </motion.div>
       )}
 
       {/* Legend */}
-      {heatmapData.length > 0 && (
+      {statisticalData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-4 pt-4 border-t border-teal-700/30"
+          className="mt-4 pt-4 border-t border-teal-700/30 space-y-3"
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-teal-300/70">
-              Intensity Scale
-            </p>
+          {/* Color scale */}
+          <div>
+            <p className="text-xs text-teal-300/70 mb-2">Adjusted Frequency Scale (Empirical Bayes)</p>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-teal-300">Low</span>
-              <div className="w-32 h-3 rounded-full" style={{
-                background: 'linear-gradient(to right, #0d9488, #14b8a6, #fbbf24, #f59e0b, #dc2626)'
-              }} />
-              <span className="text-xs text-teal-300">High</span>
+              <span className="text-xs text-teal-300">0%</span>
+              <div className="flex-1 h-3 rounded-full flex">
+                <div className="flex-1" style={{ backgroundColor: '#0d9488' }} />
+                <div className="flex-1" style={{ backgroundColor: '#14b8a6' }} />
+                <div className="flex-1" style={{ backgroundColor: '#5eead4' }} />
+                <div className="flex-1" style={{ backgroundColor: '#fbbf24' }} />
+                <div className="flex-1" style={{ backgroundColor: '#f59e0b' }} />
+                <div className="flex-1" style={{ backgroundColor: '#dc2626' }} />
+              </div>
+              <span className="text-xs text-teal-300">100%</span>
             </div>
           </div>
           
-          {/* Top locations */}
-          {heatmapData.length > 0 && (
-            <div className="mt-3">
-              <p className="text-xs text-teal-300/70 mb-2">Top Locations:</p>
+          {/* Legend items */}
+          <div className="grid grid-cols-2 gap-2 text-xs text-teal-300">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-teal-500 border-2 border-teal-500" />
+              <span>Circle size = sample count</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-amber-500 border-2 border-amber-400" />
+              <span>Gold border = significant (p&lt;0.05)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-teal-500 opacity-30" />
+              <span>Lower opacity = higher uncertainty</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <TrendingUp size={14} className="text-amber-400" />
+              <span>{stats.significantLocations} significant hotspots</span>
+            </div>
+          </div>
+          
+          {/* Top locations by shrunk frequency */}
+          {selectedHaplogroup && statisticalData.length > 0 && (
+            <div>
+              <p className="text-xs text-teal-300/70 mb-2">Highest Frequency Locations (Adjusted):</p>
               <div className="flex flex-wrap gap-2">
-                {heatmapData
+                {statisticalData
+                  .sort((a, b) => b.shrunkFrequency - a.shrunkFrequency)
                   .slice(0, 5)
                   .map((point, index) => (
                     <motion.div
@@ -284,11 +502,20 @@ export const HeatmapCard: React.FC<Props> = ({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
-                      className="flex items-center gap-1 text-xs bg-teal-900/40 px-2 py-1 rounded border border-teal-700/30"
+                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded border ${
+                        point.isSignificant 
+                          ? 'bg-amber-900/40 border-amber-700/50' 
+                          : 'bg-teal-900/40 border-teal-700/30'
+                      }`}
                     >
-                      <MapPin size={12} className="text-amber-400" />
+                      <MapPin size={12} className={point.isSignificant ? 'text-amber-400' : 'text-teal-400'} />
                       <span className="text-teal-200">{point.province}</span>
-                      <span className="text-teal-400">({formatCount(point.sample_count)})</span>
+                      <span className="text-teal-400">
+                        {(point.shrunkFrequency * 100).toFixed(1)}%
+                      </span>
+                      <span className="text-teal-500 text-[10px]">
+                        (n={formatCount(point.totalSamples)})
+                      </span>
                     </motion.div>
                   ))}
               </div>

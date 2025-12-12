@@ -52,15 +52,43 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     };
   }, [dropdownRef, isMobile]);
 
-  // Fetch haplogroup tree
+  // Fetch haplogroup tree and counts
   useEffect(() => {
-    const fetchTree = async () => {
+    const fetchTreeAndCounts = async () => {
       try {
         setLoading(true);
         const res = await fetch(`${API_BASE}/haplogroup/all/`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: HaplogroupNode[] = await res.json();
-        setHaplogroupTree(data || []);
+        
+        // Fetch counts for all root haplogroups
+        const rootHaplogroups = data.map(node => node.name);
+        const countPromises = rootHaplogroups.map(async (name) => {
+          try {
+            const countRes = await fetch(`${API_BASE}/haplogroup/?name=${encodeURIComponent(name)}`);
+            if (!countRes.ok) return null;
+            const countData: HaplogroupCount = await countRes.json();
+            return { name, count: countData };
+          } catch {
+            return null;
+          }
+        });
+        
+        const counts = await Promise.all(countPromises);
+        const countsMap: Record<string, HaplogroupCount> = {};
+        counts.forEach(item => {
+          if (item) countsMap[item.name] = item.count;
+        });
+        
+        // Sort tree by total_count (highest to lowest)
+        const sortedData = [...data].sort((a, b) => {
+          const countA = countsMap[a.name]?.total_count || 0;
+          const countB = countsMap[b.name]?.total_count || 0;
+          return countB - countA;
+        });
+        
+        setHaplogroupTree(sortedData);
+        setHaplogroupCounts(countsMap);
       } catch (err) {
         console.error('Failed to fetch haplogroup tree:', err);
         setHaplogroupTree([]);
@@ -68,10 +96,10 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
         setLoading(false);
       }
     };
-    fetchTree();
+    fetchTreeAndCounts();
   }, []);
 
-  // Fetch count for a haplogroup
+  // Fetch count for a haplogroup (for children when expanded)
   const fetchCount = async (name: string) => {
     if (haplogroupCounts[name]) return;
     
@@ -85,24 +113,42 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     }
   };
 
-  const toggleNode = (name: string) => {
+  const toggleNode = (name: string, event: React.MouseEvent) => {
+    event.stopPropagation();
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
       if (newSet.has(name)) {
         newSet.delete(name);
       } else {
         newSet.add(name);
-        fetchCount(name);
+        // Fetch counts for children when expanding
+        const node = findNodeByName(haplogroupTree, name);
+        if (node && node.children) {
+          node.children.forEach(child => fetchCount(child.name));
+        }
       }
       return newSet;
     });
   };
 
-  const handleSelect = (haplogroupName: string | null) => {
+  const handleSelect = (haplogroupName: string | null, event?: React.MouseEvent) => {
+    if (event) event.stopPropagation();
     onChange(haplogroupName);
     if (!isMobile) {
       setIsOpen(false);
     }
+  };
+  
+  // Helper to find node in tree
+  const findNodeByName = (nodes: HaplogroupNode[], name: string): HaplogroupNode | null => {
+    for (const node of nodes) {
+      if (node.name === name) return node;
+      if (node.children) {
+        const found = findNodeByName(node.children, name);
+        if (found) return found;
+      }
+    }
+    return null;
   };
 
   const formatCount = (count: number): string => count.toLocaleString();
@@ -115,16 +161,10 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
 
     return (
       <div key={node.name} className="w-full">
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
-          onClick={() => {
-            if (hasChildren) {
-              toggleNode(node.name);
-            }
-            handleSelect(node.name);
-          }}
           className={`w-full text-left rounded-md px-3 py-2 flex items-center gap-2 transition-colors ${
             isSelected 
               ? 'bg-amber-700 text-white hover:bg-amber-600' 
@@ -132,29 +172,38 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
           }`}
           style={{ paddingLeft: `${depth * 1.5 + 0.75}rem` }}
         >
-          {hasChildren && (
-            <span className="flex-shrink-0">
+          {hasChildren ? (
+            <button
+              onClick={(e) => toggleNode(node.name, e)}
+              className="flex-shrink-0 p-0.5 hover:bg-teal-700/50 rounded"
+            >
               {isExpanded ? (
                 <ChevronDown size={14} className="text-teal-300" />
               ) : (
                 <ChevronRight size={14} className="text-teal-300" />
               )}
-            </span>
+            </button>
+          ) : (
+            <span className="w-3.5" />
           )}
-          {!hasChildren && <span className="w-3.5" />}
           
-          <Dna size={14} className="flex-shrink-0" />
-          
-          <span className="flex-1 truncate text-sm font-medium">
-            {node.name}
-          </span>
-          
-          {count && (
-            <span className="text-xs text-teal-300 flex-shrink-0">
-              {formatCount(count.total_count)}
+          <button
+            onClick={(e) => handleSelect(node.name, e)}
+            className="flex-1 flex items-center gap-2 text-left"
+          >
+            <Dna size={14} className="flex-shrink-0" />
+            
+            <span className="flex-1 truncate text-sm font-medium">
+              {node.name}
             </span>
-          )}
-        </motion.button>
+            
+            {count && (
+              <span className="text-xs text-teal-300 flex-shrink-0">
+                {formatCount(count.total_count)}
+              </span>
+            )}
+          </button>
+        </motion.div>
 
         {hasChildren && isExpanded && (
           <motion.div
@@ -164,7 +213,13 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
             transition={{ duration: 0.2 }}
             className="mt-1 space-y-1"
           >
-            {node.children.map(child => renderNode(child, depth + 1))}
+            {node.children
+              .sort((a, b) => {
+                const countA = haplogroupCounts[a.name]?.total_count || 0;
+                const countB = haplogroupCounts[b.name]?.total_count || 0;
+                return countB - countA;
+              })
+              .map(child => renderNode(child, depth + 1))}
           </motion.div>
         )}
       </div>
@@ -256,10 +311,10 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05, duration: 0.2 }}
-                  onClick={() => handleSelect(null)}
+                  onClick={(e) => handleSelect(null, e)}
                   className="text-sm rounded-md px-3 py-2 bg-amber-800/80 text-white font-medium hover:bg-amber-700 transition-colors"
                 >
-                  All Haplogroups
+                  Clear Selection
                 </motion.button>
                 
                 {haplogroupTree.map(node => renderNode(node))}
