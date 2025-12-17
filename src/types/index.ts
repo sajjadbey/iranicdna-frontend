@@ -43,7 +43,7 @@ export interface Ethnicity {
 
 export interface Tribe {
     name: string;
-    ethnicity: string | null;
+    ethnicities: string[];
     historical_note: string;
     sample_count?: number;
 }

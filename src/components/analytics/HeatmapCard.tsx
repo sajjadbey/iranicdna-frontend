@@ -1,17 +1,24 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, useMap, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, GeoJSON } from 'react-leaflet';
 import { MapPin, Flame, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { HaplogroupSelector } from './HaplogroupSelector';
+import type { GeoJsonObject, Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 
 const API_BASE = 'https://qizilbash.ir/genetics';
+
+interface GeoJSONGeometry {
+  type: string;
+  coordinates: number[][][][];
+}
 
 interface HeatmapPoint {
   province: string;
   country: string;
   latitude: number;
   longitude: number;
+  geometry: GeoJSONGeometry;
   sample_count: number;
   haplogroup?: string;
 }
@@ -38,14 +45,14 @@ const normalCDF = (x: number): number => {
   return x > 0 ? 1 - p : p;
 };
 
-// Color scale based on shrunk frequency
+// Color scale based on shrunk frequency - Red and shades of red
 const getColor = (shrunkFreq: number): string => {
-  if (shrunkFreq >= 0.7) return '#dc2626'; // High
-  if (shrunkFreq >= 0.5) return '#f59e0b'; // Medium-high
-  if (shrunkFreq >= 0.3) return '#fbbf24'; // Medium
-  if (shrunkFreq >= 0.15) return '#5eead4'; // Medium-low
-  if (shrunkFreq >= 0.05) return '#14b8a6'; // Low
-  return '#0d9488'; // Very low
+  if (shrunkFreq >= 0.7) return '#7f1d1d'; // Very dark red - High
+  if (shrunkFreq >= 0.5) return '#991b1b'; // Dark red - Medium-high
+  if (shrunkFreq >= 0.3) return '#dc2626'; // Red - Medium
+  if (shrunkFreq >= 0.15) return '#ef4444'; // Light red - Medium-low
+  if (shrunkFreq >= 0.05) return '#f87171'; // Lighter red - Low
+  return '#fca5a5'; // Very light red - Very low
 };
 
 export const HeatmapCard: React.FC<Props> = ({ 
@@ -300,7 +307,7 @@ export const HeatmapCard: React.FC<Props> = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-4 gap-4 mb-4"
+        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4"
       >
         <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
           <div className="text-xs text-teal-300 mb-1">
@@ -376,67 +383,112 @@ export const HeatmapCard: React.FC<Props> = ({
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             
-            {/* Circle markers colored by shrunk frequency, sized by sample count */}
+            {/* GeoJSON polygons colored by shrunk frequency */}
             {statisticalData.map((point) => {
-              const radius = Math.max(5, Math.min(30, Math.sqrt(point.totalSamples) * 2));
               const color = getColor(point.shrunkFrequency);
-              const opacity = Math.max(0.3, 1 - point.uncertainty);
+              const fillOpacity = Math.max(0.3, 1 - point.uncertainty);
+              const borderColor = '#334155'; // slate-700 - contrasts with red
+              const borderWeight = 1.5;
+              
+              const featureData: Feature = {
+                type: 'Feature',
+                properties: {
+                  province: point.province,
+                  country: point.country,
+                  rawFrequency: point.rawFrequency,
+                  shrunkFrequency: point.shrunkFrequency,
+                  lowerCI: point.lowerCI,
+                  upperCI: point.upperCI,
+                  sampleCount: point.sample_count,
+                  totalSamples: point.totalSamples,
+                  pValue: point.pValue,
+                  isSignificant: point.isSignificant
+                },
+                geometry: point.geometry as any
+              };
               
               return (
-                <CircleMarker
+                <GeoJSON
                   key={`${point.province}-${point.country}`}
-                  center={[point.latitude, point.longitude]}
-                  radius={radius}
-                  pathOptions={{
+                  data={featureData as GeoJsonObject}
+                  style={{
                     fillColor: color,
-                    fillOpacity: opacity,
-                    color: point.isSignificant ? '#fbbf24' : color,
-                    weight: point.isSignificant ? 3 : 1,
-                    opacity: 0.8
+                    fillOpacity: fillOpacity,
+                    color: borderColor,
+                    weight: borderWeight,
+                    opacity: 0.6
                   }}
-                >
-                  <Popup>
-                    <div className="text-slate-900 p-2 min-w-[250px]">
-                      <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
-                        <MapPin size={16} />
-                        {point.province}, {point.country}
-                      </h4>
-                      
-                      <div className="space-y-1 text-sm">
-                        <p>
-                          <strong>Raw Frequency:</strong> {(point.rawFrequency * 100).toFixed(2)}%
-                        </p>
-                        <p>
-                          <strong>Adjusted Frequency:</strong>{' '}
-                          <span className="font-semibold" style={{ color }}>
-                            {(point.shrunkFrequency * 100).toFixed(2)}%
-                          </span>
-                        </p>
-                        <p>
-                          <strong>95% CI:</strong> [{(point.lowerCI * 100).toFixed(2)}%, {(point.upperCI * 100).toFixed(2)}%]
-                        </p>
-                        <p>
-                          <strong>Sample Size:</strong> {formatCount(point.sample_count)} / {formatCount(point.totalSamples)}
-                        </p>
-                        <p>
-                          <strong>P-value:</strong> {point.pValue < 0.001 ? '<0.001' : point.pValue.toFixed(3)}
-                          {point.isSignificant && (
-                            <span className="ml-2 px-2 py-0.5 bg-amber-400 text-white text-xs rounded font-semibold">
-                              Significant
+                  onEachFeature={(feature, layer) => {
+                    const props = feature.properties;
+                    if (!props) return;
+                    
+                    layer.bindPopup(`
+                      <div class="text-slate-900 p-2 max-w-[90vw] sm:min-w-[250px]">
+                        <h4 class="font-bold text-base sm:text-lg mb-2 flex items-center gap-2">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                          </svg>
+                          <span class="break-words">${props.province}, ${props.country}</span>
+                        </h4>
+                        
+                        <div class="space-y-1 text-xs sm:text-sm">
+                          <p class="flex flex-wrap items-center gap-1">
+                            <strong class="whitespace-nowrap">Raw Frequency:</strong> 
+                            <span>${(props.rawFrequency * 100).toFixed(2)}%</span>
+                          </p>
+                          <p class="flex flex-wrap items-center gap-1">
+                            <strong class="whitespace-nowrap">Adjusted Frequency:</strong> 
+                            <span class="font-semibold" style="color: ${color}">
+                              ${(props.shrunkFrequency * 100).toFixed(2)}%
                             </span>
-                          )}
-                        </p>
+                          </p>
+                          <p class="flex flex-wrap items-center gap-1">
+                            <strong class="whitespace-nowrap">95% CI:</strong> 
+                            <span class="break-all">[${(props.lowerCI * 100).toFixed(2)}%, ${(props.upperCI * 100).toFixed(2)}%]</span>
+                          </p>
+                          <p class="flex flex-wrap items-center gap-1">
+                            <strong class="whitespace-nowrap">Sample Size:</strong> 
+                            <span>${formatCount(props.sampleCount)} / ${formatCount(props.totalSamples)}</span>
+                          </p>
+                          <p class="flex flex-wrap items-center gap-1">
+                            <strong class="whitespace-nowrap">P-value:</strong> 
+                            <span>${props.pValue < 0.001 ? '<0.001' : props.pValue.toFixed(3)}</span>
+                            ${props.isSignificant ? '<span class="ml-1 px-1.5 py-0.5 bg-amber-400 text-white text-[10px] sm:text-xs rounded font-semibold whitespace-nowrap">Significant</span>' : ''}
+                          </p>
+                        </div>
+                        
+                        <div class="mt-2 pt-2 border-t border-slate-300 text-[10px] sm:text-xs text-slate-600">
+                          <p>Color = adjusted frequency</p>
+                          <p>Opacity = confidence</p>
+                        </div>
                       </div>
-                      
-                      <div className="mt-2 pt-2 border-t border-slate-300 text-xs text-slate-600">
-                        <p>Circle size = sample count</p>
-                        <p>Color = adjusted frequency</p>
-                        <p>Opacity = confidence (lower = more uncertain)</p>
-                        {point.isSignificant && <p className="text-amber-600 font-semibold">Gold border = statistically significant</p>}
-                      </div>
-                    </div>
-                  </Popup>
-                </CircleMarker>
+                    `, {
+                      maxWidth: 300,
+                      className: 'leaflet-popup-mobile-friendly'
+                    });
+                    
+                    // Add hover effect
+                    layer.on({
+                      mouseover: (e) => {
+                        const layer = e.target;
+                        layer.setStyle({
+                          weight: borderWeight + 1,
+                          fillOpacity: Math.min(1, fillOpacity + 0.2),
+                          opacity: 1
+                        });
+                      },
+                      mouseout: (e) => {
+                        const layer = e.target;
+                        layer.setStyle({
+                          weight: borderWeight,
+                          fillOpacity: fillOpacity,
+                          opacity: 0.6
+                        });
+                      }
+                    });
+                  }}
+                />
               );
             })}
           </MapContainer>
@@ -457,12 +509,12 @@ export const HeatmapCard: React.FC<Props> = ({
             <div className="flex items-center gap-2">
               <span className="text-xs text-teal-300">0%</span>
               <div className="flex-1 h-3 rounded-full flex">
-                <div className="flex-1" style={{ backgroundColor: '#0d9488' }} />
-                <div className="flex-1" style={{ backgroundColor: '#14b8a6' }} />
-                <div className="flex-1" style={{ backgroundColor: '#5eead4' }} />
-                <div className="flex-1" style={{ backgroundColor: '#fbbf24' }} />
-                <div className="flex-1" style={{ backgroundColor: '#f59e0b' }} />
+                <div className="flex-1" style={{ backgroundColor: '#fca5a5' }} />
+                <div className="flex-1" style={{ backgroundColor: '#f87171' }} />
+                <div className="flex-1" style={{ backgroundColor: '#ef4444' }} />
                 <div className="flex-1" style={{ backgroundColor: '#dc2626' }} />
+                <div className="flex-1" style={{ backgroundColor: '#991b1b' }} />
+                <div className="flex-1" style={{ backgroundColor: '#7f1d1d' }} />
               </div>
               <span className="text-xs text-teal-300">100%</span>
             </div>
@@ -471,15 +523,15 @@ export const HeatmapCard: React.FC<Props> = ({
           {/* Legend items */}
           <div className="grid grid-cols-2 gap-2 text-xs text-teal-300">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-teal-500 border-2 border-teal-500" />
-              <span>Circle size = sample count</span>
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: '#dc2626' }} />
+              <span>Province fill = adjusted frequency</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-amber-500 border-2 border-amber-400" />
-              <span>Gold border = significant (p&lt;0.05)</span>
+              <div className="w-4 h-4 rounded border" style={{ backgroundColor: '#dc2626', borderColor: '#334155' }} />
+              <span>Dark slate border for definition</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-teal-500 opacity-30" />
+              <div className="w-4 h-4 rounded opacity-30" style={{ backgroundColor: '#dc2626' }} />
               <span>Lower opacity = higher uncertainty</span>
             </div>
             <div className="flex items-center gap-2">

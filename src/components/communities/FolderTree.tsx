@@ -101,9 +101,9 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                             <span className="text-sm sm:text-base font-semibold text-teal-100 group-hover:text-teal-50 transition-colors hover:underline truncate">
                               {tribe.name}
                             </span>
-                            {tribe.ethnicity && (
+                            {tribe.ethnicities && tribe.ethnicities.length > 0 && (
                               <span className="text-xs text-teal-400/70 italic truncate">
-                                ({tribe.ethnicity})
+                                ({tribe.ethnicities.join(', ')})
                               </span>
                             )}
                           </div>

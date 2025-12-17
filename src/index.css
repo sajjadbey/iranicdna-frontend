@@ -65,3 +65,30 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1.1);
   z-index: 1000 !important;
 }
+
+/* Responsive Leaflet popup styles */
+@media (max-width: 640px) {
+  .leaflet-popup-content-wrapper {
+    max-width: calc(100vw - 40px) !important;
+    width: auto !important;
+  }
+  
+  .leaflet-popup-content {
+    margin: 8px 10px !important;
+    max-width: 100% !important;
+    width: auto !important;
+  }
+  
+  .leaflet-popup-mobile-friendly .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+  }
+}
+
+/* Ensure popup doesn't overflow on small screens */
+.leaflet-popup {
+  max-width: 90vw !important;
+}
+
+.leaflet-popup-content-wrapper {
+  overflow-x: hidden;
+}

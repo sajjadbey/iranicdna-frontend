@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronDown, ChevronRight, Dna } from 'lucide-react';
+import { ChevronDown, ChevronRight, Dna, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const API_BASE = 'https://qizilbash.ir/genetics';
@@ -24,25 +24,20 @@ interface Props {
 }
 
 export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
-  const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [haplogroupTree, setHaplogroupTree] = useState<HaplogroupNode[]>([]);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [haplogroupCounts, setHaplogroupCounts] = useState<Record<string, HaplogroupCount>>({});
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isMobile && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setSearchQuery('');
       }
     };
 
@@ -50,7 +45,14 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdownRef, isMobile]);
+  }, [dropdownRef]);
+
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
   // Fetch haplogroup tree and counts
   useEffect(() => {
@@ -134,9 +136,8 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
   const handleSelect = (haplogroupName: string | null, event?: React.MouseEvent) => {
     if (event) event.stopPropagation();
     onChange(haplogroupName);
-    if (!isMobile) {
-      setIsOpen(false);
-    }
+    setIsOpen(false);
+    setSearchQuery('');
   };
   
   // Helper to find node in tree
@@ -152,6 +153,34 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
   };
 
   const formatCount = (count: number): string => count.toLocaleString();
+
+  // Filter nodes based on search query
+  const filterNodes = (nodes: HaplogroupNode[], query: string): HaplogroupNode[] => {
+    if (!query.trim()) return nodes;
+    
+    const lowerQuery = query.toLowerCase();
+    
+    return nodes.reduce<HaplogroupNode[]>((acc, node) => {
+      const matches = node.name.toLowerCase().includes(lowerQuery);
+      const filteredChildren = node.children ? filterNodes(node.children, query) : [];
+      
+      if (matches || filteredChildren.length > 0) {
+        acc.push({
+          ...node,
+          children: filteredChildren
+        });
+        
+        // Auto-expand nodes that have matching children
+        if (filteredChildren.length > 0) {
+          setExpandedNodes(prev => new Set([...prev, node.name]));
+        }
+      }
+      
+      return acc;
+    }, []);
+  };
+
+  const filteredTree = useMemo(() => filterNodes(haplogroupTree, searchQuery), [haplogroupTree, searchQuery]);
 
   const renderNode = (node: HaplogroupNode, depth: number = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0;
@@ -226,19 +255,6 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     );
   };
 
-  // Flatten tree for mobile select
-  const flattenTree = (nodes: HaplogroupNode[], depth: number = 0): { name: string; depth: number }[] => {
-    const result: { name: string; depth: number }[] = [];
-    nodes.forEach(node => {
-      result.push({ name: node.name, depth });
-      if (node.children && node.children.length > 0) {
-        result.push(...flattenTree(node.children, depth + 1));
-      }
-    });
-    return result;
-  };
-
-  const flatOptions = useMemo(() => flattenTree(haplogroupTree), [haplogroupTree]);
 
   if (loading) {
     return (
@@ -264,49 +280,65 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
       <label className="block text-sm font-medium text-teal-200 mb-2 flex items-center gap-1">
         <Dna size={14} /> Haplogroup
       </label>
-      {isMobile ? (
-        <select
-          value={value ?? ''}
-          onChange={(e) => onChange(e.target.value || null)}
-          className="w-full rounded-lg bg-teal-900/70 text-teal-100 px-4 py-2 border border-teal-600 focus:ring-2 focus:ring-amber-500"
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full text-left rounded-lg px-4 py-3 bg-teal-900/70 text-teal-100 flex justify-between items-center ring-1 ring-teal-600 hover:ring-teal-500 transition-shadow"
         >
-          <option value="">All Haplogroups</option>
-          {flatOptions.map((option) => (
-            <option key={option.name} value={option.name}>
-              {'  '.repeat(option.depth)}
-              {option.name}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="w-full text-left rounded-lg px-4 py-3 bg-teal-900/70 text-teal-100 flex justify-between items-center ring-1 ring-teal-600 hover:ring-teal-500 transition-shadow"
-          >
-            <span className="flex items-center gap-2">
-              <Dna size={16} />
-              {value ?? 'All Haplogroups'}
-            </span>
-            <ChevronDown 
-              size={16} 
-              className={`text-teal-300 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
-            />
-          </button>
+          <span className="flex items-center gap-2">
+            <Dna size={16} />
+            {value ?? 'All Haplogroups'}
+          </span>
+          <ChevronDown 
+            size={16} 
+            className={`text-teal-300 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
+          />
+        </button>
 
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ 
-                  duration: 0.2,
-                  ease: [0.4, 0, 0.2, 1]
-                }}
-                className="absolute z-10 w-full mt-2 max-h-[400px] overflow-y-auto flex flex-col space-y-1 p-2
-                bg-teal-950/95 shadow-2xl rounded-lg border border-teal-700 backdrop-blur-sm origin-top custom-scrollbar"
-              >
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ 
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              className="absolute z-10 w-full mt-2 flex flex-col
+              bg-teal-950/95 shadow-2xl rounded-lg border border-teal-700 backdrop-blur-sm origin-top"
+            >
+              {/* Search Input */}
+              <div className="p-2 border-b border-teal-700/50">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-teal-400" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search haplogroups..."
+                    className="w-full pl-9 pr-8 py-2 bg-teal-900/70 text-teal-100 rounded-md border border-teal-600 
+                      focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm placeholder-teal-400"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchQuery('');
+                        searchInputRef.current?.focus();
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-teal-700/50 rounded"
+                    >
+                      <X size={14} className="text-teal-400" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Dropdown Content */}
+              <div className="max-h-[350px] overflow-y-auto flex flex-col space-y-1 p-2 custom-scrollbar">
                 <motion.button
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -317,12 +349,18 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
                   Clear Selection
                 </motion.button>
                 
-                {haplogroupTree.map(node => renderNode(node))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
+                {filteredTree.length > 0 ? (
+                  filteredTree.map(node => renderNode(node))
+                ) : (
+                  <div className="text-center py-4 text-teal-400 text-sm">
+                    No haplogroups found matching "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
