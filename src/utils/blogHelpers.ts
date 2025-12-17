@@ -43,7 +43,9 @@ export const fetchBlogPosts = async (params?: {
     throw new Error(`Failed to fetch blog posts: ${response.status}`);
   }
   
-  return response.json();
+  const data = await response.json();
+  // API returns paginated response with results array
+  return data.results || [];
 };
 
 // Fetch single blog post by slug

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { BookOpen, AlertCircle } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
@@ -33,11 +33,13 @@ export const BlogPostsPage: React.FC = () => {
         const data = await fetchBlogPosts(params);
 
         if (mounted) {
-          setPosts(data);
+          // Ensure data is an array
+          setPosts(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load blog posts');
+          setPosts([]); // Set empty array on error to prevent forEach errors
         }
       } finally {
         if (mounted) {
@@ -56,25 +58,17 @@ export const BlogPostsPage: React.FC = () => {
   // Extract all unique tags from posts
   const availableTags = useMemo(() => {
     const tagsSet = new Set<string>();
-    posts.forEach((post) => {
-      post.tags_list.forEach((tag) => tagsSet.add(tag));
-    });
+    // Ensure posts is an array before iterating
+    if (Array.isArray(posts)) {
+      posts.forEach((post) => {
+        if (post.tags_list && Array.isArray(post.tags_list)) {
+          post.tags_list.forEach((tag) => tagsSet.add(tag));
+        }
+      });
+    }
     return Array.from(tagsSet).sort();
   }, [posts]);
 
-  if (error) {
-    return (
-      <Layout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="max-w-xl text-center p-6 bg-slate-800/50 rounded-xl">
-            <AlertCircle className="mx-auto mb-4 text-red-400" size={48} />
-            <h2 className="text-2xl font-bold mb-2 text-red-400">Failed to Load Blog Posts</h2>
-            <p className="text-sm text-teal-300">{error}</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -127,7 +121,7 @@ export const BlogPostsPage: React.FC = () => {
 
       {/* Blog Posts Grid */}
       <AnimatePresence mode="wait">
-        {!loading && posts.length === 0 ? (
+        {!loading && (posts.length === 0 || error) ? (
           <motion.div
             key="no-posts"
             {...fadeInVariants}
@@ -137,7 +131,9 @@ export const BlogPostsPage: React.FC = () => {
             <BookOpen className="mx-auto mb-4 text-teal-500" size={48} />
             <h3 className="text-xl font-semibold text-white mb-2">No blog posts found</h3>
             <p className="text-slate-400">
-              {searchQuery || selectedTag
+              {error
+                ? 'Unable to load blog posts at this time. Please try again later.'
+                : searchQuery || selectedTag
                 ? 'Try adjusting your search or filters'
                 : 'No blog posts are currently available'}
             </p>
