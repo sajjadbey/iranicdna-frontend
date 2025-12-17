@@ -1,0 +1,22 @@
+# robots.txt for IranicDNA
+# Community-driven project to document and visualize genetic diversity across Iranian provinces
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Specific pages
+Allow: /analytics
+Allow: /communities
+
+# Disallow crawling of assets and build files
+Disallow: /assets/
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /*.json$
+
+# Sitemap location (update with your actual domain when deployed)
+# Sitemap: https://qizilbash.ir/iranicdna/sitemap.xml
+
+# Crawl-delay for polite crawling (optional)
+Crawl-delay: 1

@@ -266,12 +266,7 @@ export const HeatmapCard: React.FC<Props> = ({
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-4"
-      >
+      <div className="mb-4">
         <h3 className="text-xl font-bold text-teal-200 flex items-center gap-2 mb-4">
           <Flame size={20} />
           Haplogroup Heatmap
@@ -284,14 +279,9 @@ export const HeatmapCard: React.FC<Props> = ({
             onChange={setSelectedHaplogroup}
           />
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-        className="flex items-center justify-between mb-4"
-      >
+      <div className="flex items-center justify-between mb-4">
         {loading && (
           <motion.div
             animate={{ rotate: 360 }}
@@ -300,15 +290,10 @@ export const HeatmapCard: React.FC<Props> = ({
             <Flame size={20} className="text-amber-400" />
           </motion.div>
         )}
-      </motion.div>
+      </div>
 
       {/* Statistics */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4"
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
         <div className="bg-teal-900/40 rounded-lg p-3 border border-teal-700/30">
           <div className="text-xs text-teal-300 mb-1">
             {selectedHaplogroup ? `${selectedHaplogroup} Samples` : 'Total Samples'}
@@ -332,42 +317,27 @@ export const HeatmapCard: React.FC<Props> = ({
             {stats.significantLocations}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {!selectedHaplogroup ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-16 text-teal-400 bg-slate-700/30 rounded-xl border border-teal-700/20"
-        >
+        <div className="text-center py-16 text-teal-400 bg-slate-700/30 rounded-xl border border-teal-700/20">
           <Flame className="mx-auto mb-4 text-teal-500" size={56} />
           <p className="text-lg font-semibold mb-2">Select a Haplogroup</p>
           <p className="text-sm text-teal-500">
             Choose a haplogroup from the selector above to view its geographic distribution
           </p>
-        </motion.div>
+        </div>
       ) : statisticalData.length === 0 || loading ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-12 text-teal-400 bg-slate-700/30 rounded-xl border border-teal-700/20"
-        >
+        <div className="text-center py-12 text-teal-400 bg-slate-700/30 rounded-xl border border-teal-700/20">
           <MapPin className="mx-auto mb-3 text-teal-500" size={48} />
           <p>
             {loading 
               ? 'Loading heatmap data...'
               : `No geographic data available for ${selectedHaplogroup}`}
           </p>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30"
-        >
+        <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
           <MapContainer
             center={mapCenter}
             zoom={5}
@@ -492,17 +462,12 @@ export const HeatmapCard: React.FC<Props> = ({
               );
             })}
           </MapContainer>
-        </motion.div>
+        </div>
       )}
 
       {/* Legend */}
       {statisticalData.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="mt-4 pt-4 border-t border-teal-700/30 space-y-3"
-        >
+        <div className="mt-4 pt-4 border-t border-teal-700/30 space-y-3">
           {/* Color scale */}
           <div>
             <p className="text-xs text-teal-300/70 mb-2">Adjusted Frequency Scale (Empirical Bayes)</p>
@@ -548,12 +513,9 @@ export const HeatmapCard: React.FC<Props> = ({
                 {statisticalData
                   .sort((a, b) => b.shrunkFrequency - a.shrunkFrequency)
                   .slice(0, 5)
-                  .map((point, index) => (
-                    <motion.div
+                  .map((point) => (
+                    <div
                       key={`${point.province}-${point.country}`}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
                       className={`flex items-center gap-1 text-xs px-2 py-1 rounded border ${
                         point.isSignificant 
                           ? 'bg-amber-900/40 border-amber-700/50' 
@@ -568,12 +530,12 @@ export const HeatmapCard: React.FC<Props> = ({
                       <span className="text-teal-500 text-[10px]">
                         (n={formatCount(point.totalSamples)})
                       </span>
-                    </motion.div>
+                    </div>
                   ))}
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       )}
     </div>
   );

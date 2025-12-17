@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Dna } from 'lucide-react';
 import { fmt, generateUniqueColors } from '../../utils/colors';
-import { motion } from 'framer-motion';
+import { shouldReduceAnimations } from '../../utils/deviceDetection';
 
 interface Props {
   title: string;
@@ -29,6 +29,7 @@ interface ChartDataItem {
 }
 
 export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
+  const reduceAnimations = shouldReduceAnimations();
   
   const sortedItems = useMemo(() => {
     return Object.entries(dataMap)
@@ -66,23 +67,13 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30 flex flex-col h-full">
-      <motion.h3
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2"
-      >
+      <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
         <Dna size={20} /> {title}
-      </motion.h3>
+      </h3>
       
       <div className="flex flex-col items-center gap-6 flex-1">
         {/* Chart Section */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative w-full max-w-[280px] sm:max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none"
-        >
+        <div className="relative w-full max-w-[280px] sm:max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none">
           <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
             <PieChart>
               <Pie
@@ -96,8 +87,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                 dataKey="value"
                 paddingAngle={2}
                 animationBegin={0}
-                animationDuration={1000}
-                animationEasing="ease-in-out"
+                animationDuration={reduceAnimations ? 0 : 800}
+                isAnimationActive={!reduceAnimations}
                 stroke="transparent"
                 strokeWidth={0}
               >
@@ -105,7 +96,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                   <Cell 
                     key={`cell-${index}`} 
                     fill={colorMap[entry.name]}
-                    className="hover:opacity-80 transition-opacity cursor-pointer"
+                    className="cursor-pointer"
+                    style={{ transition: reduceAnimations ? 'none' : 'opacity 0.2s' }}
                   />
                 ))}
               </Pie>
@@ -115,36 +107,24 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
           
           {/* Center text showing total */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-2xl font-bold text-teal-100"
-            >
+            <div className="text-2xl font-bold text-teal-100">
               {fmt(total)}
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-sm text-teal-400"
-            >
+            </div>
+            <div className="text-sm text-teal-400">
               samples
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
         
         {/* Legend Section */}
         <div className="w-full overflow-hidden">
           <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar">
-            {sortedItems.map(([label, value], index) => {
+            {sortedItems.map(([label, value]) => {
               return (
-                <motion.div
+                <div
                   key={label}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-700/40 hover:bg-slate-700/60 transition-colors border border-teal-700/20 cursor-pointer"
+                  className="flex items-center justify-between p-3 rounded-lg bg-slate-700/40 border border-teal-700/20 cursor-pointer"
+                  style={{ transition: reduceAnimations ? 'none' : 'background-color 0.2s' }}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span 
@@ -154,7 +134,7 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
                     <div className="text-sm font-medium text-teal-100 truncate">{label}</div>
                   </div>
                   <div className="text-base font-semibold text-teal-200 ml-3">{fmt(value)}</div>
-                </motion.div>
+                </div>
               );
             })}
           </div>

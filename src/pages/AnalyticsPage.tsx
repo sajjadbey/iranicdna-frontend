@@ -11,6 +11,7 @@ import { MapCard } from '../components/analytics/MapCard';
 import { HeatmapCard } from '../components/analytics/HeatmapCard';
 import { AboutContribute } from '../components/AboutContribute';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants } from '../utils/deviceDetection';
 
 const API_BASE = 'https://qizilbash.ir/genetics';
 
@@ -53,6 +54,9 @@ export const AnalyticsPage: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get animation config based on device
+  const animConfig = getAnimationConfig();
 
   // Fetch all samples on mount to build filter lists and determine country/province relationships
   useEffect(() => {
@@ -298,50 +302,31 @@ export const AnalyticsPage: React.FC = () => {
         {loading && (
           <motion.div
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            {...fadeInVariants}
+            transition={{ duration: animConfig.duration }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
+            <div className="text-center">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
                 <Dna className="mx-auto mb-4 text-teal-400" size={48} />
               </motion.div>
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg text-teal-200"
-              >
+              <div className="text-lg text-teal-200">
                 Loading genetic data...
-              </motion.div>
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm text-teal-400 mt-2"
-              >
+              </div>
+              <div className="text-sm text-teal-400 mt-2">
                 Fetching from <code className="bg-slate-800 px-2 py-1 rounded">/genetics/samples/</code>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        {...slideInVariants}
+        transition={{ duration: animConfig.duration }}
         className="mb-10"
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
@@ -383,74 +368,41 @@ export const AnalyticsPage: React.FC = () => {
         {!hasAny ? (
           <motion.div
             key="no-data"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            {...scaleVariants}
+            transition={{ duration: animConfig.duration }}
             className="rounded-2xl p-8 bg-slate-800/60 text-center border border-teal-700/30"
           >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            >
-              <Dna className="mx-auto mb-3 text-teal-500" size={48} />
-            </motion.div>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-teal-400"
-            >
+            <Dna className="mx-auto mb-3 text-teal-500" size={48} />
+            <p className="text-teal-400">
               No haplogroup data available for the selected filter.
-            </motion.p>
+            </p>
           </motion.div>
         ) : (
           <motion.div
             key="data"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            {...fadeInVariants}
+            transition={{ duration: animConfig.duration }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-6"
           >
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
+            <div>
               <DonutCard title="Y‑DNA Root Haplogroups" dataMap={yRoot} total={yTotal} />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-            >
+            </div>
+            <div>
               <MapCard 
                 samples={samples} 
                 selectedProvince={selectedProvince}
-                onProvinceClick={handleProvinceClick} // Using the new handler
+                onProvinceClick={handleProvinceClick}
               />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              className="lg:col-span-2"
-            >
+            </div>
+            <div className="lg:col-span-2">
               <SubcladeList title="Y‑DNA Subclades" items={ySub} total={ySubTotal} />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-              className="lg:col-span-2"
-            >
+            </div>
+            <div className="lg:col-span-2">
               <HeatmapCard
                 selectedCountry={selectedCountry}
                 selectedEthnicity={selectedEthnicity}
               />
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -7,7 +7,6 @@ import { type Sample } from '../../types';
 import { generateUniqueColors } from '../../utils/colors';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { motion } from 'framer-motion';
 
 interface ProvinceStats {
   name: string;
@@ -40,7 +39,7 @@ const PROVINCE_COORDINATES: Record<string, [number, number]> = {
   'Kermanshah': [34.3142, 47.0650],
   'Qom': [34.6416, 50.8746],
   'Yazd': [31.8974, 54.3569],
-  'Ardabil': [38.2498, 48.2933],
+  'Ardebil': [38.2498, 48.2933],
   'Hamadan': [34.7992, 48.5146],
   'Zanjan': [36.6736, 48.4787],
   'Qazvin': [36.2688, 50.0041],
@@ -211,22 +210,12 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
-      <motion.h3
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2"
-      >
+      <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
         <MapPin size={20} />
         Geographic Distribution
-      </motion.h3>
+      </h3>
       
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30"
-      >
+      <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
@@ -301,25 +290,17 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
             );
           })}
         </MapContainer>
-      </motion.div>
+      </div>
       
       {/* Legend */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="mt-4 pt-4 border-t border-teal-700/30"
-      >
+      <div className="mt-4 pt-4 border-t border-teal-700/30">
         <p className="text-xs text-teal-300/70 mb-2">
           Circle size represents sample count • Color shows dominant haplogroup
         </p>
         <div className="flex flex-wrap gap-2">
-          {allHaplogroups.slice(0, 8).map((hg, index) => (
-            <motion.div
+          {allHaplogroups.slice(0, 8).map((hg) => (
+            <div
               key={hg}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
               className="flex items-center gap-1 text-xs"
             >
               <span
@@ -327,10 +308,10 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
                 style={{ backgroundColor: colorMap[hg] }}
               />
               <span className="text-teal-200">{hg}</span>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

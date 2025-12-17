@@ -58,12 +58,39 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent !important;
   border: none !important;
   cursor: pointer;
-  transition: transform 0.2s ease;
 }
 
-.pie-chart-marker:hover {
-  transform: scale(1.1);
-  z-index: 1000 !important;
+/* Only enable hover effects on devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+  .pie-chart-marker {
+    transition: transform 0.2s ease;
+  }
+  
+  .pie-chart-marker:hover {
+    transform: scale(1.1);
+    z-index: 1000 !important;
+  }
+}
+
+/* Disable expensive animations on mobile */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Responsive Leaflet popup styles */
