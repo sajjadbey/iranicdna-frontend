@@ -77,3 +77,20 @@ export interface HeatmapPoint {
     sample_count: number;
     haplogroup?: string;
 }
+
+export interface BlogPost {
+    id: number;
+    title: string;
+    slug: string;
+    content: string;
+    excerpt: string;
+    author: string;
+    featured_image: string | null;
+    meta_description: string;
+    tags: string;
+    tags_list: string[];
+    created_at: string;
+    updated_at: string;
+    published_at: string;
+    view_count: number;
+}

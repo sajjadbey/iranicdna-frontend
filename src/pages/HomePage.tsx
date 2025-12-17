@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Dna, Info, Send, Globe, Users } from 'lucide-react';
+import { Dna, Info, Send, Globe, Users, BookOpen } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { AboutContribute } from '../components/AboutContribute';
 import mainLogo from '../assets/logo.png';
@@ -39,6 +39,12 @@ export const HomePage: React.FC = () => {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white font-medium transition-colors"
             >
               <Users size={20} /> View Communities
+            </Link>
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-800 hover:bg-purple-700 text-white font-medium transition-colors"
+            >
+              <BookOpen size={20} /> Read Blog
             </Link>
             <a
               href="https://t.me/Iranic_DNA"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Send, BarChart3, Users, Menu, X } from 'lucide-react';
+import { Dna, Info, Send, BarChart3, Users, BookOpen, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
 
@@ -61,6 +61,16 @@ export const Header: React.FC = () => {
               }`}
             >
               <Users size={14} /> Communities
+            </Link>
+            <Link
+              to="/blog"
+              className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                isActive('/blog') || location.pathname.startsWith('/blog/')
+                  ? 'bg-white/10 text-white'
+                  : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <BookOpen size={14} /> Blog
             </Link>
             <a
               href="#about"
@@ -166,6 +176,26 @@ export const Header: React.FC = () => {
                   >
                     <Users size={18} />
                     <span className="font-medium">Communities</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <Link
+                    to="/blog"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                      isActive('/blog') || location.pathname.startsWith('/blog/')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <BookOpen size={18} />
+                    <span className="font-medium">Blog</span>
                   </Link>
                 </motion.div>
                 <motion.div

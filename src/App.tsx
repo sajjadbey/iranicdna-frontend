@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { CommunitiesPage } from './pages/CommunitiesPage';
+import { BlogPostsPage } from './pages/BlogPostsPage';
+import { BlogPostDetailPage } from './pages/BlogPostDetailPage';
 
 const App: React.FC = () => {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
@@ -15,6 +17,8 @@ const App: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/communities" element={<CommunitiesPage />} />
+        <Route path="/blog" element={<BlogPostsPage />} />
+        <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
       </Routes>
     </BrowserRouter>
   );
