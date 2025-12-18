@@ -183,7 +183,7 @@ export const BlogPostDetailPage: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="prose prose-invert prose-teal max-w-none prose-headings:font-bold prose-headings:text-white prose-headings:mt-8 prose-headings:mb-4 prose-h2:text-2xl prose-h3:text-xl prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-4 prose-a:text-teal-400 prose-a:no-underline hover:prose-a:text-teal-300 prose-strong:text-white prose-code:text-teal-300 prose-code:bg-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-700 prose-img:rounded-lg prose-blockquote:border-l-4 prose-blockquote:border-teal-500 prose-blockquote:text-slate-400 prose-ul:text-slate-300 prose-ol:text-slate-300">
+          <div className="prose prose-lg prose-invert max-w-none prose-headings:text-white prose-p:text-slate-300 prose-a:text-teal-400 prose-strong:text-white prose-code:text-teal-300 prose-code:bg-slate-800/50 prose-pre:bg-slate-800/50 prose-blockquote:border-teal-500 prose-blockquote:text-slate-400 prose-img:rounded-lg">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw, rehypeSanitize]}
