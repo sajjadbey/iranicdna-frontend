@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Layout } from '../components/Layout';
 import { BlogPostCard } from '../components/blog/BlogPostCard';
 import { BlogPostFilters } from '../components/blog/BlogPostFilters';
+import { DNABackground } from '../components/DNABackground';
+import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
 import type { BlogPost } from '../types';
 import { fetchBlogPosts } from '../utils/blogHelpers';
-import { fadeInVariants, slideInVariants, getAnimationConfig } from '../utils/deviceDetection';
+import { fadeInVariants, slideInVariants, getAnimationConfig, isMobileDevice } from '../utils/deviceDetection';
 
 export const BlogPostsPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -70,8 +72,16 @@ export const BlogPostsPage: React.FC = () => {
   }, [posts]);
 
 
+  const backgroundConfig = useMemo(() => {
+    const isMobile = isMobileDevice();
+    return isMobile 
+      ? { ...dnaBackgroundConfig, ...mobileDnaBackgroundConfig }
+      : dnaBackgroundConfig;
+  }, []);
+
   return (
     <Layout>
+      <DNABackground {...backgroundConfig} />
       <AnimatePresence mode="wait">
         {loading && (
           <motion.div

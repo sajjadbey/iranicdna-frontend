@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Eye, Clock, Tag, AlertCircle, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,9 +7,11 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { Layout } from '../components/Layout';
+import { DNABackground } from '../components/DNABackground';
+import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
 import type { BlogPost } from '../types';
 import { fetchBlogPostBySlug, formatDate, estimateReadingTime, formatViewCount } from '../utils/blogHelpers';
-import { fadeInVariants, slideInVariants, getAnimationConfig } from '../utils/deviceDetection';
+import { fadeInVariants, slideInVariants, getAnimationConfig, isMobileDevice } from '../utils/deviceDetection';
 
 export const BlogPostDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -56,9 +58,17 @@ export const BlogPostDetailPage: React.FC = () => {
     };
   }, [slug]);
 
+  const backgroundConfig = useMemo(() => {
+    const isMobile = isMobileDevice();
+    return isMobile 
+      ? { ...dnaBackgroundConfig, ...mobileDnaBackgroundConfig }
+      : dnaBackgroundConfig;
+  }, []);
+
   if (loading) {
     return (
       <Layout>
+        <DNABackground {...backgroundConfig} />
         <AnimatePresence mode="wait">
           <motion.div
             key="loading"
@@ -84,6 +94,7 @@ export const BlogPostDetailPage: React.FC = () => {
   if (error || !post) {
     return (
       <Layout>
+        <DNABackground {...backgroundConfig} />
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="max-w-xl text-center p-6 bg-slate-800/50 rounded-xl">
             <AlertCircle className="mx-auto mb-4 text-red-400" size={48} />
@@ -106,6 +117,7 @@ export const BlogPostDetailPage: React.FC = () => {
 
   return (
     <Layout>
+      <DNABackground {...backgroundConfig} />
       <motion.div
         {...slideInVariants}
         transition={{ duration: animConfig.duration }}
