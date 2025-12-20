@@ -15,7 +15,7 @@ import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBac
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants, isMobileDevice } from '../utils/deviceDetection';
 
-const API_BASE = 'https://api.qizilbash.ir/';
+const API_BASE = 'https://api.qizilbash.ir';
 
 // API DTOs
 interface CountryDTO { name: string }
