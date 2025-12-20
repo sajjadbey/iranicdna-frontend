@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Dna, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE = 'https://qizilbash.ir/genetics';
+const API_BASE = 'https://api.qizilbash.ir';
 
 interface HaplogroupNode {
   name: string;
