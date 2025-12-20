@@ -1,6 +1,6 @@
 import type { BlogPost } from '../types';
 
-const API_BASE = 'https://qizilbash.ir/genetics';
+const API_BASE = 'https://api.qizilbash.ir';
 
 // Date formatting
 export const formatDate = (dateString: string): string => {

@@ -10,7 +10,7 @@ import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBac
 import { isMobileDevice } from '../utils/deviceDetection';
 import type { Tribe, Clan } from '../types';
 
-const API_BASE = 'https://qizilbash.ir/genetics';
+const API_BASE = 'https://api.qizilbash.ir';
 
 export const CommunitiesPage: React.FC = () => {
   const [tribes, setTribes] = useState<Tribe[]>([]);
