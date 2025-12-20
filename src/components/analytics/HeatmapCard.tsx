@@ -6,7 +6,7 @@ import { HaplogroupSelector } from './HaplogroupSelector';
 import type { GeoJsonObject, Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 
-const API_BASE = 'https://qizilbash.ir/genetics';
+const API_BASE = 'https://api.qizilbash.ir';
 
 interface GeoJSONGeometry {
   type: string;
