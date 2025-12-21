@@ -184,9 +184,20 @@ export const VCFToPlinkConverter: React.FC = () => {
       {/* Info Notice */}
       <div className="mb-4 p-4 rounded-lg bg-blue-900/20 border border-blue-500/30">
         <p className="text-sm text-blue-200 font-semibold mb-2">About This Tool</p>
-        <p className="text-xs text-blue-200/90">
+        <p className="text-xs text-blue-200/90 mb-3">
           Convert your VCF file to 23andMe format using plink. Supports .vcf, .vcf.gz, .txt, .txt.gz, and .zip formats.
         </p>
+        <div className="mt-3 pt-3 border-t border-blue-500/20">
+          <p className="text-xs text-blue-200 font-semibold mb-2">How It Works</p>
+          <p className="text-xs text-blue-200/80 mb-2">
+            Files with the following VCF header format are accepted:
+          </p>
+          <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-blue-500/20">
+            <div>##fileformat=VCFv4.2</div>
+            <div>##source=MySmartGene-v2</div>
+            <div>##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
