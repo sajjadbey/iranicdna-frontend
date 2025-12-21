@@ -7,7 +7,8 @@ import { AnalyticsPage } from './pages/AnalyticsPage';
 import { CommunitiesPage } from './pages/CommunitiesPage';
 import { BlogPostsPage } from './pages/BlogPostsPage';
 import { BlogPostDetailPage } from './pages/BlogPostDetailPage';
-import { VCFAnalysisPage } from './pages/VCFAnalysisPage';
+import { AdmixturePage } from './pages/AdmixturePage';
+import { ToolsPage } from './pages/ToolsPage';
 
 const App: React.FC = () => {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
@@ -20,7 +21,8 @@ const App: React.FC = () => {
         <Route path="/communities" element={<CommunitiesPage />} />
         <Route path="/blog" element={<BlogPostsPage />} />
         <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
-        <Route path="/vcf-analysis" element={<VCFAnalysisPage />} />
+        <Route path="/tools" element={<ToolsPage />} />
+        <Route path="/tools/admixture" element={<AdmixturePage />} />
       </Routes>
     </BrowserRouter>
   );

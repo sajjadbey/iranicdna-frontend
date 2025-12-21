@@ -31,10 +31,15 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.name.endsWith('.vcf') || droppedFile.name.endsWith('.txt')) {
+      if (
+        droppedFile.name.endsWith('.vcf') ||
+        droppedFile.name.endsWith('.txt') ||
+        droppedFile.name.endsWith('.gz') ||
+        droppedFile.name.endsWith('.zip')
+      ) {
         setFile(droppedFile);
       } else {
-        onUploadError('Please select a valid VCF or TXT file');
+        onUploadError('Please select a valid VCF, TXT, GZ, or ZIP file');
       }
     }
   };
@@ -42,10 +47,15 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.name.endsWith('.vcf') || selectedFile.name.endsWith('.txt')) {
+      if (
+        selectedFile.name.endsWith('.vcf') ||
+        selectedFile.name.endsWith('.txt') ||
+        selectedFile.name.endsWith('.gz') ||
+        selectedFile.name.endsWith('.zip')
+      ) {
         setFile(selectedFile);
       } else {
-        onUploadError('Please select a valid VCF or TXT file');
+        onUploadError('Please select a valid VCF, TXT, GZ, or ZIP file');
       }
     }
   };
@@ -54,7 +64,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
     e.preventDefault();
 
     if (!file) {
-      onUploadError('Please select a VCF or TXT file');
+      onUploadError('Please select a VCF, TXT, GZ, or ZIP file');
       return;
     }
 
@@ -146,7 +156,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         <input
           ref={fileInputRef}
           type="file"
-          accept=".vcf,.txt"
+          accept=".vcf,.txt,.gz,.zip"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -161,7 +171,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         ) : (
           <div>
             <p className="text-teal-200 mb-1">Drag and drop your file here</p>
-            <p className="text-sm text-teal-400">or click to browse (.vcf or .txt)</p>
+            <p className="text-sm text-teal-400">or click to browse (.vcf, .txt, .gz, or .zip)</p>
           </div>
         )}
       </div>

@@ -8,7 +8,7 @@ import type { VCFAnalysisResponse } from '../types/vcf';
 import { getAllAnalyses, getAnalysisById } from '../utils/vcfHelpers';
 import { fadeInVariants, slideInVariants } from '../utils/deviceDetection';
 
-export const VCFAnalysisPage: React.FC = () => {
+export const AdmixturePage: React.FC = () => {
   const [analyses, setAnalyses] = useState<VCFAnalysisResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
