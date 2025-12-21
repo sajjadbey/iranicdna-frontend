@@ -137,7 +137,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       <div className="mb-4 p-4 rounded-lg bg-amber-900/20 border border-amber-500/30">
         <p className="text-sm text-amber-200 font-semibold">Supported Formats</p>
         <p className="text-xs text-amber-200/90 mt-2">
-          Files exported from MySmartGene or 23andMe PLINK format are accepted.
+          Files exported from MySmartGene VCF, 23andMe PLINK and MyHeritageDNA CSV formats are accepted.
         </p>
       </div>
 
