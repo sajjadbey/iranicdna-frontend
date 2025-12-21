@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Dna, Info, Send, Globe, Users, BookOpen, FlaskConical } from 'lucide-react';
+import { Dna, Info, Send, Globe, Users, BookOpen, Wrench } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { AboutContribute } from '../components/AboutContribute';
 import { DNABackground } from '../components/DNABackground';
@@ -52,10 +52,10 @@ export const HomePage: React.FC = () => {
               <Users size={20} /> View Communities
             </Link>
             <Link
-              to="/vcf-analysis"
+              to="/tools"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-white font-medium transition-colors"
             >
-              <FlaskConical size={20} /> Admixture
+              <Wrench size={20} /> Tools
             </Link>
             <Link
               to="/blog"

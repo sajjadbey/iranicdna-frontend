@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FlaskConical, Wrench } from 'lucide-react';
+import { FlaskConical, Wrench, Dna } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { fadeInVariants, slideInVariants } from '../utils/deviceDetection';
 
@@ -12,6 +12,7 @@ export const ToolsPage: React.FC = () => {
       title: 'Admixture Analysis',
       description: 'Upload your VCF file for admixture analysis and explore your genetic ancestry',
       icon: FlaskConical,
+      secondaryIcon: Dna,
       path: '/tools/admixture',
       color: 'from-teal-400 to-cyan-400',
       bgGradient: 'from-teal-900/20 to-cyan-900/20',
@@ -47,6 +48,7 @@ export const ToolsPage: React.FC = () => {
       >
         {tools.map((tool, index) => {
           const Icon = tool.icon;
+          const SecondaryIcon = tool.secondaryIcon;
           return (
             <motion.div
               key={tool.id}
@@ -59,8 +61,15 @@ export const ToolsPage: React.FC = () => {
                 className={`block rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} ${tool.hoverBorder} transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 group`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg bg-gradient-to-br ${tool.color} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className={`bg-gradient-to-br ${tool.color} bg-clip-text text-transparent`} size={28} />
+                  <div className="flex gap-2">
+                    <div className={`p-3 rounded-lg bg-gradient-to-br ${tool.color} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className={`bg-gradient-to-br ${tool.color} bg-clip-text text-transparent`} size={28} />
+                    </div>
+                    {SecondaryIcon && (
+                      <div className={`p-3 rounded-lg bg-gradient-to-br ${tool.color} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
+                        <SecondaryIcon className={`bg-gradient-to-br ${tool.color} bg-clip-text text-transparent`} size={28} />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-teal-100 mb-2 group-hover:text-white transition-colors">
