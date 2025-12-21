@@ -11,6 +11,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
   const [tolerance, setTolerance] = useState(0.001);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<'uploading' | 'done' | 'processing'>('uploading');
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +76,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
 
     setUploading(true);
     setUploadProgress(0);
+    setUploadStatus('uploading');
 
     try {
       const result = await uploadVCFFile(
@@ -84,30 +86,40 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         tolerance,
         (progress) => {
           setUploadProgress(progress);
+          if (progress === 100) {
+            setUploadStatus('done');
+          }
         }
       );
       
-      // Small delay to show 100% before resetting
+      // Show "Done" message briefly, then switch to "Processing"
       setTimeout(() => {
-        onUploadSuccess(result);
+        setUploadStatus('processing');
         
-        // Reset form
-        setFile(null);
-        setSampleId('');
-        setSelectedModels(['K12b']);
-        setTolerance(0.001);
-        setUploadProgress(0);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }, 500);
+        // Small delay before showing success and resetting
+        setTimeout(() => {
+          onUploadSuccess(result);
+          
+          // Reset form
+          setFile(null);
+          setSampleId('');
+          setSelectedModels(['K12b']);
+          setTolerance(0.001);
+          setUploadProgress(0);
+          setUploadStatus('uploading');
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 1000);
+      }, 800);
     } catch (error) {
       setUploadProgress(0);
+      setUploadStatus('uploading');
       onUploadError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setTimeout(() => {
         setUploading(false);
-      }, 500);
+      }, 1800);
     }
   };
 
@@ -226,15 +238,29 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       {uploading && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-teal-200">Uploading...</span>
-            <span className="text-sm font-medium text-teal-100">{uploadProgress}%</span>
+            <span className="text-sm text-teal-200">
+              {uploadStatus === 'uploading' && 'Uploading...'}
+              {uploadStatus === 'done' && '✓ Upload Complete'}
+              {uploadStatus === 'processing' && 'Processing...'}
+            </span>
+            <span className="text-sm font-medium text-teal-100">
+              {uploadStatus === 'uploading' && `${uploadProgress}%`}
+              {uploadStatus === 'done' && '100%'}
+              {uploadStatus === 'processing' && ''}
+            </span>
           </div>
           <div className="w-full h-2 bg-slate-900/60 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${uploadProgress}%` }}
+              animate={{ width: uploadStatus === 'processing' ? '100%' : `${uploadProgress}%` }}
               transition={{ duration: 0.3 }}
-              className="h-full bg-gradient-to-r from-teal-500 to-amber-500"
+              className={`h-full ${
+                uploadStatus === 'done' 
+                  ? 'bg-green-500' 
+                  : uploadStatus === 'processing'
+                  ? 'bg-amber-500'
+                  : 'bg-gradient-to-r from-teal-500 to-amber-500'
+              }`}
             />
           </div>
         </div>
