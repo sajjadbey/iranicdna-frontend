@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Wrench, Dna } from 'lucide-react';
+import { Wrench, Dna, RefreshCw } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { fadeInVariants, slideInVariants } from '../utils/deviceDetection';
 
@@ -17,6 +17,17 @@ export const ToolsPage: React.FC = () => {
       bgGradient: 'from-teal-900/20 to-cyan-900/20',
       borderColor: 'border-teal-500/30',
       hoverBorder: 'hover:border-teal-400/50',
+    },
+    {
+      id: 'vcf-to-plink',
+      title: 'VCF to 23andMe Converter',
+      description: 'Convert your VCF file to 23andMe format using plink for compatibility with various tools',
+      icon: RefreshCw,
+      path: '/tools/vcf-to-plink',
+      color: 'from-amber-400 to-orange-400',
+      bgGradient: 'from-amber-900/20 to-orange-900/20',
+      borderColor: 'border-amber-500/30',
+      hoverBorder: 'hover:border-amber-400/50',
     },
   ];
 
