@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FlaskConical, Wrench, Dna } from 'lucide-react';
+import { Wrench, Dna } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { fadeInVariants, slideInVariants } from '../utils/deviceDetection';
 
