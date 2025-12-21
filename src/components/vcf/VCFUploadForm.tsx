@@ -135,14 +135,9 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
 
       {/* Format Notice */}
       <div className="mb-4 p-4 rounded-lg bg-amber-900/20 border border-amber-500/30">
-        <p className="text-sm text-amber-200 font-semibold mb-3">Required Format</p>
-        <div className="text-xs text-amber-300/90 font-mono bg-slate-900/40 p-3 rounded border border-amber-500/20 space-y-0.5 overflow-x-auto">
-          <p className="whitespace-nowrap">##fileformat=VCFv4.2</p>
-          <p className="whitespace-nowrap">##source=MySmartGene-v2</p>
-          <p className="break-all">##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</p>
-        </div>
-        <p className="text-xs text-amber-200/90 mt-3">
-          Only files exported from MySmartGene with the above header format are accepted.
+        <p className="text-sm text-amber-200 font-semibold">Supported Formats</p>
+        <p className="text-xs text-amber-200/90 mt-2">
+          Files exported from MySmartGene or 23andMe PLINK format are accepted.
         </p>
       </div>
 
