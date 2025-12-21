@@ -192,10 +192,10 @@ export const VCFToPlinkConverter: React.FC = () => {
           <p className="text-xs text-blue-200/80 mb-2">
             Files with the following VCF header format are accepted:
           </p>
-          <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-blue-500/20">
-            <div>##fileformat=VCFv4.2</div>
-            <div>##source=MySmartGene-v2</div>
-            <div>##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
+          <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-blue-500/20 overflow-x-auto">
+            <div className="whitespace-nowrap">##fileformat=VCFv4.2</div>
+            <div className="whitespace-nowrap">##source=MySmartGene-v2</div>
+            <div className="whitespace-nowrap">##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
           </div>
         </div>
       </div>

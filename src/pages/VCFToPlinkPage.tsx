@@ -47,8 +47,22 @@ export const VCFToPlinkPage: React.FC = () => {
                 <ul className="list-disc list-inside space-y-1 text-sm">
                   <li>Plain VCF files (.vcf)</li>
                   <li>Compressed VCF files (.vcf.gz)</li>
+                  <li>Plain text files (.txt)</li>
+                  <li>Compressed text files (.txt.gz)</li>
                   <li>ZIP archives containing VCF files (.zip)</li>
                 </ul>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-teal-100 mb-2">Accepted VCF Header Format</h4>
+                <p className="text-sm mb-2">
+                  Files with the following VCF header format are accepted:
+                </p>
+                <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-teal-500/20 overflow-x-auto">
+                  <div className="whitespace-nowrap">##fileformat=VCFv4.2</div>
+                  <div className="whitespace-nowrap">##source=MySmartGene-v2</div>
+                  <div className="whitespace-nowrap">##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
+                </div>
               </div>
 
               <div>
