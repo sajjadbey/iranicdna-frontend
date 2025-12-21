@@ -31,7 +31,8 @@ export const uploadVCFFile = async (
   file: File,
   sampleId: string,
   models: string[],
-  tolerance: number
+  tolerance: number,
+  onProgress?: (progress: number) => void
 ): Promise<VCFAnalysisResponse> => {
   const formData = new FormData();
   formData.append('vcf_file', file);
@@ -42,17 +43,49 @@ export const uploadVCFFile = async (
     formData.append('models_requested', models.join(','));
   }
   
-  const response = await fetch(`${API_BASE}/tools/vcf-analysis/`, {
-    method: 'POST',
-    body: formData,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    
+    // Track upload progress
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        onProgress(Math.round(percentComplete));
+      }
+    });
+    
+    // Handle completion
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch (error) {
+          reject(new Error('Failed to parse response'));
+        }
+      } else {
+        try {
+          const errorData = JSON.parse(xhr.responseText);
+          reject(new Error(errorData.detail || `Upload failed: ${xhr.statusText}`));
+        } catch {
+          reject(new Error(`Upload failed: ${xhr.statusText}`));
+        }
+      }
+    });
+    
+    // Handle errors
+    xhr.addEventListener('error', () => {
+      reject(new Error('Network error occurred'));
+    });
+    
+    xhr.addEventListener('abort', () => {
+      reject(new Error('Upload cancelled'));
+    });
+    
+    // Send request
+    xhr.open('POST', `${API_BASE}/tools/vcf-analysis/`);
+    xhr.send(formData);
   });
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `Upload failed: ${response.statusText}`);
-  }
-  
-  return response.json();
 };
 
 export const getAnalysisById = async (id: string): Promise<VCFAnalysisResponse> => {

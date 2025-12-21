@@ -77,21 +77,15 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
     setUploadProgress(0);
 
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      const result = await uploadVCFFile(file, sampleId.trim(), selectedModels, tolerance);
-      
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+      const result = await uploadVCFFile(
+        file, 
+        sampleId.trim(), 
+        selectedModels, 
+        tolerance,
+        (progress) => {
+          setUploadProgress(progress);
+        }
+      );
       
       // Small delay to show 100% before resetting
       setTimeout(() => {
