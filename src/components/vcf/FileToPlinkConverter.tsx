@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const API_BASE = 'https://api.qizilbash.ir';
 
-export const VCFToPlinkConverter: React.FC = () => {
+export const FileToPlinkConverter: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [sampleId, setSampleId] = useState('sample');
   const [converting, setConverting] = useState(false);
