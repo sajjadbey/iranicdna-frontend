@@ -12,7 +12,7 @@ interface Props {
 }
 
 // Explicit list of locations to exclude from display
-const HIDDEN_LOCATIONS = ['Türk'];
+const HIDDEN_LOCATIONS = ['türk'];
 
 export const LocationSelector: React.FC<Props> = ({ 
     label, 
