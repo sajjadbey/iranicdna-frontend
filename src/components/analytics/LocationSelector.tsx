@@ -11,6 +11,9 @@ interface Props {
     placeholder?: string;
 }
 
+// Explicit list of locations to exclude from display
+const HIDDEN_LOCATIONS = ['Türk'];
+
 export const LocationSelector: React.FC<Props> = ({ 
     label, 
     options, 
@@ -21,6 +24,11 @@ export const LocationSelector: React.FC<Props> = ({
     const [isMobile, setIsMobile] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Filter out hidden locations from the options
+    const filteredOptions = options.filter(option => 
+        !HIDDEN_LOCATIONS.includes(option.toLowerCase())
+    );
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -62,7 +70,7 @@ export const LocationSelector: React.FC<Props> = ({
                     className="w-full rounded-lg bg-teal-900/70 text-teal-100 px-4 py-2 border border-teal-600 focus:ring-2 focus:ring-amber-500"
                 >
                     <option value="">{placeholder}</option>
-                    {options.map((option) => (
+                    {filteredOptions.map((option) => (
                         <option key={option} value={option}>
                             {option}
                         </option>
@@ -106,7 +114,7 @@ export const LocationSelector: React.FC<Props> = ({
                                     {placeholder}
                                 </motion.button>
                                 
-                                {options.map((option, index) => (
+                                {filteredOptions.map((option, index) => (
                                     <motion.button
                                         key={option}
                                         initial={{ opacity: 0, x: -10 }}
