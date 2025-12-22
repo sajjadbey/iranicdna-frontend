@@ -36,12 +36,13 @@ export const VCFToPlinkConverter: React.FC = () => {
         droppedFile.name.endsWith('.vcf.gz') ||
         droppedFile.name.endsWith('.txt') ||
         droppedFile.name.endsWith('.txt.gz') ||
+        droppedFile.name.endsWith('.csv') ||
         droppedFile.name.endsWith('.zip')
       ) {
         setFile(droppedFile);
         setError(null);
       } else {
-        setError('Please select a valid file (.vcf, .vcf.gz, .txt, .txt.gz, or .zip)');
+        setError('Please select a valid file (.vcf, .vcf.gz, .txt, .txt.gz, .csv, or .zip)');
       }
     }
   };
@@ -54,19 +55,20 @@ export const VCFToPlinkConverter: React.FC = () => {
         selectedFile.name.endsWith('.vcf.gz') ||
         selectedFile.name.endsWith('.txt') ||
         selectedFile.name.endsWith('.txt.gz') ||
+        selectedFile.name.endsWith('.csv') ||
         selectedFile.name.endsWith('.zip')
       ) {
         setFile(selectedFile);
         setError(null);
       } else {
-        setError('Please select a valid file (.vcf, .vcf.gz, .txt, .txt.gz, or .zip)');
+        setError('Please select a valid file (.vcf, .vcf.gz, .txt, .txt.gz, .csv, or .zip)');
       }
     }
   };
 
   const handleConvert = async () => {
     if (!file) {
-      setError('Please select a VCF file');
+      setError('Please select a file');
       return;
     }
 
@@ -179,24 +181,22 @@ export const VCFToPlinkConverter: React.FC = () => {
       transition={{ duration: 0.3 }}
       className="rounded-xl p-6 bg-slate-800/60 ring-1 ring-teal-600/30"
     >
-      <h3 className="text-xl font-semibold text-teal-100 mb-4">VCF to 23andMe Converter</h3>
+      <h3 className="text-xl font-semibold text-teal-100 mb-4">DNA File to 23andMe Converter</h3>
 
       {/* Info Notice */}
       <div className="mb-4 p-4 rounded-lg bg-blue-900/20 border border-blue-500/30">
         <p className="text-sm text-blue-200 font-semibold mb-2">About This Tool</p>
         <p className="text-xs text-blue-200/90 mb-3">
-          Convert your VCF file to 23andMe format using plink. Supports .vcf, .vcf.gz, .txt, .txt.gz, and .zip formats.
+          Convert VCF or MyHeritage CSV files to 23andMe format using plink.
         </p>
         <div className="mt-3 pt-3 border-t border-blue-500/20">
-          <p className="text-xs text-blue-200 font-semibold mb-2">How It Works</p>
-          <p className="text-xs text-blue-200/80 mb-2">
-            Files with the following VCF header format are accepted:
-          </p>
-          <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-blue-500/20 overflow-x-auto">
-            <div className="whitespace-nowrap">##fileformat=VCFv4.2</div>
-            <div className="whitespace-nowrap">##source=MySmartGene-v2</div>
-            <div className="whitespace-nowrap">##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
-          </div>
+          <p className="text-xs text-blue-200 font-semibold mb-2">Supported Formats</p>
+          <ul className="text-xs text-blue-200/80 space-y-1 list-disc list-inside">
+            <li>VCF files (.vcf, .vcf.gz) - MySmartGene, 23andMe compatible</li>
+            <li>MyHeritage CSV files (.csv)</li>
+            <li>Text files (.txt, .txt.gz)</li>
+            <li>ZIP archives (.zip)</li>
+          </ul>
         </div>
       </div>
 
@@ -247,7 +247,7 @@ export const VCFToPlinkConverter: React.FC = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".vcf,.vcf.gz,.txt,.txt.gz,.zip"
+          accept=".vcf,.vcf.gz,.txt,.txt.gz,.csv,.zip"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -262,7 +262,7 @@ export const VCFToPlinkConverter: React.FC = () => {
         ) : (
           <div>
             <p className="text-teal-200 mb-1">Drag and drop your file here</p>
-            <p className="text-sm text-teal-400">or click to browse (.vcf, .vcf.gz, .txt, .txt.gz, or .zip)</p>
+            <p className="text-sm text-teal-400">or click to browse (.vcf, .vcf.gz, .txt, .txt.gz, .csv, or .zip)</p>
           </div>
         )}
       </div>

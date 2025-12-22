@@ -35,12 +35,13 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       if (
         droppedFile.name.endsWith('.vcf') ||
         droppedFile.name.endsWith('.txt') ||
+        droppedFile.name.endsWith('.csv') ||
         droppedFile.name.endsWith('.gz') ||
         droppedFile.name.endsWith('.zip')
       ) {
         setFile(droppedFile);
       } else {
-        onUploadError('Please select a valid VCF, TXT, GZ, or ZIP file');
+        onUploadError('Please select a valid VCF, TXT, CSV, GZ, or ZIP file');
       }
     }
   };
@@ -51,12 +52,13 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       if (
         selectedFile.name.endsWith('.vcf') ||
         selectedFile.name.endsWith('.txt') ||
+        selectedFile.name.endsWith('.csv') ||
         selectedFile.name.endsWith('.gz') ||
         selectedFile.name.endsWith('.zip')
       ) {
         setFile(selectedFile);
       } else {
-        onUploadError('Please select a valid VCF, TXT, GZ, or ZIP file');
+        onUploadError('Please select a valid VCF, TXT, CSV, GZ, or ZIP file');
       }
     }
   };
@@ -65,7 +67,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
     e.preventDefault();
 
     if (!file) {
-      onUploadError('Please select a VCF, TXT, GZ, or ZIP file');
+      onUploadError('Please select a VCF, TXT, CSV, GZ, or ZIP file');
       return;
     }
 
@@ -137,7 +139,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       <div className="mb-4 p-4 rounded-lg bg-amber-900/20 border border-amber-500/30">
         <p className="text-sm text-amber-200 font-semibold">Supported Formats</p>
         <p className="text-xs text-amber-200/90 mt-2">
-          Files exported from MySmartGene VCF, 23andMe PLINK and MyHeritageDNA CSV formats are accepted.
+          Files exported from MySmartGene VCF, 23andMe PLINK, and MyHeritage CSV formats are accepted.
         </p>
       </div>
 
@@ -157,7 +159,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         <input
           ref={fileInputRef}
           type="file"
-          accept=".vcf,.txt,.gz,.zip"
+          accept=".vcf,.txt,.csv,.gz,.zip"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -172,7 +174,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         ) : (
           <div>
             <p className="text-teal-200 mb-1">Drag and drop your file here</p>
-            <p className="text-sm text-teal-400">or click to browse (.vcf, .txt, .gz, or .zip)</p>
+            <p className="text-sm text-teal-400">or click to browse (.vcf, .txt, .csv, .gz, or .zip)</p>
           </div>
         )}
       </div>

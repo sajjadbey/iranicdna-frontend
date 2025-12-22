@@ -9,7 +9,7 @@ import { BlogPostsPage } from './pages/BlogPostsPage';
 import { BlogPostDetailPage } from './pages/BlogPostDetailPage';
 import { AdmixturePage } from './pages/AdmixturePage';
 import { ToolsPage } from './pages/ToolsPage';
-import { VCFToPlinkPage } from './pages/VCFToPlinkPage';
+import { FileConverterPage } from './pages/FileConverterPage';
 
 const App: React.FC = () => {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
@@ -24,7 +24,9 @@ const App: React.FC = () => {
         <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
         <Route path="/tools" element={<ToolsPage />} />
         <Route path="/tools/admixture" element={<AdmixturePage />} />
-        <Route path="/tools/vcf-to-plink" element={<VCFToPlinkPage />} />
+        <Route path="/tools/file-converter" element={<FileConverterPage />} />
+        {/* Legacy route redirect */}
+        <Route path="/tools/vcf-to-plink" element={<FileConverterPage />} />
       </Routes>
     </BrowserRouter>
   );

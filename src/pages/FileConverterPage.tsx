@@ -2,10 +2,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
 import { Layout } from '../components/Layout';
-import { VCFToPlinkConverter } from '../components/vcf/VCFToPlinkConverter';
+import { FileToPlinkConverter } from '../components/vcf/FileToPlinkConverter';
 import { slideInVariants, fadeInVariants } from '../utils/deviceDetection';
 
-export const VCFToPlinkPage: React.FC = () => {
+export const FileConverterPage: React.FC = () => {
   return (
     <Layout>
       <motion.section
@@ -17,10 +17,10 @@ export const VCFToPlinkPage: React.FC = () => {
           <RefreshCw className="text-teal-400" size={36} />
           <div>
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
-              VCF to 23andMe Converter
+              DNA File Converter
             </h2>
             <p className="mt-2 text-teal-300/80">
-              Convert your VCF file to 23andMe format using plink
+              Convert VCF or MyHeritage CSV files to 23andMe format
             </p>
           </div>
         </div>
@@ -29,7 +29,7 @@ export const VCFToPlinkPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Converter Form */}
         <div className="lg:col-span-1">
-          <VCFToPlinkConverter />
+          <FileToPlinkConverter />
         </div>
 
         {/* Information Section */}
@@ -45,31 +45,26 @@ export const VCFToPlinkPage: React.FC = () => {
               <div>
                 <h4 className="text-lg font-semibold text-teal-100 mb-2">Supported Formats</h4>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Plain VCF files (.vcf)</li>
-                  <li>Compressed VCF files (.vcf.gz)</li>
-                  <li>Plain text files (.txt)</li>
-                  <li>Compressed text files (.txt.gz)</li>
-                  <li>ZIP archives containing VCF files (.zip)</li>
+                  <li>VCF files (.vcf, .vcf.gz)</li>
+                  <li>MyHeritage CSV files (.csv)</li>
+                  <li>Plain text files (.txt, .txt.gz)</li>
+                  <li>ZIP archives (.zip)</li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="text-lg font-semibold text-teal-100 mb-2">Accepted VCF Header Format</h4>
-                <p className="text-sm mb-2">
-                  Files with the following VCF header format are accepted:
-                </p>
-                <div className="bg-slate-900/40 rounded px-3 py-2 font-mono text-xs text-blue-100/90 border border-teal-500/20 overflow-x-auto">
-                  <div className="whitespace-nowrap">##fileformat=VCFv4.2</div>
-                  <div className="whitespace-nowrap">##source=MySmartGene-v2</div>
-                  <div className="whitespace-nowrap">##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=Genotype&gt;</div>
-                </div>
+                <h4 className="text-lg font-semibold text-teal-100 mb-2">Supported File Sources</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li><strong>VCF files:</strong> MySmartGene, 23andMe, and other VCF v4.2 compatible sources</li>
+                  <li><strong>MyHeritage:</strong> DNA data exported as CSV format</li>
+                </ul>
               </div>
 
               <div>
                 <h4 className="text-lg font-semibold text-teal-100 mb-2">Process</h4>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Enter a sample ID (used in the output filename)</li>
-                  <li>Upload your VCF file</li>
+                  <li>Upload your VCF or MyHeritage CSV file</li>
                   <li>Click "Convert & Download"</li>
                   <li>Your converted file will download automatically as {'{sample_id}_23andme.txt.gz'}</li>
                 </ol>
@@ -78,7 +73,7 @@ export const VCFToPlinkPage: React.FC = () => {
               <div>
                 <h4 className="text-lg font-semibold text-teal-100 mb-2">Output Format</h4>
                 <p className="text-sm">
-                  The converter uses plink to transform your VCF file into 23andMe format, 
+                  The converter uses plink to transform your DNA file into 23andMe format, 
                   which is compatible with various genetic analysis tools and services.
                 </p>
               </div>
