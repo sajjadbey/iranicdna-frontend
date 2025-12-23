@@ -24,6 +24,7 @@ export interface SignupData {
 export interface SigninData {
   email: string;
   password: string;
+  turnstile_token?: string;
 }
 
 export interface UpdateProfileData {

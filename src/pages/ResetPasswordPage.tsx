@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Lock, CheckCircle, XCircle, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../services/authService';
 import { Layout } from '../components/Layout';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 export const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const ResetPasswordPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -79,6 +81,12 @@ export const ResetPasswordPage: React.FC = () => {
       return;
     }
 
+    // Check if Turnstile token is present
+    if (!turnstileToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -87,6 +95,7 @@ export const ResetPasswordPage: React.FC = () => {
         code: fullCode,
         new_password: newPassword,
         new_password_confirm: confirmPassword,
+        turnstile_token: turnstileToken,
       });
 
       setSuccess('Password reset successfully! Redirecting to sign in...');
@@ -244,6 +253,17 @@ export const ResetPasswordPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Security Verification */}
+              <TurnstileWidget
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                  setError('');
+                }}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+                theme="dark"
+              />
 
               {/* Submit Button */}
               <motion.button

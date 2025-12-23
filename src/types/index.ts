@@ -107,6 +107,7 @@ export interface RequestVerificationData {
 
 export interface PasswordResetRequestData {
     email: string;
+    turnstile_token?: string;
 }
 
 export interface PasswordResetConfirmData {
@@ -114,4 +115,5 @@ export interface PasswordResetConfirmData {
     code: string;
     new_password: string;
     new_password_confirm: string;
+    turnstile_token?: string;
 }

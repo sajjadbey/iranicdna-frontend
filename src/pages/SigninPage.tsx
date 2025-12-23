@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 import type { SigninData } from '../types/auth';
 
 export const SigninPage: React.FC = () => {
@@ -24,6 +25,7 @@ export const SigninPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [info, setInfo] = useState(locationState?.message || '');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Clear info message after 10 seconds
   useEffect(() => {
@@ -42,10 +44,17 @@ export const SigninPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Check if Turnstile token is present
+    if (!turnstileToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await signin(formData);
+      await signin({ ...formData, turnstile_token: turnstileToken });
       setSuccess('Login successful! Redirecting...');
       setTimeout(() => navigate('/'), 1500);
     } catch (err: unknown) {
@@ -163,6 +172,17 @@ export const SigninPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Security Verification */}
+              <TurnstileWidget
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                  setError('');
+                }}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+                theme="dark"
+              />
 
               {/* Submit Button */}
               <motion.button

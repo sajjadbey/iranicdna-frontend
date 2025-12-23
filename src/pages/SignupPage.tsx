@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { API_ENDPOINTS } from '../config/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 import type { SignupData } from '../types/auth';
 
 export const SignupPage: React.FC = () => {
@@ -23,6 +24,7 @@ export const SignupPage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,14 +35,24 @@ export const SignupPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Check if Turnstile token is present
+    if (!turnstileToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Call the backend signup API directly (doesn't set user in context anymore)
+      // Call the backend signup API with Turnstile token
       const response = await fetch(API_ENDPOINTS.signup, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          turnstile_token: turnstileToken,
+        }),
       });
 
       const data = await response.json();
@@ -233,6 +245,17 @@ export const SignupPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Security Verification */}
+              <TurnstileWidget
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                  setError('');
+                }}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+                theme="dark"
+              />
 
               {/* Submit Button */}
               <motion.button
