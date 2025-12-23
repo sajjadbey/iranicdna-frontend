@@ -49,18 +49,8 @@ export const SignupPage: React.FC = () => {
         throw new Error(data.error || data.message || 'Registration failed');
       }
 
-      // Show success message briefly then redirect to signin
-      setSuccess(data.message || 'Registration successful! Please check your email for verification code.');
-      
-      // Redirect to signin page after 2 seconds
-      setTimeout(() => {
-        navigate('/signin', { 
-          state: { 
-            message: 'Registration successful! Please check your email for the verification code to activate your account.',
-            email: formData.email 
-          } 
-        });
-      }, 2000);
+      // Redirect to verification page with email
+      navigate('/verify-email', { state: { email: formData.email } });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(errorMessage);

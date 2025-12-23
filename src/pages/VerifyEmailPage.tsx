@@ -75,12 +75,17 @@ export const VerifyEmailPage: React.FC = () => {
         code: verificationCode,
       });
 
-      setSuccess('Email verified successfully! Redirecting...');
+      setSuccess('Email verified successfully! Redirecting to sign in...');
       
-      // Update auth context with user data
-      if (response.user) {
-        setTimeout(() => navigate('/'), 1500);
-      }
+      // Redirect to signin page with success message after verification
+      setTimeout(() => {
+        navigate('/signin', { 
+          state: { 
+            message: 'Email verified successfully! You can now sign in to your account.',
+            email: email
+          } 
+        });
+      }, 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Verification failed. Please try again.';
       setError(errorMessage);
