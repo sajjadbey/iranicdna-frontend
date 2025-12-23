@@ -94,3 +94,24 @@ export interface BlogPost {
     published_at: string;
     view_count: number;
 }
+
+// Email Verification Types
+export interface VerifyEmailData {
+    email: string;
+    code: string;
+}
+
+export interface RequestVerificationData {
+    email: string;
+}
+
+export interface PasswordResetRequestData {
+    email: string;
+}
+
+export interface PasswordResetConfirmData {
+    email: string;
+    code: string;
+    new_password: string;
+    new_password_confirm: string;
+}

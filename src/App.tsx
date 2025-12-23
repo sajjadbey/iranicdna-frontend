@@ -13,6 +13,9 @@ import { FileConverterPage } from './pages/FileConverterPage';
 import { SignupPage } from './pages/SignupPage';
 import { SigninPage } from './pages/SigninPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
 const App: React.FC = () => {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
@@ -35,6 +38,9 @@ const App: React.FC = () => {
           {/* Auth Routes */}
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<SigninPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           
           {/* Protected Routes */}
           <Route

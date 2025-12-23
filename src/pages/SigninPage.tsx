@@ -159,8 +159,18 @@ export const SigninPage: React.FC = () => {
               </motion.button>
             </form>
 
-            {/* Sign Up Link */}
+            {/* Forgot Password Link */}
             <div className="mt-6 text-center">
+              <Link
+                to="/forgot-password"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
+            {/* Sign Up Link */}
+            <div className="mt-4 text-center">
               <p className="text-gray-400">
                 Don't have an account?{' '}
                 <Link

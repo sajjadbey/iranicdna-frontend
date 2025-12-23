@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.qizilbash.ir';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -10,4 +10,12 @@ export const API_ENDPOINTS = {
   verify: `${API_BASE_URL}/auth/verify/`,
   profile: `${API_BASE_URL}/auth/profile/`,
   refreshToken: `${API_BASE_URL}/auth/token/refresh/`,
+  
+  // Email Verification
+  verifyEmail: `${API_BASE_URL}/auth/verification/verify/`,
+  requestVerification: `${API_BASE_URL}/auth/verification/request/`,
+  
+  // Password Reset
+  requestPasswordReset: `${API_BASE_URL}/auth/password-reset/request/`,
+  confirmPasswordReset: `${API_BASE_URL}/auth/password-reset/confirm/`,
 } as const;

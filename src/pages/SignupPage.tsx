@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
+import { API_ENDPOINTS } from '../config/api';
 import type { SignupData } from '../types/auth';
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signup } = useAuth();
   
   const [formData, setFormData] = useState<SignupData>({
     email: '',
@@ -37,9 +36,21 @@ export const SignupPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await signup(formData);
-      setSuccess('Account created successfully! Redirecting...');
-      setTimeout(() => navigate('/'), 1500);
+      // Call the backend signup API directly (doesn't set user in context anymore)
+      const response = await fetch(API_ENDPOINTS.signup, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Registration failed');
+      }
+
+      // Redirect to verification page with email
+      navigate('/verify-email', { state: { email: formData.email } });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(errorMessage);

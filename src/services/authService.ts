@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '../config/api';
+import type { VerifyEmailData, RequestVerificationData, PasswordResetRequestData, PasswordResetConfirmData } from '../types';
 import type { SignupData, SigninData, UpdateProfileData, AuthResponse, User } from '../types/auth';
 
 // Token storage keys
@@ -160,5 +161,41 @@ export const authService = {
 
     tokenService.setTokens(response.access, refresh);
     return response.access;
+  },
+
+  // Email Verification
+  verifyEmail: async (data: VerifyEmailData): Promise<AuthResponse> => {
+    const response = await apiRequest<AuthResponse>(API_ENDPOINTS.verifyEmail, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+
+    // Store tokens after successful verification
+    if (response.tokens) {
+      tokenService.setTokens(response.tokens.access, response.tokens.refresh);
+    }
+    return response;
+  },
+
+  requestVerificationCode: async (data: RequestVerificationData): Promise<{ message: string; email_sent: boolean }> => {
+    return apiRequest(API_ENDPOINTS.requestVerification, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Password Reset
+  requestPasswordReset: async (data: PasswordResetRequestData): Promise<{ message: string; email_sent: boolean }> => {
+    return apiRequest(API_ENDPOINTS.requestPasswordReset, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  confirmPasswordReset: async (data: PasswordResetConfirmData): Promise<{ message: string }> => {
+    return apiRequest(API_ENDPOINTS.confirmPasswordReset, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 };
