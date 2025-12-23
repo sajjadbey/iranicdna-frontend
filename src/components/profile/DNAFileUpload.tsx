@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, File, X, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Upload, File, X} from 'lucide-react';
 import type { DNAFile } from '../../types/dnaFile';
 
 interface DNAFileUploadProps {
