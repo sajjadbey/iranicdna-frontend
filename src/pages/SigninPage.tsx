@@ -1,24 +1,37 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { LogIn, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
 import type { SigninData } from '../types/auth';
 
 export const SigninPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signin } = useAuth();
   
+  // Get state from navigation (from signup page)
+  const locationState = location.state as { message?: string; email?: string } | null;
+  
   const [formData, setFormData] = useState<SigninData>({
-    email: '',
+    email: locationState?.email || '',
     password: '',
   });
   
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [info, setInfo] = useState(locationState?.message || '');
   const [loading, setLoading] = useState(false);
+
+  // Clear info message after 10 seconds
+  useEffect(() => {
+    if (info) {
+      const timer = setTimeout(() => setInfo(''), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [info]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,7 +81,18 @@ export const SigninPage: React.FC = () => {
               <p className="text-gray-400">Sign in to your account</p>
             </div>
 
-            {/* Success/Error Messages */}
+            {/* Success/Error/Info Messages */}
+            {info && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="mb-6 p-4 bg-blue-500/20 border border-blue-500/50 rounded-lg flex items-start gap-2 text-blue-300"
+              >
+                <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                <span className="text-sm">{info}</span>
+              </motion.div>
+            )}
+            
             {success && (
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
