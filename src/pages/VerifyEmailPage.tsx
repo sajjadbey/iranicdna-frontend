@@ -70,7 +70,7 @@ export const VerifyEmailPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await authService.verifyEmail({
+      await authService.verifyEmail({
         email,
         code: verificationCode,
       });
