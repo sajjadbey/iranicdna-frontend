@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Send, BarChart3, Users, BookOpen, Menu, X, Wrench } from 'lucide-react';
+import { Dna, Info, Send, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Header: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
   
   const scrollToAbout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -97,6 +99,35 @@ export const Header: React.FC = () => {
             >
               <Send size={14} /> Join
             </a>
+            
+            {/* Auth Links */}
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/profile"
+                  className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                    isActive('/profile')
+                      ? 'bg-white/10 text-white'
+                      : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <User size={14} /> {user?.username || 'Profile'}
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                >
+                  <LogOut size={14} /> Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/signin"
+                className="text-sm font-medium bg-[var(--color-accent)] hover:bg-amber-600 text-white flex items-center gap-1 px-4 py-1.5 rounded-lg transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -262,6 +293,67 @@ export const Header: React.FC = () => {
                     <span className="font-medium">Join</span>
                   </a>
                 </motion.div>
+                
+                {/* Mobile Auth Links */}
+                {isAuthenticated ? (
+                  <>
+                    <motion.div
+                      variants={{
+                        open: { x: 0, opacity: 1 },
+                        closed: { x: -100, opacity: 0 }
+                      }}
+                      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <Link
+                        to="/profile"
+                        onClick={closeMobileMenu}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                          isActive('/profile')
+                            ? 'bg-white/10 text-white'
+                            : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <User size={18} />
+                        <span className="font-medium">{user?.username || 'Profile'}</span>
+                      </Link>
+                    </motion.div>
+                    <motion.div
+                      variants={{
+                        open: { x: 0, opacity: 1 },
+                        closed: { x: -100, opacity: 0 }
+                      }}
+                      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <button
+                        onClick={() => {
+                          logout();
+                          closeMobileMenu();
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        <LogOut size={18} />
+                        <span className="font-medium">Logout</span>
+                      </button>
+                    </motion.div>
+                  </>
+                ) : (
+                  <motion.div
+                    variants={{
+                      open: { x: 0, opacity: 1 },
+                      closed: { x: -100, opacity: 0 }
+                    }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <Link
+                      to="/signin"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-accent)] hover:bg-amber-600 text-white transition-colors"
+                    >
+                      <User size={18} />
+                      <span className="font-medium">Sign In</span>
+                    </Link>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.nav>
           )}
