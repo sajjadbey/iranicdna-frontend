@@ -20,6 +20,6 @@ export const API_ENDPOINTS = {
   confirmPasswordReset: `${API_BASE_URL}/auth/password-reset/confirm/`,
   
   // DNA File Management
-  dnaFiles: `${API_BASE_URL}/genetics/dna-files/`,
-  dnaFileUpload: `${API_BASE_URL}/genetics/dna-files/upload/`,
+  dnaFiles: `${API_BASE_URL}/dna-files/`,
+  dnaFileUpload: `${API_BASE_URL}/dna-files/upload/`,
 } as const;
