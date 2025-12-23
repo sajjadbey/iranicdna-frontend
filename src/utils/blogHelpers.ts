@@ -1,6 +1,6 @@
 import type { BlogPost } from '../types';
 
-const API_BASE = 'https://api.qizilbash.ir';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // Date formatting
 export const formatDate = (dateString: string): string => {

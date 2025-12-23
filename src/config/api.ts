@@ -18,4 +18,8 @@ export const API_ENDPOINTS = {
   // Password Reset
   requestPasswordReset: `${API_BASE_URL}/auth/password-reset/request/`,
   confirmPasswordReset: `${API_BASE_URL}/auth/password-reset/confirm/`,
+  
+  // DNA File Management
+  dnaFiles: `${API_BASE_URL}/genetics/dna-files/`,
+  dnaFileUpload: `${API_BASE_URL}/genetics/dna-files/upload/`,
 } as const;

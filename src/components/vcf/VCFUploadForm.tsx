@@ -1,73 +1,28 @@
-import React, { useState, useRef } from 'react';
-import { CloudUpload } from 'lucide-react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { VCFUploadFormProps } from '../../types/vcf';
-import { uploadVCFFile } from '../../utils/vcfHelpers';
+import { uploadVCFFileWithDNAFile } from '../../utils/vcfHelpers';
+import { DNAFileSelector } from './DNAFileSelector';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, onUploadError }) => {
-  const [file, setFile] = useState<File | null>(null);
+  const { user } = useAuth();
+  const [selectedDNAFileId, setSelectedDNAFileId] = useState<string | null>(null);
   const [sampleId, setSampleId] = useState('');
   const [selectedModels, setSelectedModels] = useState<string[]>(['K12b']);
   const [tolerance, setTolerance] = useState(0.001);
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<'uploading' | 'done' | 'processing'>('uploading');
-  const [dragActive, setDragActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (
-        droppedFile.name.endsWith('.vcf') ||
-        droppedFile.name.endsWith('.txt') ||
-        droppedFile.name.endsWith('.csv') ||
-        droppedFile.name.endsWith('.gz') ||
-        droppedFile.name.endsWith('.zip')
-      ) {
-        setFile(droppedFile);
-      } else {
-        onUploadError('Please select a valid VCF, TXT, CSV, GZ, or ZIP file');
-      }
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (
-        selectedFile.name.endsWith('.vcf') ||
-        selectedFile.name.endsWith('.txt') ||
-        selectedFile.name.endsWith('.csv') ||
-        selectedFile.name.endsWith('.gz') ||
-        selectedFile.name.endsWith('.zip')
-      ) {
-        setFile(selectedFile);
-      } else {
-        onUploadError('Please select a valid VCF, TXT, CSV, GZ, or ZIP file');
-      }
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file) {
-      onUploadError('Please select a VCF, TXT, CSV, GZ, or ZIP file');
+    if (!user) {
+      onUploadError('Please sign in to use this tool');
+      return;
+    }
+
+    if (!selectedDNAFileId) {
+      onUploadError('Please select a DNA file from your profile');
       return;
     }
 
@@ -77,51 +32,26 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
     }
 
     setUploading(true);
-    setUploadProgress(0);
-    setUploadStatus('uploading');
 
     try {
-      const result = await uploadVCFFile(
-        file, 
-        sampleId.trim(), 
-        selectedModels, 
-        tolerance,
-        (progress) => {
-          setUploadProgress(progress);
-          if (progress === 100) {
-            setUploadStatus('done');
-          }
-        }
+      const result = await uploadVCFFileWithDNAFile(
+        selectedDNAFileId,
+        sampleId.trim(),
+        selectedModels,
+        tolerance
       );
+
+      onUploadSuccess(result);
       
-      // Show "Done" message briefly, then switch to "Processing"
-      setTimeout(() => {
-        setUploadStatus('processing');
-        
-        // Small delay before showing success and resetting
-        setTimeout(() => {
-          onUploadSuccess(result);
-          
-          // Reset form
-          setFile(null);
-          setSampleId('');
-          setSelectedModels(['K12b']);
-          setTolerance(0.001);
-          setUploadProgress(0);
-          setUploadStatus('uploading');
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-        }, 1000);
-      }, 800);
+      // Reset form
+      setSelectedDNAFileId(null);
+      setSampleId('');
+      setSelectedModels(['K12b']);
+      setTolerance(0.001);
     } catch (error) {
-      setUploadProgress(0);
-      setUploadStatus('uploading');
-      onUploadError(error instanceof Error ? error.message : 'Upload failed');
+      onUploadError(error instanceof Error ? error.message : 'Analysis failed');
     } finally {
-      setTimeout(() => {
-        setUploading(false);
-      }, 1800);
+      setUploading(false);
     }
   };
 
@@ -133,51 +63,35 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       onSubmit={handleSubmit}
       className="rounded-xl p-6 bg-slate-800/60 ring-1 ring-teal-600/30"
     >
-      <h3 className="text-xl font-semibold text-teal-100 mb-4">Upload File</h3>
+      <h3 className="text-xl font-semibold text-teal-100 mb-4">Select DNA File</h3>
 
-      {/* Format Notice */}
-      <div className="mb-4 p-4 rounded-lg bg-amber-900/20 border border-amber-500/30">
-        <p className="text-sm text-amber-200 font-semibold">Supported Formats</p>
-        <p className="text-xs text-amber-200/90 mt-2">
-          Files exported from MySmartGene VCF, 23andMe PLINK, and MyHeritage CSV formats are accepted.
-        </p>
-      </div>
-
-      {/* File Upload Area */}
-      <div
-        className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive
-            ? 'border-teal-400 bg-teal-900/20'
-            : 'border-teal-600/30 bg-slate-900/40'
-        }`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".vcf,.txt,.csv,.gz,.zip"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <CloudUpload className="mx-auto mb-3 text-teal-400" size={48} />
-        {file ? (
-          <div>
-            <p className="text-teal-100 font-medium">{file.name}</p>
-            <p className="text-sm text-teal-400 mt-1">
-              {(file.size / 1024).toFixed(1)} KB
+      {!user ? (
+        <div className="mb-6 p-4 rounded-lg bg-amber-900/20 border border-amber-500/30 text-center">
+          <p className="text-amber-200 text-sm">Please sign in to use this tool</p>
+        </div>
+      ) : (
+        <>
+          {/* Format Notice */}
+          <div className="mb-4 p-4 rounded-lg bg-blue-900/20 border border-blue-500/30">
+            <p className="text-sm text-blue-200 font-semibold">Select Your File</p>
+            <p className="text-xs text-blue-200/90 mt-2">
+              Choose from your uploaded DNA files. Upload files in your Profile page first if you haven't already.
             </p>
           </div>
-        ) : (
-          <div>
-            <p className="text-teal-200 mb-1">Drag and drop your file here</p>
-            <p className="text-sm text-teal-400">or click to browse (.vcf, .txt, .csv, .gz, or .zip)</p>
+
+          {/* DNA File Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-teal-200 mb-2">
+              Your DNA Files
+            </label>
+            <DNAFileSelector
+              selectedFileId={selectedDNAFileId}
+              onFileSelect={setSelectedDNAFileId}
+              onError={onUploadError}
+            />
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Sample ID Input */}
       <div className="mb-6">
@@ -231,42 +145,10 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
         <p className="text-xs text-teal-400 mt-1">Default: 0.001</p>
       </div>
 
-      {/* Upload Progress Bar */}
-      {uploading && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-teal-200">
-              {uploadStatus === 'uploading' && 'Uploading...'}
-              {uploadStatus === 'done' && '✓ Upload Complete'}
-              {uploadStatus === 'processing' && 'Processing...'}
-            </span>
-            <span className="text-sm font-medium text-teal-100">
-              {uploadStatus === 'uploading' && `${uploadProgress}%`}
-              {uploadStatus === 'done' && '100%'}
-              {uploadStatus === 'processing' && ''}
-            </span>
-          </div>
-          <div className="w-full h-2 bg-slate-900/60 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: uploadStatus === 'processing' ? '100%' : `${uploadProgress}%` }}
-              transition={{ duration: 0.3 }}
-              className={`h-full ${
-                uploadStatus === 'done' 
-                  ? 'bg-green-500' 
-                  : uploadStatus === 'processing'
-                  ? 'bg-amber-500'
-                  : 'bg-gradient-to-r from-teal-500 to-amber-500'
-              }`}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={uploading || !file || !sampleId.trim()}
+        disabled={!user || uploading || !selectedDNAFileId || !sampleId.trim()}
         className="w-full px-6 py-3 rounded-lg bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
       >
         {uploading ? (
@@ -274,16 +156,12 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            >
-              <CloudUpload size={20} />
-            </motion.div>
-            Uploading...
+              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+            />
+            Starting Analysis...
           </>
         ) : (
-          <>
-            <CloudUpload size={20} />
-            Upload & Analyze
-          </>
+          'Start Analysis'
         )}
       </button>
     </motion.form>

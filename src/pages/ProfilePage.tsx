@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Calendar, Dna } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
+import { DNAFileUpload } from '../components/profile/DNAFileUpload';
+import { DNAFileList } from '../components/profile/DNAFileList';
+import { dnaFileService } from '../services/dnaFileService';
 import type { UpdateProfileData } from '../types/auth';
+import type { DNAFile } from '../types/dnaFile';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
+  const [dnaFiles, setDnaFiles] = useState<DNAFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(true);
   
   const [formData, setFormData] = useState<UpdateProfileData>({
     username: user?.username || '',
@@ -26,6 +32,25 @@ export const ProfilePage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'profile' | 'dna-files'>('profile');
+
+  // Fetch DNA files
+  useEffect(() => {
+    const fetchDNAFiles = async () => {
+      try {
+        const files = await dnaFileService.getUserDNAFiles();
+        setDnaFiles(files);
+      } catch (err) {
+        console.error('Failed to fetch DNA files:', err);
+      } finally {
+        setLoadingFiles(false);
+      }
+    };
+
+    if (user) {
+      fetchDNAFiles();
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,6 +100,45 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleFileUploadSuccess = (file: DNAFile) => {
+    setDnaFiles([file, ...dnaFiles]);
+    setSuccess('DNA file uploaded successfully!');
+    setTimeout(() => setSuccess(''), 5000);
+  };
+
+  const handleFileUploadError = (errorMsg: string) => {
+    setError(errorMsg);
+    setTimeout(() => setError(''), 5000);
+  };
+
+  const handleFileDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this DNA file?')) {
+      return;
+    }
+
+    try {
+      await dnaFileService.deleteDNAFile(id);
+      setDnaFiles(dnaFiles.filter(f => f.id !== id));
+      setSuccess('DNA file deleted successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete file');
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
+  const handleFileUpdate = async (id: string, data: { sample_name?: string; description?: string }) => {
+    try {
+      const updated = await dnaFileService.updateDNAFile(id, data);
+      setDnaFiles(dnaFiles.map(f => f.id === id ? updated : f));
+      setSuccess('DNA file updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update file');
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
   if (!user) {
     return (
       <Layout>
@@ -90,37 +154,47 @@ export const ProfilePage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-4xl mx-auto"
         >
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
+            <p className="text-gray-400">Manage your account and DNA files</p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === 'profile'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <User className="w-5 h-5" />
+              Profile
+            </button>
+            <button
+              onClick={() => setActiveTab('dna-files')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === 'dna-files'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <Dna className="w-5 h-5" />
+              DNA Files
+              {dnaFiles.length > 0 && (
+                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {dnaFiles.length}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Card with glassmorphism */}
           <div className="bg-[var(--color-card)]/50 backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 p-8">
-            {/* Header */}
-            <div className="mb-8">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center mb-4 shadow-lg"
-              >
-                <User className="w-10 h-10 text-white" />
-              </motion.div>
-              <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
-              <p className="text-gray-400">Manage your account information</p>
-            </div>
-
-            {/* Account Info */}
-            <div className="mb-8 p-4 bg-white/5 rounded-lg border border-white/10">
-              <div className="flex items-center gap-2 text-gray-300 mb-2">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm font-medium">Email:</span>
-                <span className="text-white">{user.email}</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm font-medium">Member since:</span>
-                <span className="text-white">{new Date(user.date_joined).toLocaleDateString()}</span>
-              </div>
-            </div>
 
             {/* Success/Error Messages */}
             {success && (
@@ -145,8 +219,26 @@ export const ProfilePage: React.FC = () => {
               </motion.div>
             )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Tab Content */}
+            {activeTab === 'profile' ? (
+              /* Profile Tab */
+              <>
+                {/* Account Info */}
+                <div className="mb-8 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <div className="flex items-center gap-2 text-gray-300 mb-2">
+                    <Mail className="w-4 h-4" />
+                    <span className="text-sm font-medium">Email:</span>
+                    <span className="text-white">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm font-medium">Member since:</span>
+                    <span className="text-white">{new Date(user.date_joined).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-6">
               {/* Basic Info Section */}
               <div className="space-y-5">
                 <h2 className="text-xl font-semibold text-white border-b border-white/10 pb-2">
@@ -302,8 +394,41 @@ export const ProfilePage: React.FC = () => {
                 ) : (
                   'Save Changes'
                 )}
-              </motion.button>
-            </form>
+                  </motion.button>
+                </form>
+              </>
+            ) : (
+              /* DNA Files Tab */
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-2xl font-semibold text-white mb-2">Upload DNA File</h2>
+                  <p className="text-gray-400 text-sm mb-6">
+                    Upload your raw DNA data from 23andMe, MyHeritage, MySmartGene, or other providers.
+                    Files are automatically detected and validated.
+                  </p>
+                  <DNAFileUpload
+                    onUploadSuccess={handleFileUploadSuccess}
+                    onUploadError={handleFileUploadError}
+                  />
+                </div>
+
+                <div className="border-t border-white/10 pt-8">
+                  <h2 className="text-2xl font-semibold text-white mb-6">Your DNA Files</h2>
+                  {loadingFiles ? (
+                    <div className="text-center py-12">
+                      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-400">Loading DNA files...</p>
+                    </div>
+                  ) : (
+                    <DNAFileList
+                      files={dnaFiles}
+                      onDelete={handleFileDelete}
+                      onUpdate={handleFileUpdate}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

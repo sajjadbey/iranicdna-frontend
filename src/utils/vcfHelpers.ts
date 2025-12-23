@@ -1,7 +1,7 @@
 // VCF Analysis Helper Functions
 import type { VCFAnalysisResponse } from '../types/vcf';
 
-const API_BASE = 'https://api.qizilbash.ir';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // Format timestamp to readable date
 export const formatTimestamp = (timestamp: string): string => {
@@ -66,7 +66,7 @@ export const uploadVCFFile = async (
       } else {
         try {
           const errorData = JSON.parse(xhr.responseText);
-          reject(new Error(errorData.detail || `Upload failed: ${xhr.statusText}`));
+          reject(new Error(errorData.detail || errorData.error || `Upload failed: ${xhr.statusText}`));
         } catch {
           reject(new Error(`Upload failed: ${xhr.statusText}`));
         }
@@ -84,12 +84,28 @@ export const uploadVCFFile = async (
     
     // Send request
     xhr.open('POST', `${API_BASE}/tools/vcf-analysis/`);
+    
+    // Add authentication header if token exists (must be after open())
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    }
+    
     xhr.send(formData);
   });
 };
 
 export const getAnalysisById = async (id: string): Promise<VCFAnalysisResponse> => {
-  const response = await fetch(`${API_BASE}/tools/vcf-analysis/${id}/`);
+  const token = localStorage.getItem('access_token');
+  const headers: HeadersInit = {};
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(`${API_BASE}/tools/vcf-analysis/${id}/`, {
+    headers,
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch analysis: ${response.statusText}`);
@@ -99,10 +115,55 @@ export const getAnalysisById = async (id: string): Promise<VCFAnalysisResponse> 
 };
 
 export const getAllAnalyses = async (): Promise<VCFAnalysisResponse[]> => {
-  const response = await fetch(`${API_BASE}/tools/vcf-analyses/`);
+  const token = localStorage.getItem('access_token');
+  const headers: HeadersInit = {};
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(`${API_BASE}/tools/vcf-analyses/`, {
+    headers,
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch analyses: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
+export const uploadVCFFileWithDNAFile = async (
+  dnaFileId: string,
+  sampleId: string,
+  models: string[],
+  tolerance: number
+): Promise<VCFAnalysisResponse> => {
+  const formData = new FormData();
+  formData.append('dna_file_id', dnaFileId);
+  formData.append('sample_id', sampleId);
+  formData.append('tolerance', tolerance.toString());
+  
+  if (models.length > 0) {
+    formData.append('models_requested', models.join(','));
+  }
+  
+  const token = localStorage.getItem('access_token');
+  const headers: HeadersInit = {};
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(`${API_BASE}/tools/vcf-analysis/`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || errorData.error || 'Analysis failed');
   }
   
   return response.json();
