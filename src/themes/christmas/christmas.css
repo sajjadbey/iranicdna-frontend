@@ -1,0 +1,110 @@
+/**
+ * Christmas/Winter Theme Styles
+ * 
+ * Glass morphism effects, glowing text, and winter decorations
+ */
+
+/* Glass Effect - Frosted glass morphism */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(175, 219, 245, 0.3);
+  box-shadow: 0 8px 32px rgba(175, 219, 245, 0.15);
+}
+
+/* Glowing text effect for headings */
+.text-glow {
+  text-shadow: 
+    0 0 20px rgba(175, 219, 245, 0.5),
+    0 0 40px rgba(175, 219, 245, 0.3);
+}
+
+.text-glow-gold {
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+/* Enhanced box shadows for cards */
+.winter-shadow {
+  box-shadow: 
+    0 8px 32px rgba(10, 25, 41, 0.3),
+    0 0 0 1px rgba(175, 219, 245, 0.1);
+}
+
+.winter-shadow-hover:hover {
+  box-shadow: 
+    0 12px 48px rgba(175, 219, 245, 0.2),
+    0 0 0 1px rgba(175, 219, 245, 0.2);
+}
+
+/* Gradient text for titles */
+.winter-gradient-text {
+  background: linear-gradient(135deg, #AFDBF5 0%, #A4DDED 50%, #FFD700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Ice blue glow on hover */
+.ice-glow:hover {
+  box-shadow: 0 0 30px rgba(175, 219, 245, 0.4);
+}
+
+/* Gold glow on hover */
+.gold-glow:hover {
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+/* Frosted border effect */
+.frosted-border {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.frosted-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(175, 219, 245, 0.3), rgba(255, 215, 0, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Winter button styles */
+.winter-button {
+  background: linear-gradient(135deg, #AFDBF5 0%, #A4DDED 100%);
+  color: #0A1929;
+  font-weight: 700;
+  box-shadow: 0 0 30px rgba(175, 219, 245, 0.4);
+  transition: all 0.3s ease;
+}
+
+.winter-button:hover {
+  box-shadow: 0 0 50px rgba(175, 219, 245, 0.6);
+  transform: scale(1.05);
+}
+
+/* Reduce animations for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .glass-hover,
+  .winter-button,
+  .ice-glow,
+  .gold-glow {
+    transition: none;
+    transform: none;
+  }
+}

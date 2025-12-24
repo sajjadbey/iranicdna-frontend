@@ -1,46 +1,21 @@
-import React, { useMemo, useState, useEffect, lazy, Suspense } from 'react';
+import React from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { particlesBackgroundConfig, mobileParticlesBackgroundConfig } from '../config/particlesBackgroundConfig';
-import { isMobileDevice, isLowEndDevice, prefersReducedMotion } from '../utils/deviceDetection';
+import { ThemeBackground } from '../themes/theme';
 
-// Lazy load particles to avoid blocking initial page load
-const ParticlesBackground = lazy(() => 
-  import('./ParticlesBackground').then(module => ({ default: module.ParticlesBackground }))
-);
-
+/**
+ * Layout Component
+ * 
+ * Main layout wrapper that provides:
+ * - Theme-aware background animation
+ * - Header and Footer
+ * - Consistent page structure
+ */
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [showParticles, setShowParticles] = useState(true);
-  
-  // Determine if particles should be shown and with what config
-  const { backgroundConfig, shouldShow } = useMemo(() => {
-    const isMobile = isMobileDevice();
-    const isLowEnd = isLowEndDevice();
-    const reducedMotion = prefersReducedMotion();
-    
-    // Disable particles on low-end devices or if user prefers reduced motion
-    const shouldShow = !isLowEnd && !reducedMotion;
-    
-    const config = isMobile 
-      ? { ...particlesBackgroundConfig, ...mobileParticlesBackgroundConfig }
-      : particlesBackgroundConfig;
-    
-    return { backgroundConfig: config, shouldShow };
-  }, []);
-  
-  // Update state after mount to avoid hydration issues
-  useEffect(() => {
-    setShowParticles(shouldShow);
-  }, [shouldShow]);
-
   return (
-    <div className="min-h-screen text-teal-100 relative overflow-hidden" style={{ backgroundColor: '#0f172a' }}>
-      {/* Particles Background - Only render on capable devices, lazy loaded */}
-      {showParticles && (
-        <Suspense fallback={null}>
-          <ParticlesBackground {...backgroundConfig} />
-        </Suspense>
-      )}
+    <div className="min-h-screen text-teal-100 relative overflow-hidden" style={{ backgroundColor: 'var(--color-bg)' }}>
+      {/* Theme-aware background - automatically switches between particles and snowfall */}
+      <ThemeBackground />
       
       <div className="relative z-10">
         <Header />
