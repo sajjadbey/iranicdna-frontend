@@ -1,24 +1,13 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Dna, Info, Send, Globe, Users, BookOpen, Wrench } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { AboutContribute } from '../components/AboutContribute';
-import { DNABackground } from '../components/DNABackground';
-import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
-import { isMobileDevice } from '../utils/deviceDetection';
 import mainLogo from '../assets/logo.png';
 
 export const HomePage: React.FC = () => {
-  const backgroundConfig = useMemo(() => {
-    const isMobile = isMobileDevice();
-    return isMobile 
-      ? { ...dnaBackgroundConfig, ...mobileDnaBackgroundConfig }
-      : dnaBackgroundConfig;
-  }, []);
-
   return (
     <Layout>
-      <DNABackground {...backgroundConfig} />
       <section className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-4 mb-8">

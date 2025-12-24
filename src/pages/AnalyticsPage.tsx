@@ -11,10 +11,8 @@ import { MapCard } from '../components/analytics/MapCard';
 import { HeatmapCard } from '../components/analytics/HeatmapCard';
 import { ProvinceComparisonModal } from '../components/analytics/ProvinceComparisonModal';
 import { AboutContribute } from '../components/AboutContribute';
-import { DNABackground } from '../components/DNABackground';
-import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants, isMobileDevice } from '../utils/deviceDetection';
+import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants } from '../utils/deviceDetection';
 import { API_ENDPOINTS } from '../config/api';
 import { cachedFetch } from '../utils/apiCache';
 
@@ -292,17 +290,9 @@ export const AnalyticsPage: React.FC = () => {
   );
 
 
-  const backgroundConfig = useMemo(() => {
-    const isMobile = isMobileDevice();
-    return isMobile 
-      ? { ...dnaBackgroundConfig, ...mobileDnaBackgroundConfig }
-      : dnaBackgroundConfig;
-  }, []);
-
   if (error)
     return (
       <Layout>
-        <DNABackground {...backgroundConfig} />
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="max-w-xl text-center p-6 bg-slate-800/50 rounded-xl">
             <h2 className="text-2xl font-bold mb-2 text-red-400">Data Error</h2>
@@ -314,7 +304,6 @@ export const AnalyticsPage: React.FC = () => {
 
   return (
     <Layout>
-      <DNABackground {...backgroundConfig} />
       <AnimatePresence mode="wait">
         {loading && (
           <motion.div

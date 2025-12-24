@@ -40,6 +40,11 @@ export const API_ENDPOINTS = {
   // Blog
   blog: `${API_BASE_URL}/blog/`,
   blogPost: (slug: string) => `${API_BASE_URL}/blog/${slug}/`,
+  blogComments: (slug: string) => `${API_BASE_URL}/blog/${slug}/comments/`,
+  blogCommentCreate: (slug: string) => `${API_BASE_URL}/blog/${slug}/comments/create/`,
+  blogCommentDelete: (id: number) => `${API_BASE_URL}/blog/comments/${id}/`,
+  blogCommentUpdate: (id: number) => `${API_BASE_URL}/blog/comments/${id}/update/`,
+  blogCommentReport: (commentId: number) => `${API_BASE_URL}/blog/comments/${commentId}/report/`,
   
   // Analytics API endpoints 
   samples: `${ANALYTICS_API_URL}/samples/`,

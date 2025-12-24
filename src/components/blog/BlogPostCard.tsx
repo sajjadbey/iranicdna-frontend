@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, User, Eye, Clock, Tag } from 'lucide-react';
+import { Calendar, User, Eye, Clock, Tag, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { BlogPost } from '../../types';
 import { formatDate, estimateReadingTime, formatViewCount } from '../../utils/blogHelpers';
@@ -88,6 +88,10 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({ post }) => {
             <div className="flex items-center gap-1.5">
               <Eye size={14} style={{ width: '14px', height: '14px', color: 'currentColor' }} />
               <span>{formatViewCount(post.view_count)} views</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <MessageCircle size={14} style={{ width: '14px', height: '14px', color: 'currentColor' }} />
+              <span>{post.comment_count || 0} {post.comment_count === 1 ? 'comment' : 'comments'}</span>
             </div>
           </div>
         </div>

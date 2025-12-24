@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import type { DNABackgroundProps, ColorScheme } from '../../types/dna-background';
 import { Scene } from './Scene';
@@ -20,6 +20,8 @@ export function DNABackground({
   performanceMode = false,
   className = '',
 }: DNABackgroundProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   // Determine color scheme
   const colors: ColorScheme = useMemo(() => {
     if (customColors) {
@@ -52,6 +54,29 @@ export function DNABackground({
     }),
     [particleCount]
   );
+
+  // Handle WebGL context loss
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      console.warn('WebGL context lost. Attempting to restore...');
+    };
+
+    const handleContextRestored = () => {
+      console.log('WebGL context restored.');
+    };
+
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    canvas.addEventListener('webglcontextrestored', handleContextRestored);
+
+    return () => {
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+    };
+  }, []);
   
   return (
     <div
@@ -59,13 +84,20 @@ export function DNABackground({
       style={{ zIndex }}
     >
       <Canvas
+        ref={canvasRef}
         camera={{ position: [0, 0, 8], fov: 50 }}
         gl={{
           alpha: true,
           antialias: !performanceMode,
           powerPreference: performanceMode ? 'low-power' : 'high-performance',
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
         }}
         dpr={performanceMode ? 1 : [1, 2]}
+        onCreated={({ gl }) => {
+          // Additional WebGL context configuration
+          gl.setClearColor(0x000000, 0);
+        }}
       >
         <Suspense fallback={null}>
           <Scene

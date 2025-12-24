@@ -5,9 +5,6 @@ import { Layout } from '../components/Layout';
 import { FolderTree } from '../components/communities/FolderTree';
 import { TribeDetailModal } from '../components/communities/TribeDetailModal';
 import { AboutContribute } from '../components/AboutContribute';
-import { DNABackground } from '../components/DNABackground';
-import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
-import { isMobileDevice } from '../utils/deviceDetection';
 import { API_ENDPOINTS, ANALYTICS_API_URL } from '../config/api';
 import type { Tribe, Clan } from '../types';
 import { cachedFetch } from '../utils/apiCache';
@@ -107,17 +104,9 @@ export const CommunitiesPage: React.FC = () => {
     }, 300);
   };
 
-  const backgroundConfig = useMemo(() => {
-    const isMobile = isMobileDevice();
-    return isMobile 
-      ? { ...dnaBackgroundConfig, ...mobileDnaBackgroundConfig }
-      : dnaBackgroundConfig;
-  }, []);
-
   if (error) {
     return (
       <Layout>
-        <DNABackground {...backgroundConfig} />
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="max-w-xl text-center p-6 bg-slate-800/50 rounded-xl">
             <h2 className="text-2xl font-bold mb-2 text-red-400">Data Error</h2>
@@ -130,7 +119,6 @@ export const CommunitiesPage: React.FC = () => {
 
   return (
     <Layout>
-      <DNABackground {...backgroundConfig} />
       <AnimatePresence mode="wait">
         {loading && (
           <motion.div
