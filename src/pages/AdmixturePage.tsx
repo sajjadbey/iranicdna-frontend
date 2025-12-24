@@ -55,7 +55,7 @@ export const AdmixturePage: React.FC = () => {
           console.error(`Failed to update analysis ${analysis.id}:`, err);
         }
       }
-    }, 5000); // Poll every 5 seconds
+    }, 10000); // Poll every 10 seconds (reduced from 5s for better memory)
 
     return () => clearInterval(interval);
   }, [analyses]);
