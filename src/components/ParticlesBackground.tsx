@@ -9,6 +9,10 @@ interface ParticlesBackgroundProps {
   particleCount?: number;
   particleSpeed?: number;
   colorTheme?: 'blue' | 'purple' | 'green' | 'gold';
+  fpsLimit?: number;
+  interactivity?: boolean;
+  enableLinks?: boolean;
+  detectRetina?: boolean;
 }
 
 export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
@@ -17,6 +21,10 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
   particleCount = 80,
   particleSpeed = 1.5,
   colorTheme = 'gold',
+  fpsLimit = 60,
+  interactivity = true,
+  enableLinks = true,
+  detectRetina = true,
 }) => {
   const [init, setInit] = useState(false);
 
@@ -30,7 +38,7 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
   }, []);
 
   const particlesLoaded = async (container?: Container): Promise<void> => {
-    console.log('Particles loaded', container);
+    // Particles loaded successfully
   };
 
   // Color themes matching the site design
@@ -62,8 +70,8 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
           value: 'transparent',
         },
       },
-      fpsLimit: 60,
-      interactivity: {
+      fpsLimit,
+      interactivity: interactivity ? {
         events: {
           onClick: {
             enable: true,
@@ -87,6 +95,15 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
             },
           },
         },
+      } : {
+        events: {
+          onClick: {
+            enable: false,
+          },
+          onHover: {
+            enable: false,
+          },
+        },
       },
       style: {
         position: 'absolute',
@@ -99,10 +116,10 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
         },
         links: {
           color: colors.links,
-          distance: 150,
-          enable: true,
-          opacity: 0.3,
-          width: 1,
+          distance: enableLinks ? 150 : 0,
+          enable: enableLinks,
+          opacity: enableLinks ? 0.3 : 0,
+          width: enableLinks ? 1 : 0,
         },
         move: {
           direction: 'none',
@@ -130,9 +147,9 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
           value: { min: 2, max: 5 },
         },
       },
-      detectRetina: true,
+      detectRetina,
     }),
-    [colors, particleCount]
+    [colors, particleCount, particleSpeed, fpsLimit, interactivity, enableLinks, detectRetina]
   );
 
   if (!init) {
