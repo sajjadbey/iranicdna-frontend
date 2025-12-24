@@ -25,12 +25,15 @@ export const Snowfall: React.FC = () => {
     setShouldAnimate(!reducedMotion);
 
     if (reducedMotion) {
+      console.log('[Snowfall] Animations disabled due to prefers-reduced-motion');
       return;
     }
 
     // Reduce snowflake count on mobile for better performance
     const isMobile = isMobileDevice();
     const snowflakeCount = isMobile ? 30 : 50;
+
+    console.log('[Snowfall] Initializing with', snowflakeCount, 'snowflakes (mobile:', isMobile, ')');
 
     // Generate snowflakes with random properties
     const flakes = Array.from({ length: snowflakeCount }, (_, i) => ({
@@ -45,8 +48,11 @@ export const Snowfall: React.FC = () => {
   }, []);
 
   if (!shouldAnimate) {
+    console.log('[Snowfall] Not rendering - shouldAnimate is false');
     return null;
   }
+
+  console.log('[Snowfall] Rendering', snowflakes.length, 'snowflakes');
 
   return (
     <>
@@ -102,22 +108,23 @@ export const Snowfall: React.FC = () => {
         }
 
         .snowflake-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 1;
-          overflow: hidden;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          pointer-events: none !important;
+          z-index: 1 !important;
+          overflow: visible !important;
         }
 
         .snowflake-item {
-          position: fixed;
-          top: -100px;
-          color: rgba(255, 255, 255, 0.3);
-          animation: snowfall linear infinite;
-          will-change: transform, opacity;
+          position: absolute !important;
+          top: -10vh !important;
+          color: rgba(255, 255, 255, 0.8) !important;
+          animation: snowfall linear infinite !important;
         }
 
         .animate-float {
@@ -132,7 +139,7 @@ export const Snowfall: React.FC = () => {
           animation: glow 3s ease-in-out infinite;
         }
 
-        /* Reduce animations on lower-end devices */
+        /* Only disable on reduced motion preference */
         @media (prefers-reduced-motion: reduce) {
           .snowflake-item,
           .animate-float,
@@ -161,24 +168,24 @@ export const Snowfall: React.FC = () => {
       </div>
 
       {/* Winter Background Decorations */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="fixed inset-0 z-[998] pointer-events-none">
         {/* Frosted gradient orbs */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#AFDBF5]/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-[#FFD700]/10 rounded-full blur-[100px] translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-[#A4DDED]/15 rounded-full blur-[140px]"></div>
+        <div className="absolute top-0 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#AFDBF5]/20 rounded-full blur-[80px] md:blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-1/3 right-0 w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-[#FFD700]/10 rounded-full blur-[60px] md:blur-[100px] translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-1/4 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-[#A4DDED]/15 rounded-full blur-[80px] md:blur-[140px]"></div>
 
-        {/* Floating winter elements */}
-        <div className="absolute top-20 right-20 opacity-10 animate-float">
+        {/* Floating winter elements - hide on small mobile */}
+        <div className="hidden sm:block absolute top-20 right-20 opacity-10 animate-float">
           <Star size={40} className="text-[#FFD700]" />
         </div>
         <div 
-          className="absolute top-1/2 left-10 opacity-10 animate-float" 
+          className="hidden sm:block absolute top-1/2 left-10 opacity-10 animate-float" 
           style={{ animationDelay: '2s' }}
         >
           <SnowflakeIcon size={60} className="text-[#AFDBF5]" />
         </div>
         <div 
-          className="absolute bottom-40 right-40 opacity-10 animate-float" 
+          className="hidden sm:block absolute bottom-40 right-40 opacity-10 animate-float" 
           style={{ animationDelay: '4s' }}
         >
           <Gift size={50} className="text-[#FFD700]" />

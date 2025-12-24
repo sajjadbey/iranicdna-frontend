@@ -7,6 +7,10 @@ import compression from 'vite-plugin-compression';
 export default defineConfig({
   plugins: [react(), tailwindcss(), compression({algorithm: 'gzip'})],
   base: '/',
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
   build: {
     rollupOptions: {
       output: {
