@@ -10,6 +10,7 @@ import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBac
 import { isMobileDevice } from '../utils/deviceDetection';
 import { API_ENDPOINTS, ANALYTICS_API_URL } from '../config/api';
 import type { Tribe, Clan } from '../types';
+import { cachedFetch } from '../utils/apiCache';
 
 export const CommunitiesPage: React.FC = () => {
   const [tribes, setTribes] = useState<Tribe[]>([]);
@@ -28,32 +29,22 @@ export const CommunitiesPage: React.FC = () => {
       setError(null);
 
       try {
-        const [tribesRes, clansRes] = await Promise.all([
-          fetch(API_ENDPOINTS.tribes),
-          fetch(API_ENDPOINTS.clans),
+        const [tribesData, clansData] = await Promise.all([
+          cachedFetch<Tribe[]>(API_ENDPOINTS.tribes),
+          cachedFetch<Clan[]>(API_ENDPOINTS.clans),
         ]);
-
-        if (!tribesRes.ok || !clansRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const tribesData: Tribe[] = await tribesRes.json();
-        const clansData: Clan[] = await clansRes.json();
 
         // Fetch sample counts for each tribe
         const tribesWithCounts = await Promise.all(
           tribesData.map(async (tribe) => {
             try {
-              const samplesRes = await fetch(`${API_ENDPOINTS.samples}?tribe=${encodeURIComponent(tribe.name)}`);
-              if (samplesRes.ok) {
-                const samples = await samplesRes.json();
-                const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
-                return { ...tribe, sample_count: totalCount };
-              }
+              const samples = await cachedFetch<any[]>(`${API_ENDPOINTS.samples}?tribe=${encodeURIComponent(tribe.name)}`);
+              const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
+              return { ...tribe, sample_count: totalCount };
             } catch {
               // If fetch fails, return tribe without count
+              return tribe;
             }
-            return tribe;
           })
         );
 
@@ -61,16 +52,13 @@ export const CommunitiesPage: React.FC = () => {
         const clansWithCounts = await Promise.all(
           clansData.map(async (clan) => {
             try {
-              const samplesRes = await fetch(`${API_ENDPOINTS.samples}?clan=${encodeURIComponent(clan.name)}`);
-              if (samplesRes.ok) {
-                const samples = await samplesRes.json();
-                const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
-                return { ...clan, sample_count: totalCount };
-              }
+              const samples = await cachedFetch<any[]>(`${API_ENDPOINTS.samples}?clan=${encodeURIComponent(clan.name)}`);
+              const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
+              return { ...clan, sample_count: totalCount };
             } catch {
               // If fetch fails, return clan without count
+              return clan;
             }
-            return clan;
           })
         );
 

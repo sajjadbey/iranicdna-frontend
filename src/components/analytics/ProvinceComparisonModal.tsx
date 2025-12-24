@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ComparisonDonutChart } from './ComparisonDonutChart';
 import { type Sample } from '../../types';
 import { API_ENDPOINTS } from '../../config/api';
+import { cachedFetch } from '../../utils/apiCache';
 
 interface Props {
   isOpen: boolean;
@@ -47,18 +48,9 @@ export const ProvinceComparisonModal: React.FC<Props> = ({ isOpen, onClose, allP
     setLoading(true);
     try {
       // Fetch samples for both provinces
-      const [res1, res2] = await Promise.all([
-        fetch(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province1)}`),
-        fetch(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province2)}`)
-      ]);
-
-      if (!res1.ok || !res2.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
       const [data1, data2] = await Promise.all([
-        res1.json(),
-        res2.json()
+        cachedFetch<Sample[]>(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province1)}`),
+        cachedFetch<Sample[]>(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province2)}`)
       ]);
 
       setSamples1(data1 || []);

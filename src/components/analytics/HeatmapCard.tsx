@@ -6,6 +6,7 @@ import { HaplogroupSelector } from './HaplogroupSelector';
 import type { GeoJsonObject, Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
 import { API_ENDPOINTS } from '../../config/api';
+import { cachedFetch } from '../../utils/apiCache';
 
 interface GeoJSONGeometry {
   type: string;
@@ -78,9 +79,7 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
         
         const haplogroupUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${haplogroupParams.toString()}`;
-        const haplogroupRes = await fetch(haplogroupUrl);
-        if (!haplogroupRes.ok) throw new Error(`HTTP ${haplogroupRes.status}`);
-        const haplogroupData: HeatmapPoint[] = await haplogroupRes.json();
+        const haplogroupData = await cachedFetch<HeatmapPoint[]>(haplogroupUrl);
         
         // Fetch total data (without haplogroup filter) for percentage calculation
         const totalParams = new URLSearchParams();
@@ -88,9 +87,7 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
         
         const totalUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${totalParams.toString()}`;
-        const totalRes = await fetch(totalUrl);
-        if (!totalRes.ok) throw new Error(`HTTP ${totalRes.status}`);
-        const totalDataResult: HeatmapPoint[] = await totalRes.json();
+        const totalDataResult = await cachedFetch<HeatmapPoint[]>(totalUrl);
         
         setHeatmapData(haplogroupData || []);
         setTotalData(totalDataResult || []);

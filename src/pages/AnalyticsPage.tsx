@@ -16,6 +16,7 @@ import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBac
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants, isMobileDevice } from '../utils/deviceDetection';
 import { API_ENDPOINTS } from '../config/api';
+import { cachedFetch } from '../utils/apiCache';
 
 // API DTOs
 interface CountryDTO { name: string }
@@ -66,9 +67,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchAllSamples = async () => {
       try {
-        const res = await fetch(API_ENDPOINTS.samples);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Sample[] = await res.json();
+        const data = await cachedFetch<Sample[]>(API_ENDPOINTS.samples);
         setAllSamples(data || []);
         
         // Extract unique countries
@@ -89,9 +88,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const res = await fetch(API_ENDPOINTS.countries);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: CountryDTO[] = await res.json();
+        const data = await cachedFetch<CountryDTO[]>(API_ENDPOINTS.countries);
         if (allCountries.length === 0) {
             setAllCountries(data.map((c) => c.name).sort());
         }
@@ -106,9 +103,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchEthnicities = async () => {
       try {
-        const res = await fetch(API_ENDPOINTS.ethnicities);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: EthnicityDTO[] = await res.json();
+        const data = await cachedFetch<EthnicityDTO[]>(API_ENDPOINTS.ethnicities);
         setEthnicities(data.map((e) => e.name).sort());
       } catch (err) {
         console.error('Failed to fetch ethnicities:', err);
@@ -251,9 +246,7 @@ export const AnalyticsPage: React.FC = () => {
         if (selectedEthnicity) params.append('ethnicity', selectedEthnicity);
         
         const url = `${API_ENDPOINTS.samples}?${params.toString()}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Sample[] = await res.json();
+        const data = await cachedFetch<Sample[]>(url);
         
         if (mounted) {
           setSamples(data || []);

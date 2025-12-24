@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Dna, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_ENDPOINTS } from '../../config/api';
+import { cachedFetch } from '../../utils/apiCache';
 
 interface HaplogroupNode {
   name: string;
@@ -58,17 +59,13 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     const fetchTreeAndCounts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(API_ENDPOINTS.haplogroupAll);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: HaplogroupNode[] = await res.json();
+        const data = await cachedFetch<HaplogroupNode[]>(API_ENDPOINTS.haplogroupAll);
         
         // Fetch counts for all root haplogroups
         const rootHaplogroups = data.map(node => node.name);
         const countPromises = rootHaplogroups.map(async (name) => {
           try {
-            const countRes = await fetch(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
-            if (!countRes.ok) return null;
-            const countData: HaplogroupCount = await countRes.json();
+            const countData = await cachedFetch<HaplogroupCount>(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
             return { name, count: countData };
           } catch {
             return null;

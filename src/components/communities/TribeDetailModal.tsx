@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Tribe, Clan, Sample } from '../../types';
 import { DonutCard } from '../analytics/DonutCard';
 import { SubcladeList } from '../analytics/SubcladeList';
+import { cachedFetch } from '../../utils/apiCache';
 
 interface Props {
   isOpen: boolean;
@@ -60,9 +61,7 @@ export const TribeDetailModal: React.FC<Props> = ({ isOpen, onClose, tribe, clan
         }
         
         const url = `${apiBase}/samples/?${params.toString()}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Sample[] = await res.json();
+        const data = await cachedFetch<Sample[]>(url);
         setSamples(data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
