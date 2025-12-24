@@ -28,10 +28,10 @@ export const particlesBackgroundConfig: ParticlesBackgroundConfig = {
   
   // Number of particles to display
   // Reduced for better memory usage (was 150)
-  particleCount: 60,
+  particleCount: 250,
   
   // Particle movement speed (1.5 = moderate speed)
-  particleSpeed: 1.5,
+  particleSpeed: 1.2,
   
   // Color theme to match site design
   // 'gold' matches the site's accent color
