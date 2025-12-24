@@ -15,8 +15,8 @@ const ParticlesBackground = lazy(() =>
  * ThemeBackground Component
  * 
  * Renders the appropriate background animation based on the current theme:
- * - Default theme: Particles.js background
- * - Christmas theme: Snowfall animation with winter decorations
+ * - Default theme: Particles.js background (disabled on low-end)
+ * - Christmas theme: Snowfall animation (lighter, works on mobile)
  */
 export const ThemeBackground: React.FC = () => {
   const { themeConfig } = useTheme();
@@ -27,9 +27,14 @@ export const ThemeBackground: React.FC = () => {
     const isLowEnd = isLowEndDevice();
     const reducedMotion = prefersReducedMotion();
 
-    // Disable animations on low-end devices or if user prefers reduced motion
+    // For Christmas theme, allow even on low-end devices (snowfall is lightweight)
+    if (themeConfig.name === 'christmas') {
+      return !reducedMotion;
+    }
+
+    // For particles (default theme), disable on low-end devices
     return !isLowEnd && !reducedMotion;
-  }, []);
+  }, [themeConfig.name]);
 
   // Update state after mount to avoid hydration issues
   useEffect(() => {

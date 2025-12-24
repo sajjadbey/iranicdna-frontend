@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Snowflake as SnowflakeIcon, Star, Gift } from 'lucide-react';
-import { prefersReducedMotion } from '../../utils/deviceDetection';
+import { prefersReducedMotion, isMobileDevice } from '../../utils/deviceDetection';
 
 interface SnowflakeData {
   id: number;
@@ -13,6 +13,7 @@ interface SnowflakeData {
 /**
  * Winter-themed background with snowfall and decorative elements
  * Matches the festive design with frosted orbs and floating icons
+ * Optimized for mobile with reduced snowflake count
  */
 export const Snowfall: React.FC = () => {
   const [snowflakes, setSnowflakes] = useState<SnowflakeData[]>([]);
@@ -27,8 +28,12 @@ export const Snowfall: React.FC = () => {
       return;
     }
 
-    // Generate 50 snowflakes with random properties
-    const flakes = Array.from({ length: 50 }, (_, i) => ({
+    // Reduce snowflake count on mobile for better performance
+    const isMobile = isMobileDevice();
+    const snowflakeCount = isMobile ? 30 : 50;
+
+    // Generate snowflakes with random properties
+    const flakes = Array.from({ length: snowflakeCount }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 5,
