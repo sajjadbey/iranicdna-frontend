@@ -153,9 +153,12 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
 
   return (
     <div className={className}>
-      {/* Clean container matching form input style */}
-      <div className="rounded-lg border border-white/10 bg-white/5 py-4 px-3 transition-all hover:border-white/20 flex items-center justify-center min-h-[80px]">
-        <div ref={containerRef} className="flex items-center justify-center" style={{ margin: '0 auto' }} />
+      {/* Clean container matching form input style - with responsive scaling */}
+      <div className="turnstile-container rounded-lg border border-white/10 bg-white/5 py-3 px-2 transition-all hover:border-white/20 flex items-center justify-center min-h-[70px] overflow-hidden">
+        <div 
+          ref={containerRef} 
+          className="turnstile-wrapper flex items-center justify-center w-full"
+        />
       </div>
       
       {error && (
@@ -166,6 +169,57 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
           {error}
         </p>
       )}
+      
+      <style>{`
+        /* Turnstile widget responsive container */
+        .turnstile-container {
+          position: relative;
+          width: 100%;
+        }
+        
+        .turnstile-wrapper {
+          position: relative;
+          max-width: 100%;
+        }
+        
+        /* Scale down Turnstile widget on mobile to fit container */
+        @media (max-width: 400px) {
+          .turnstile-wrapper > div {
+            transform: scale(0.8);
+            transform-origin: center center;
+          }
+          .turnstile-container {
+            min-height: 60px !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .turnstile-wrapper > div {
+            transform: scale(0.7);
+            transform-origin: center center;
+          }
+          .turnstile-container {
+            min-height: 55px !important;
+          }
+        }
+        
+        @media (max-width: 320px) {
+          .turnstile-wrapper > div {
+            transform: scale(0.65);
+            transform-origin: center center;
+          }
+          .turnstile-container {
+            min-height: 50px !important;
+          }
+        }
+        
+        /* Ensure iframe doesn't cause overflow */
+        .turnstile-wrapper iframe {
+          max-width: 100%;
+          margin: 0 auto;
+          display: block;
+        }
+      `}</style>
     </div>
   );
 };
