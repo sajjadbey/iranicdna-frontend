@@ -70,13 +70,13 @@ export const particlesBackgroundConfig: ParticlesBackgroundConfig = {
  */
 export const mobileParticlesBackgroundConfig: Partial<ParticlesBackgroundConfig> = {
   // Drastically reduce particle count on mobile for better performance
-  particleCount: 15,
+  particleCount: 200,
   
   // Slower speed on mobile saves CPU
-  particleSpeed: 0.8,
+  particleSpeed: 1.2,
   
   // Lower FPS on mobile (30 FPS is sufficient and saves battery)
-  fpsLimit: 30,
+  fpsLimit: 60,
   
   // Disable interactivity on mobile (saves significant resources)
   interactivity: false,
