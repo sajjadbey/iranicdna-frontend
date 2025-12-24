@@ -1,7 +1,6 @@
 // VCF Analysis Helper Functions
+import { API_ENDPOINTS } from '../config/api';
 import type { VCFAnalysisResponse } from '../types/vcf';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 // Format timestamp to readable date
 export const formatTimestamp = (timestamp: string): string => {
@@ -83,7 +82,7 @@ export const uploadVCFFile = async (
     });
     
     // Send request
-    xhr.open('POST', `${API_BASE}/tools/vcf-analysis/`);
+    xhr.open('POST', API_ENDPOINTS.vcfAnalysis);
     
     // Add authentication header if token exists (must be after open())
     const token = localStorage.getItem('access_token');
@@ -103,7 +102,7 @@ export const getAnalysisById = async (id: string): Promise<VCFAnalysisResponse> 
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const response = await fetch(`${API_BASE}/tools/vcf-analysis/${id}/`, {
+  const response = await fetch(`${API_ENDPOINTS.vcfAnalysis}${id}/`, {
     headers,
   });
   
@@ -122,7 +121,7 @@ export const getAllAnalyses = async (): Promise<VCFAnalysisResponse[]> => {
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const response = await fetch(`${API_BASE}/tools/vcf-analyses/`, {
+  const response = await fetch(API_ENDPOINTS.vcfAnalyses, {
     headers,
   });
   
@@ -155,7 +154,7 @@ export const uploadVCFFileWithDNAFile = async (
     headers['Authorization'] = `Bearer ${token}`;
   }
   
-  const response = await fetch(`${API_BASE}/tools/vcf-analysis/`, {
+  const response = await fetch(API_ENDPOINTS.vcfAnalysis, {
     method: 'POST',
     headers,
     body: formData,

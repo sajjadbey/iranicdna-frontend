@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { HaplogroupSelector } from './HaplogroupSelector';
 import type { GeoJsonObject, Feature } from 'geojson';
 import 'leaflet/dist/leaflet.css';
-
-const API_BASE = 'https://api.qizilbash.ir';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface GeoJSONGeometry {
   type: string;
@@ -78,7 +77,7 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedCountry) haplogroupParams.append('country', selectedCountry);
         if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
         
-        const haplogroupUrl = `${API_BASE}/haplogroup/heatmap/?${haplogroupParams.toString()}`;
+        const haplogroupUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${haplogroupParams.toString()}`;
         const haplogroupRes = await fetch(haplogroupUrl);
         if (!haplogroupRes.ok) throw new Error(`HTTP ${haplogroupRes.status}`);
         const haplogroupData: HeatmapPoint[] = await haplogroupRes.json();
@@ -88,7 +87,7 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedCountry) totalParams.append('country', selectedCountry);
         if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
         
-        const totalUrl = `${API_BASE}/haplogroup/heatmap/?${totalParams.toString()}`;
+        const totalUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${totalParams.toString()}`;
         const totalRes = await fetch(totalUrl);
         if (!totalRes.ok) throw new Error(`HTTP ${totalRes.status}`);
         const totalDataResult: HeatmapPoint[] = await totalRes.json();

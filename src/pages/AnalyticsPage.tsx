@@ -14,8 +14,7 @@ import { DNABackground } from '../components/DNABackground';
 import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants, isMobileDevice } from '../utils/deviceDetection';
-
-const API_BASE = 'https://api.qizilbash.ir';
+import { API_ENDPOINTS } from '../config/api';
 
 // API DTOs
 interface CountryDTO { name: string }
@@ -64,7 +63,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchAllSamples = async () => {
       try {
-        const res = await fetch(`${API_BASE}/samples/`);
+        const res = await fetch(API_ENDPOINTS.samples);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: Sample[] = await res.json();
         setAllSamples(data || []);
@@ -87,7 +86,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const res = await fetch(`${API_BASE}/countries/`);
+        const res = await fetch(API_ENDPOINTS.countries);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: CountryDTO[] = await res.json();
         if (allCountries.length === 0) {
@@ -104,7 +103,7 @@ export const AnalyticsPage: React.FC = () => {
   useEffect(() => {
     const fetchEthnicities = async () => {
       try {
-        const res = await fetch(`${API_BASE}/ethnicities/`);
+        const res = await fetch(API_ENDPOINTS.ethnicities);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: EthnicityDTO[] = await res.json();
         setEthnicities(data.map((e) => e.name).sort());
@@ -237,7 +236,7 @@ export const AnalyticsPage: React.FC = () => {
         if (selectedProvince) params.append('province', selectedProvince);
         if (selectedEthnicity) params.append('ethnicity', selectedEthnicity);
         
-        const url = `${API_BASE}/samples/?${params.toString()}`;
+        const url = `${API_ENDPOINTS.samples}?${params.toString()}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: Sample[] = await res.json();

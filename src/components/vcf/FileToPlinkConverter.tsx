@@ -3,8 +3,7 @@ import { Download, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DNAFileSelector } from './DNAFileSelector';
 import { useAuth } from '../../contexts/AuthContext';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_ENDPOINTS } from '../../config/api';
 
 export const FileToPlinkConverter: React.FC = () => {
   const { user } = useAuth();
@@ -44,7 +43,7 @@ export const FileToPlinkConverter: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE}/tools/vcf-to-plink/`, {
+      const response = await fetch(API_ENDPOINTS.vcfToPlink, {
         method: 'POST',
         headers,
         body: formData,

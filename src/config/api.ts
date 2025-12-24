@@ -1,5 +1,8 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.qizilbash.ir';
+
+// Analytics API
+export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://api.qizilbash.ir';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -28,4 +31,25 @@ export const API_ENDPOINTS = {
   // DNA File Management
   dnaFiles: `${API_BASE_URL}/dna-files/`,
   dnaFileUpload: `${API_BASE_URL}/dna-files/upload/`,
+  
+  // VCF Tools
+  vcfToPlink: `${API_BASE_URL}/tools/vcf-to-plink/`,
+  vcfAnalysis: `${API_BASE_URL}/tools/vcf-analysis/`,
+  vcfAnalyses: `${API_BASE_URL}/tools/vcf-analyses/`,
+  
+  // Blog
+  blog: `${API_BASE_URL}/blog/`,
+  blogPost: (slug: string) => `${API_BASE_URL}/blog/${slug}/`,
+  
+  // Analytics API endpoints 
+  samples: `${ANALYTICS_API_URL}/samples/`,
+  countries: `${ANALYTICS_API_URL}/countries/`,
+  ethnicities: `${ANALYTICS_API_URL}/ethnicities/`,
+  tribes: `${ANALYTICS_API_URL}/tribes/`,
+  clans: `${ANALYTICS_API_URL}/clans/`,
+  
+  // Haplogroup endpoints
+  haplogroupAll: `${ANALYTICS_API_URL}/haplogroup/all/`,
+  haplogroup: `${ANALYTICS_API_URL}/haplogroup/`,
+  haplogroupHeatmap: `${ANALYTICS_API_URL}/haplogroup/heatmap/`,
 } as const;

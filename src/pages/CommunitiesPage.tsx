@@ -8,9 +8,8 @@ import { AboutContribute } from '../components/AboutContribute';
 import { DNABackground } from '../components/DNABackground';
 import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
 import { isMobileDevice } from '../utils/deviceDetection';
+import { API_ENDPOINTS, ANALYTICS_API_URL } from '../config/api';
 import type { Tribe, Clan } from '../types';
-
-const API_BASE = 'https://api.qizilbash.ir';
 
 export const CommunitiesPage: React.FC = () => {
   const [tribes, setTribes] = useState<Tribe[]>([]);
@@ -30,8 +29,8 @@ export const CommunitiesPage: React.FC = () => {
 
       try {
         const [tribesRes, clansRes] = await Promise.all([
-          fetch(`${API_BASE}/tribes/`),
-          fetch(`${API_BASE}/clans/`),
+          fetch(API_ENDPOINTS.tribes),
+          fetch(API_ENDPOINTS.clans),
         ]);
 
         if (!tribesRes.ok || !clansRes.ok) {
@@ -45,7 +44,7 @@ export const CommunitiesPage: React.FC = () => {
         const tribesWithCounts = await Promise.all(
           tribesData.map(async (tribe) => {
             try {
-              const samplesRes = await fetch(`${API_BASE}/samples/?tribe=${encodeURIComponent(tribe.name)}`);
+              const samplesRes = await fetch(`${API_ENDPOINTS.samples}?tribe=${encodeURIComponent(tribe.name)}`);
               if (samplesRes.ok) {
                 const samples = await samplesRes.json();
                 const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
@@ -62,7 +61,7 @@ export const CommunitiesPage: React.FC = () => {
         const clansWithCounts = await Promise.all(
           clansData.map(async (clan) => {
             try {
-              const samplesRes = await fetch(`${API_BASE}/samples/?clan=${encodeURIComponent(clan.name)}`);
+              const samplesRes = await fetch(`${API_ENDPOINTS.samples}?clan=${encodeURIComponent(clan.name)}`);
               if (samplesRes.ok) {
                 const samples = await samplesRes.json();
                 const totalCount = samples.reduce((sum: number, s: any) => sum + (s.count || 1), 0);
@@ -270,7 +269,7 @@ export const CommunitiesPage: React.FC = () => {
         onClose={handleCloseModal}
         tribe={selectedTribe}
         clan={selectedClan}
-        apiBase={API_BASE}
+        apiBase={ANALYTICS_API_URL}
       />
 
       {/* About & Contribute Section */}

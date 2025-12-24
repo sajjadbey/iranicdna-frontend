@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Dna, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const API_BASE = 'https://api.qizilbash.ir';
+import { API_ENDPOINTS } from '../../config/api';
 
 interface HaplogroupNode {
   name: string;
@@ -59,7 +58,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     const fetchTreeAndCounts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE}/haplogroup/all/`);
+        const res = await fetch(API_ENDPOINTS.haplogroupAll);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: HaplogroupNode[] = await res.json();
         
@@ -67,7 +66,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
         const rootHaplogroups = data.map(node => node.name);
         const countPromises = rootHaplogroups.map(async (name) => {
           try {
-            const countRes = await fetch(`${API_BASE}/haplogroup/?name=${encodeURIComponent(name)}`);
+            const countRes = await fetch(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
             if (!countRes.ok) return null;
             const countData: HaplogroupCount = await countRes.json();
             return { name, count: countData };
@@ -106,7 +105,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     if (haplogroupCounts[name]) return;
     
     try {
-      const res = await fetch(`${API_BASE}/haplogroup/?name=${encodeURIComponent(name)}`);
+      const res = await fetch(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: HaplogroupCount = await res.json();
       setHaplogroupCounts(prev => ({ ...prev, [name]: data }));
