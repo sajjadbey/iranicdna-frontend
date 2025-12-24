@@ -1,7 +1,7 @@
 // AnalyticsPage.tsx
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dna } from 'lucide-react';
+import { Dna, BarChart3 } from 'lucide-react';
 import { type Sample } from '../types';
 import { Layout } from '../components/Layout';
 import { LocationSelector } from '../components/analytics/LocationSelector';
@@ -9,6 +9,7 @@ import { DonutCard } from '../components/analytics/DonutCard';
 import { SubcladeList } from '../components/analytics/SubcladeList';
 import { MapCard } from '../components/analytics/MapCard';
 import { HeatmapCard } from '../components/analytics/HeatmapCard';
+import { ProvinceComparisonModal } from '../components/analytics/ProvinceComparisonModal';
 import { AboutContribute } from '../components/AboutContribute';
 import { DNABackground } from '../components/DNABackground';
 import { dnaBackgroundConfig, mobileDnaBackgroundConfig } from '../config/dnaBackgroundConfig';
@@ -55,6 +56,8 @@ export const AnalyticsPage: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
 
   // Get animation config based on device
   const animConfig = getAnimationConfig();
@@ -146,6 +149,17 @@ export const AnalyticsPage: React.FC = () => {
     
     return Array.from(provincesSet).sort();
   }, [selectedCountry, selectedEthnicity, allSamples]);
+
+  // Get all provinces for comparison modal
+  const allProvinces = useMemo(() => {
+    const provincesSet = new Set<string>();
+    allSamples.forEach(sample => {
+      if (sample.province) {
+        provincesSet.add(sample.province);
+      }
+    });
+    return Array.from(provincesSet).sort();
+  }, [allSamples]);
 
   // Filter ethnicities based on selected country/province
   const filteredEthnicities = useMemo(() => {
@@ -339,7 +353,7 @@ export const AnalyticsPage: React.FC = () => {
         transition={{ duration: animConfig.duration }}
         className="mb-10"
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
           <div className="md:col-span-2">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
               Analytics
@@ -347,6 +361,15 @@ export const AnalyticsPage: React.FC = () => {
             <p className="mt-3 text-teal-300/80">
               Explore Y-DNA haplogroup distributions with interactive maps and subclade data.
             </p>
+            
+            {/* Compare Provinces Button */}
+            <button
+              onClick={() => setIsComparisonModalOpen(true)}
+              className="mt-4 px-6 py-3 bg-slate-800/80 hover:bg-slate-700/80 border border-teal-700/30 hover:border-teal-500/50 rounded-xl transition-all flex items-center gap-2 text-teal-200 font-semibold shadow-lg hover:shadow-xl"
+            >
+              <BarChart3 size={20} />
+              Compare Provinces
+            </button>
           </div>
           <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row gap-4">
             <LocationSelector
@@ -418,6 +441,13 @@ export const AnalyticsPage: React.FC = () => {
       </AnimatePresence>
 
       <AboutContribute />
+      
+      {/* Province Comparison Modal */}
+      <ProvinceComparisonModal
+        isOpen={isComparisonModalOpen}
+        onClose={() => setIsComparisonModalOpen(false)}
+        allProvinces={allProvinces}
+      />
     </Layout>
   );
 };
