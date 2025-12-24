@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { API_ENDPOINTS } from '../config/api';
 import { TurnstileWidget } from '../components/TurnstileWidget';
@@ -25,16 +25,279 @@ export const SignupPage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [emailError, setEmailError] = useState('');
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+
+  // Validate email format
+  const validateEmailFormat = (email: string): string | null => {
+    if (!email) {
+      return null;
+    }
+
+    // Check minimum length
+    if (email.length < 3) {
+      return 'Email is too short';
+    }
+
+    // Check for @ symbol
+    if (!email.includes('@')) {
+      return 'Email must contain @ symbol';
+    }
+
+    // Check for valid format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      // More specific error messages
+      const parts = email.split('@');
+      if (parts.length !== 2) {
+        return 'Email must have exactly one @ symbol';
+      }
+      
+      const [localPart, domain] = parts;
+      
+      if (!localPart) {
+        return 'Email must have text before @';
+      }
+      
+      if (!domain) {
+        return 'Email must have a domain after @';
+      }
+      
+      if (!domain.includes('.')) {
+        return 'Email domain must contain a period (.)';
+      }
+      
+      const domainParts = domain.split('.');
+      const extension = domainParts[domainParts.length - 1];
+      
+      if (extension.length < 2) {
+        return 'Email domain extension must be at least 2 characters';
+      }
+      
+      // Check for invalid characters
+      const validCharRegex = /^[a-zA-Z0-9._%+-]+$/;
+      if (!validCharRegex.test(localPart)) {
+        return 'Email contains invalid characters before @';
+      }
+      
+      const validDomainRegex = /^[a-zA-Z0-9.-]+$/;
+      if (!validDomainRegex.test(domain)) {
+        return 'Email domain contains invalid characters';
+      }
+      
+      return 'Please enter a valid email address';
+    }
+
+    return null; // Valid email
+  };
+
+  // Debounced email availability check
+  const checkEmailAvailability = useCallback(
+    async (email: string) => {
+      if (!email || email.length < 3) {
+        setEmailAvailable(null);
+        return;
+      }
+
+      // Validate format first
+      const formatError = validateEmailFormat(email);
+      if (formatError) {
+        setEmailError(formatError);
+        setEmailAvailable(null);
+        return;
+      }
+
+      setEmailChecking(true);
+      
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.checkEmail}?email=${encodeURIComponent(email)}`
+        );
+        const data = await response.json();
+        
+        if (data.available) {
+          setEmailAvailable(true);
+          setEmailError('');
+        } else {
+          setEmailAvailable(false);
+          setEmailError(data.message || 'Email is not available.');
+        }
+      } catch (err) {
+        console.error('Error checking email:', err);
+        setEmailAvailable(null);
+      } finally {
+        setEmailChecking(false);
+      }
+    },
+    []
+  );
+
+  // Validate username format
+  const validateUsernameFormat = (username: string): string | null => {
+    if (!username) {
+      return null;
+    }
+
+    // Check minimum length
+    if (username.length < 4) {
+      return 'Username must be at least 4 characters';
+    }
+
+    // Check maximum length
+    if (username.length > 30) {
+      return 'Username must be at most 30 characters';
+    }
+
+    // Check for spaces
+    if (username.includes(' ')) {
+      return 'Username cannot contain spaces';
+    }
+
+    // Check for valid characters (letters, numbers, underscores, hyphens)
+    const validCharRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!validCharRegex.test(username)) {
+      return 'Username can only contain letters, numbers, underscores (_), and hyphens (-)';
+    }
+
+    // Check if starts with a letter or number
+    if (!/^[a-zA-Z0-9]/.test(username)) {
+      return 'Username must start with a letter or number';
+    }
+
+    return null; // Valid username
+  };
+
+  // Debounced username availability check
+  const checkUsernameAvailability = useCallback(
+    async (username: string) => {
+      if (!username || username.length < 4) {
+        setUsernameAvailable(null);
+        return;
+      }
+
+      // Validate format first
+      const formatError = validateUsernameFormat(username);
+      if (formatError) {
+        setUsernameError(formatError);
+        setUsernameAvailable(null);
+        return;
+      }
+
+      setUsernameChecking(true);
+      
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.checkUsername}?username=${encodeURIComponent(username)}`
+        );
+        const data = await response.json();
+        
+        if (data.available) {
+          setUsernameAvailable(true);
+          setUsernameError('');
+        } else {
+          setUsernameAvailable(false);
+          setUsernameError(data.message || 'Username is not available.');
+        }
+      } catch (err) {
+        console.error('Error checking username:', err);
+        setUsernameAvailable(null);
+      } finally {
+        setUsernameChecking(false);
+      }
+    },
+    []
+  );
+
+  // Debounce email checking - only check availability if format is valid
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.email) {
+        const formatError = validateEmailFormat(formData.email);
+        if (!formatError) {
+          // Only check availability if format is valid
+          checkEmailAvailability(formData.email);
+        }
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [formData.email, checkEmailAvailability]);
+
+  // Debounce username checking - only check availability if format is valid
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.username) {
+        const formatError = validateUsernameFormat(formData.username);
+        if (!formatError) {
+          // Only check availability if format is valid
+          checkUsernameAvailability(formData.username);
+        }
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [formData.username, checkUsernameAvailability]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     setError('');
+    
+    // Reset email state when typing
+    if (name === 'email') {
+      setEmailAvailable(null);
+      // Immediate format validation as user types
+      if (value) {
+        const formatError = validateEmailFormat(value);
+        setEmailError(formatError || '');
+      } else {
+        setEmailError('');
+      }
+    }
+    
+    // Reset username state when typing
+    if (name === 'username') {
+      setUsernameAvailable(null);
+      // Immediate format validation as user types
+      if (value) {
+        const formatError = validateUsernameFormat(value);
+        setUsernameError(formatError || '');
+      } else {
+        setUsernameError('');
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Check if email is available
+    if (emailAvailable === false) {
+      setError('Please choose an available email.');
+      return;
+    }
+
+    if (emailAvailable === null && formData.email) {
+      setError('Please wait while we check email availability.');
+      return;
+    }
+
+    // Check if username is available
+    if (usernameAvailable === false) {
+      setError('Please choose an available username.');
+      return;
+    }
+
+    if (usernameAvailable === null && formData.username) {
+      setError('Please wait while we check username availability.');
+      return;
+    }
 
     // Check if Turnstile token is present
     if (!turnstileToken) {
@@ -58,6 +321,13 @@ export const SignupPage: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle field-specific errors from backend
+        if (data.email) {
+          setEmailError(Array.isArray(data.email) ? data.email[0] : data.email);
+        }
+        if (data.username) {
+          setUsernameError(Array.isArray(data.username) ? data.username[0] : data.username);
+        }
         throw new Error(data.error || data.message || 'Registration failed');
       }
 
@@ -135,16 +405,51 @@ export const SignupPage: React.FC = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all"
+                    className={`w-full pl-10 pr-12 py-3 bg-white/5 border ${
+                      emailError 
+                        ? 'border-red-500/50' 
+                        : emailAvailable 
+                        ? 'border-emerald-500/50' 
+                        : 'border-white/10'
+                    } rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all`}
                     placeholder="your.email@example.com"
                   />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {emailChecking && formData.email && (
+                      <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                    )}
+                    {!emailChecking && emailAvailable === true && (
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    )}
+                    {!emailChecking && emailAvailable === false && (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    )}
+                  </div>
                 </div>
+                {emailError && (
+                  <motion.p 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-1 text-sm text-red-400"
+                  >
+                    {emailError}
+                  </motion.p>
+                )}
+                {!emailError && emailAvailable === true && (
+                  <motion.p 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-1 text-sm text-emerald-400"
+                  >
+                    ✓ Email is available!
+                  </motion.p>
+                )}
               </div>
 
               {/* Username */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-                  Username (optional)
+                  Username *
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -154,10 +459,51 @@ export const SignupPage: React.FC = () => {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all"
+                    required
+                    minLength={4}
+                    maxLength={30}
+                    className={`w-full pl-10 pr-12 py-3 bg-white/5 border ${
+                      usernameError 
+                        ? 'border-red-500/50' 
+                        : usernameAvailable 
+                        ? 'border-emerald-500/50' 
+                        : 'border-white/10'
+                    } rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all`}
                     placeholder="Choose a username"
                   />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameChecking && formData.username && (
+                      <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                    )}
+                    {!usernameChecking && usernameAvailable === true && (
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    )}
+                    {!usernameChecking && usernameAvailable === false && (
+                      <XCircle className="w-5 h-5 text-red-500" />
+                    )}
+                  </div>
                 </div>
+                {usernameError && (
+                  <motion.p 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-1 text-sm text-red-400"
+                  >
+                    {usernameError}
+                  </motion.p>
+                )}
+                {!usernameError && usernameAvailable === true && (
+                  <motion.p 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-1 text-sm text-emerald-400"
+                  >
+                    ✓ Username is available!
+                  </motion.p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  4-30 characters. Must start with letter/number. Letters, numbers, underscores, and hyphens only. No spaces.
+                </p>
               </div>
 
               {/* First & Last Name */}

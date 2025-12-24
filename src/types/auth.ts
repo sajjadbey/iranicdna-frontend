@@ -16,7 +16,7 @@ export interface SignupData {
   email: string;
   password: string;
   password_confirm: string;
-  username?: string;
+  username: string;
   first_name?: string;
   last_name?: string;
 }

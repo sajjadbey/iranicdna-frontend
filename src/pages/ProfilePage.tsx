@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Calendar, Dna } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, CheckCircle, XCircle, Calendar, Dna, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
 import { DNAFileUpload } from '../components/profile/DNAFileUpload';
 import { DNAFileList } from '../components/profile/DNAFileList';
 import { dnaFileService } from '../services/dnaFileService';
+import { API_ENDPOINTS } from '../config/api';
 import type { UpdateProfileData } from '../types/auth';
 import type { DNAFile } from '../types/dnaFile';
 
@@ -33,6 +34,107 @@ export const ProfilePage: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'dna-files'>('profile');
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+
+  // Validate username format
+  const validateUsernameFormat = (username: string): string | null => {
+    if (!username) {
+      return null;
+    }
+
+    // Check minimum length
+    if (username.length < 4) {
+      return 'Username must be at least 4 characters';
+    }
+
+    // Check maximum length
+    if (username.length > 30) {
+      return 'Username must be at most 30 characters';
+    }
+
+    // Check for spaces
+    if (username.includes(' ')) {
+      return 'Username cannot contain spaces';
+    }
+
+    // Check for valid characters (letters, numbers, underscores, hyphens)
+    const validCharRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!validCharRegex.test(username)) {
+      return 'Username can only contain letters, numbers, underscores (_), and hyphens (-)';
+    }
+
+    // Check if starts with a letter or number
+    if (!/^[a-zA-Z0-9]/.test(username)) {
+      return 'Username must start with a letter or number';
+    }
+
+    return null; // Valid username
+  };
+
+  // Debounced username availability check
+  const checkUsernameAvailability = useCallback(
+    async (username: string) => {
+      // Don't check if it's the current username
+      if (username === user?.username) {
+        setUsernameAvailable(null);
+        setUsernameError('');
+        return;
+      }
+
+      if (!username || username.length < 4) {
+        setUsernameAvailable(null);
+        return;
+      }
+
+      // Validate format first
+      const formatError = validateUsernameFormat(username);
+      if (formatError) {
+        setUsernameError(formatError);
+        setUsernameAvailable(null);
+        return;
+      }
+
+      setUsernameChecking(true);
+      
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.checkUsername}?username=${encodeURIComponent(username)}`
+        );
+        const data = await response.json();
+        
+        if (data.available) {
+          setUsernameAvailable(true);
+          setUsernameError('');
+        } else {
+          setUsernameAvailable(false);
+          setUsernameError(data.message || 'Username is not available.');
+        }
+      } catch (err) {
+        console.error('Error checking username:', err);
+        setUsernameAvailable(null);
+      } finally {
+        setUsernameChecking(false);
+      }
+    },
+    [user?.username]
+  );
+
+  // Debounce username checking - only check availability if format is valid
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.username && formData.username !== user?.username) {
+        const formatError = validateUsernameFormat(formData.username);
+        if (!formatError) {
+          // Only check availability if format is valid
+          checkUsernameAvailability(formData.username);
+        }
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [formData.username, checkUsernameAvailability, user?.username]);
 
   // Fetch DNA files
   useEffect(() => {
@@ -53,8 +155,21 @@ export const ProfilePage: React.FC = () => {
   }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
     setError('');
+    
+    // Reset username state when typing
+    if (name === 'username') {
+      setUsernameAvailable(null);
+      // Immediate format validation as user types
+      if (value && value !== user?.username) {
+        const formatError = validateUsernameFormat(value);
+        setUsernameError(formatError || '');
+      } else {
+        setUsernameError('');
+      }
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +181,20 @@ export const ProfilePage: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Check if username is being changed and is available
+    if (formData.username !== user?.username) {
+      if (usernameAvailable === false) {
+        setError('Please choose an available username.');
+        return;
+      }
+
+      if (usernameAvailable === null && formData.username) {
+        setError('Please wait while we check username availability.');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -250,15 +379,57 @@ export const ProfilePage: React.FC = () => {
                   <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
                     Username
                   </label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    placeholder="Your username"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      minLength={4}
+                      maxLength={30}
+                      className={`w-full px-4 pr-12 py-3 bg-white/5 border ${
+                        usernameError 
+                          ? 'border-red-500/50' 
+                          : usernameAvailable 
+                          ? 'border-emerald-500/50' 
+                          : 'border-white/10'
+                      } rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all`}
+                      placeholder="Your username"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {usernameChecking && formData.username && formData.username !== user?.username && (
+                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                      )}
+                      {!usernameChecking && usernameAvailable === true && formData.username !== user?.username && (
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      )}
+                      {!usernameChecking && usernameAvailable === false && (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                  </div>
+                  {usernameError && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1 text-sm text-red-400"
+                    >
+                      {usernameError}
+                    </motion.p>
+                  )}
+                  {!usernameError && usernameAvailable === true && formData.username !== user?.username && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-1 text-sm text-emerald-400"
+                    >
+                      ✓ Username is available!
+                    </motion.p>
+                  )}
+                  <p className="mt-1 text-xs text-gray-500">
+                    4-30 characters. Must start with letter/number. Letters, numbers, underscores, and hyphens only. No spaces.
+                  </p>
                 </div>
 
                 {/* First & Last Name */}
