@@ -37,7 +37,7 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
     });
   }, []);
 
-  const particlesLoaded = async (container?: Container): Promise<void> => {
+  const particlesLoaded = async (): Promise<void> => {
     // Particles loaded successfully
   };
 
