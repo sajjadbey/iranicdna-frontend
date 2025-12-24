@@ -49,10 +49,18 @@ export const Snowfall: React.FC = () => {
       <style>{`
         @keyframes snowfall {
           0% {
-            transform: translateY(-10vh) translateX(0);
+            transform: translateY(-100px) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
           }
           100% {
-            transform: translateY(110vh) translateX(20px);
+            transform: translateY(calc(100vh + 100px)) translateX(20px);
+            opacity: 0;
           }
         }
 
@@ -88,8 +96,23 @@ export const Snowfall: React.FC = () => {
           }
         }
 
-        .animate-snowfall {
+        .snowflake-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+          overflow: hidden;
+        }
+
+        .snowflake-item {
+          position: fixed;
+          top: -100px;
+          color: rgba(255, 255, 255, 0.3);
           animation: snowfall linear infinite;
+          will-change: transform, opacity;
         }
 
         .animate-float {
@@ -106,21 +129,22 @@ export const Snowfall: React.FC = () => {
 
         /* Reduce animations on lower-end devices */
         @media (prefers-reduced-motion: reduce) {
-          .animate-snowfall,
+          .snowflake-item,
           .animate-float,
           .animate-sparkle,
           .animate-glow {
-            animation: none;
+            animation: none !important;
+            display: none;
           }
         }
       `}</style>
 
       {/* Snowfall Animation */}
-      <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
+      <div className="snowflake-container">
         {snowflakes.map((flake) => (
           <SnowflakeIcon
             key={flake.id}
-            className="absolute text-white/30 animate-snowfall"
+            className="snowflake-item"
             size={flake.size}
             style={{
               left: `${flake.left}%`,
