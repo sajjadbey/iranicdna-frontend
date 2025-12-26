@@ -78,7 +78,7 @@ export const ContactPage: React.FC = () => {
                   <h4 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Admins</h4>
                   <div className="space-y-2">
                     <a
-                      href="https://t.me/ermia_iranicdna"
+                      href="https://t.me/Nalwd"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-teal-500/50 transition-all group"
@@ -88,13 +88,13 @@ export const ContactPage: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-white font-medium">Ermia</p>
-                        <p className="text-sm text-gray-400">@ermia_iranicdna</p>
+                        <p className="text-sm text-gray-400">@Nalwd</p>
                       </div>
                       <Send className="w-4 h-4 text-gray-400 group-hover:text-teal-400 transition-colors" />
                     </a>
                     
                     <a
-                      href="https://t.me/arta_iranicdna"
+                      href="https://t.me/Arta_imani"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-teal-500/50 transition-all group"
@@ -104,23 +104,7 @@ export const ContactPage: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-white font-medium">Arta</p>
-                        <p className="text-sm text-gray-400">@arta_iranicdna</p>
-                      </div>
-                      <Send className="w-4 h-4 text-gray-400 group-hover:text-teal-400 transition-colors" />
-                    </a>
-                    
-                    <a
-                      href="https://t.me/ariya_iranicdna"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-teal-500/50 transition-all group"
-                    >
-                      <div className="w-10 h-10 bg-gradient-to-br from-teal-600 to-teal-800 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-white font-medium">Ariya</p>
-                        <p className="text-sm text-gray-400">@ariya_iranicdna</p>
+                        <p className="text-sm text-gray-400">@Arta_imani</p>
                       </div>
                       <Send className="w-4 h-4 text-gray-400 group-hover:text-teal-400 transition-colors" />
                     </a>
@@ -131,7 +115,7 @@ export const ContactPage: React.FC = () => {
                 <div>
                   <h4 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Developer</h4>
                   <a
-                    href="https://t.me/sajjad_dev"
+                    href="https://t.me/eternal_qizilbash"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-500/50 transition-all group"
@@ -141,7 +125,7 @@ export const ContactPage: React.FC = () => {
                     </div>
                     <div className="flex-1">
                       <p className="text-white font-medium">Sajjad</p>
-                      <p className="text-sm text-gray-400">@sajjad_dev</p>
+                      <p className="text-sm text-gray-400">@eternal_qizilbash</p>
                     </div>
                     <Send className="w-4 h-4 text-gray-400 group-hover:text-amber-400 transition-colors" />
                   </a>
