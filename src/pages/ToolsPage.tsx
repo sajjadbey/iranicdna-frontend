@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Wrench, Dna, RefreshCw } from 'lucide-react';
+import { Wrench, Dna, RefreshCw, TrendingUp } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { fadeInVariants, slideInVariants } from '../utils/deviceDetection';
 
@@ -28,6 +28,17 @@ export const ToolsPage: React.FC = () => {
       bgGradient: 'from-amber-900/20 to-orange-900/20',
       borderColor: 'border-amber-500/30',
       hoverBorder: 'hover:border-amber-400/50',
+    },
+    {
+      id: 'qpadm',
+      title: 'qpAdm Population Analysis',
+      description: 'Estimate ancestry proportions from different source populations using advanced statistical modeling',
+      icon: TrendingUp,
+      path: '/tools/qpadm',
+      color: 'from-purple-400 to-pink-400',
+      bgGradient: 'from-purple-900/20 to-pink-900/20',
+      borderColor: 'border-purple-500/30',
+      hoverBorder: 'hover:border-purple-400/50',
     },
   ];
 
@@ -64,10 +75,11 @@ export const ToolsPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 + index * 0.1 }}
+              className="h-full"
             >
               <Link
                 to={tool.path}
-                className={`block rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} ${tool.hoverBorder} transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 group`}
+                className={`flex h-full rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} ${tool.hoverBorder} transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 group`}
               >
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-lg bg-teal-400/10 group-hover:scale-110 transition-transform duration-300">

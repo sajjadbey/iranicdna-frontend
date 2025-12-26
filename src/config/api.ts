@@ -57,4 +57,12 @@ export const API_ENDPOINTS = {
   haplogroupAll: `${ANALYTICS_API_URL}/haplogroup/all/`,
   haplogroup: `${ANALYTICS_API_URL}/haplogroup/`,
   haplogroupHeatmap: `${ANALYTICS_API_URL}/haplogroup/heatmap/`,
+  
+  // qpAdm endpoints
+  qpadmRun: `${API_BASE_URL}/tools/qpadm/run/`,
+  qpadmRunDetail: (id: string) => `${API_BASE_URL}/tools/qpadm/run/${id}/`,
+  qpadmRuns: `${API_BASE_URL}/tools/qpadm/runs/`,
+  qpadmStatus: `${API_BASE_URL}/tools/qpadm/status/`,
+  qpadmQueueStatus: `${API_BASE_URL}/tools/qpadm/queue/status/`,
+  qpadmPopulations: `${API_BASE_URL}/tools/qpadm/populations/`,
 } as const;

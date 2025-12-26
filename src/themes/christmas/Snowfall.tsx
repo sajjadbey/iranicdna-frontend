@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Snowflake as SnowflakeIcon, Star, Gift } from 'lucide-react';
-import { prefersReducedMotion, isMobileDevice } from '../../utils/deviceDetection';
+import { prefersReducedMotion } from '../../utils/deviceDetection';
 
 interface SnowflakeData {
   id: number;
@@ -10,153 +10,55 @@ interface SnowflakeData {
   size: number;
 }
 
+// Generate snowflakes once and reuse them across navigation
+let cachedSnowflakes: SnowflakeData[] | null = null;
+
+const generateSnowflakes = (): SnowflakeData[] => {
+  if (cachedSnowflakes) {
+    return cachedSnowflakes;
+  }
+
+  const snowflakeCount = 50;
+  cachedSnowflakes = Array.from({ length: snowflakeCount }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 5,
+    duration: 10 + Math.random() * 20,
+    size: 12 + Math.random() * 8,
+  }));
+
+  return cachedSnowflakes;
+};
+
 /**
  * Winter-themed background with snowfall and decorative elements
  * Matches the festive design with frosted orbs and floating icons
- * Optimized for mobile with reduced snowflake count
+ * Snowflakes persist across navigation for smooth experience
  */
 export const Snowfall: React.FC = () => {
-  const [snowflakes, setSnowflakes] = useState<SnowflakeData[]>([]);
   const [shouldAnimate, setShouldAnimate] = useState(true);
+  const snowflakesRef = useRef<SnowflakeData[]>(generateSnowflakes());
 
   useEffect(() => {
     // Respect user's motion preferences
     const reducedMotion = prefersReducedMotion();
     setShouldAnimate(!reducedMotion);
-
-    if (reducedMotion) {
-      console.log('[Snowfall] Animations disabled due to prefers-reduced-motion');
-      return;
-    }
-
-    // Reduce snowflake count on mobile for better performance
-    const isMobile = isMobileDevice();
-    const snowflakeCount = isMobile ? 30 : 50;
-
-    console.log('[Snowfall] Initializing with', snowflakeCount, 'snowflakes (mobile:', isMobile, ')');
-
-    // Generate snowflakes with random properties
-    const flakes = Array.from({ length: snowflakeCount }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 5,
-      duration: 10 + Math.random() * 20,
-      size: 12 + Math.random() * 8,
-    }));
-
-    setSnowflakes(flakes);
   }, []);
 
   if (!shouldAnimate) {
-    console.log('[Snowfall] Not rendering - shouldAnimate is false');
     return null;
   }
 
-  console.log('[Snowfall] Rendering', snowflakes.length, 'snowflakes');
+  const snowflakes = snowflakesRef.current;
 
   return (
     <>
-      {/* Embedded CSS for animations */}
-      <style>{`
-        @keyframes snowfall {
-          0% {
-            transform: translateY(-100px) translateX(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(calc(100vh + 100px)) translateX(20px);
-            opacity: 0;
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.5;
-            transform: scale(0.9);
-          }
-        }
-
-        @keyframes glow {
-          0%, 100% {
-            text-shadow: 0 0 20px rgba(175, 219, 245, 0.5),
-                         0 0 40px rgba(175, 219, 245, 0.3);
-          }
-          50% {
-            text-shadow: 0 0 30px rgba(175, 219, 245, 0.8),
-                         0 0 60px rgba(175, 219, 245, 0.5),
-                         0 0 80px rgba(255, 215, 0, 0.3);
-          }
-        }
-
-        .snowflake-container {
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          pointer-events: none !important;
-          z-index: 1 !important;
-          overflow: visible !important;
-        }
-
-        .snowflake-item {
-          position: absolute !important;
-          top: -10vh !important;
-          color: rgba(255, 255, 255, 0.8) !important;
-          animation: snowfall linear infinite !important;
-        }
-
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .animate-sparkle {
-          animation: sparkle 3s ease-in-out infinite;
-        }
-
-        .animate-glow {
-          animation: glow 3s ease-in-out infinite;
-        }
-
-        /* Only disable on reduced motion preference */
-        @media (prefers-reduced-motion: reduce) {
-          .snowflake-item,
-          .animate-float,
-          .animate-sparkle,
-          .animate-glow {
-            animation: none !important;
-            display: none;
-          }
-        }
-      `}</style>
-
-      {/* Snowfall Animation */}
-      <div className="snowflake-container">
+      {/* Snowfall Animation - Fixed positioning with high z-index */}
+      <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
         {snowflakes.map((flake) => (
           <SnowflakeIcon
             key={flake.id}
-            className="snowflake-item"
+            className="absolute text-white/30 animate-snowfall"
             size={flake.size}
             style={{
               left: `${flake.left}%`,

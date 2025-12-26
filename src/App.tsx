@@ -13,6 +13,7 @@ const BlogPostDetailPage = lazy(() => import('./pages/BlogPostDetailPage').then(
 const AdmixturePage = lazy(() => import('./pages/AdmixturePage').then(m => ({ default: m.AdmixturePage })));
 const ToolsPage = lazy(() => import('./pages/ToolsPage').then(m => ({ default: m.ToolsPage })));
 const FileConverterPage = lazy(() => import('./pages/FileConverterPage').then(m => ({ default: m.FileConverterPage })));
+const QpAdmPage = lazy(() => import('./pages/QpAdmPage').then(m => ({ default: m.QpAdmPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })));
 const SigninPage = lazy(() => import('./pages/SigninPage').then(m => ({ default: m.SigninPage })));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
@@ -49,6 +50,7 @@ const App: React.FC = () => {
               <Route path="/tools/admixture" element={<AdmixturePage />} />
               <Route path="/tools/file-converter" element={<FileConverterPage />} />
               <Route path="/tools/vcf-to-plink" element={<FileConverterPage />} />
+              <Route path="/tools/qpadm" element={<QpAdmPage />} />
               
               {/* Auth Routes */}
               <Route path="/signup" element={<SignupPage />} />

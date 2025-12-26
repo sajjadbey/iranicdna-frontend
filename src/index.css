@@ -82,13 +82,71 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Disable expensive animations on mobile */
-@media (max-width: 768px) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+/* Winter/Christmas Animations */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0);
+    opacity: 0;
   }
+  3% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(110vh)) translateX(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(175, 219, 245, 0.5),
+                 0 0 40px rgba(175, 219, 245, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 30px rgba(175, 219, 245, 0.8),
+                 0 0 60px rgba(175, 219, 245, 0.5),
+                 0 0 80px rgba(255, 215, 0, 0.3);
+  }
+}
+
+/* Animation utility classes */
+.animate-snowfall {
+  animation: snowfall linear infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
 }
 
 /* Reduce motion for users who prefer it */
@@ -100,6 +158,14 @@ h1, h2, h3, h4, h5, h6 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  
+  .animate-snowfall,
+  .animate-float,
+  .animate-sparkle,
+  .animate-glow {
+    animation: none !important;
+    display: none;
   }
 }
 

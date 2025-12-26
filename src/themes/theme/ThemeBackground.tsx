@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useMemo, useState, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
-import { isLowEndDevice, prefersReducedMotion } from '../../utils/deviceDetection';
+import { prefersReducedMotion } from '../../utils/deviceDetection';
 import { Snowfall } from '../christmas/Snowfall';
 import '../christmas/christmas.css';
 
@@ -22,18 +22,10 @@ export const ThemeBackground: React.FC = () => {
   const { themeConfig } = useTheme();
   const [showAnimation, setShowAnimation] = useState(true);
 
-  // Determine if animations should be shown
+  // Determine if animations should be shown (only check for reduced motion preference)
   const shouldShow = useMemo(() => {
-    const isLowEnd = isLowEndDevice();
     const reducedMotion = prefersReducedMotion();
-
-    // For Christmas theme, allow even on low-end devices (snowfall is lightweight)
-    if (themeConfig.name === 'christmas') {
-      return !reducedMotion;
-    }
-
-    // For particles (default theme), disable on low-end devices
-    return !isLowEnd && !reducedMotion;
+    return !reducedMotion;
   }, [themeConfig.name]);
 
   // Update state after mount to avoid hydration issues

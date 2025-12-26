@@ -21,7 +21,7 @@ export const Header: React.FC = () => {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <header className="bg-gradient-to-r from-teal-900/90 to-amber-800/90 text-slate-50 shadow-sm backdrop-blur-md sticky top-0 z-40">
+    <header className="bg-gradient-to-r from-teal-900/90 to-amber-800/90 text-slate-50 shadow-sm backdrop-blur-md sticky top-0 z-[100]">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <Link 
