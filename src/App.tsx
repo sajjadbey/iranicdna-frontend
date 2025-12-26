@@ -20,6 +20,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ defaul
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -46,6 +47,7 @@ const App: React.FC = () => {
               <Route path="/communities" element={<CommunitiesPage />} />
               <Route path="/blog" element={<BlogPostsPage />} />
               <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/tools/admixture" element={<AdmixturePage />} />
               <Route path="/tools/file-converter" element={<FileConverterPage />} />

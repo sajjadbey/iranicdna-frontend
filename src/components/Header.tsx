@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Send, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut } from 'lucide-react';
+import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
@@ -91,14 +91,16 @@ export const Header: React.FC = () => {
             >
               <Info size={14} /> About
             </a>
-            <a
-              href="https://t.me/Iranic_DNA "
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            <Link
+              to="/contact"
+              className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                isActive('/contact')
+                  ? 'bg-white/10 text-white'
+                  : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+              }`}
             >
-              <Send size={14} /> Join
-            </a>
+              <Mail size={14} /> Contact Us
+            </Link>
             
             {/* Auth Links */}
             {isAuthenticated ? (
@@ -282,16 +284,18 @@ export const Header: React.FC = () => {
                   }}
                   transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  <a
-                    href="https://t.me/Iranic_DNA "
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    to="/contact"
                     onClick={closeMobileMenu}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-teal-100/90 hover:text-white hover:bg-white/5 transition-colors"
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                      isActive('/contact')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
                   >
-                    <Send size={18} />
-                    <span className="font-medium">Join</span>
-                  </a>
+                    <Mail size={18} />
+                    <span className="font-medium">Contact Us</span>
+                  </Link>
                 </motion.div>
                 
                 {/* Mobile Auth Links */}
