@@ -28,21 +28,26 @@ export interface QueueInfo {
 }
 
 export interface QpAdmResults {
-  raw_output: string;
-  p_value: number | null;
+  raw_output?: string;
+  p_value: number | null;  // Overall model fit p-value
   target: string;
   sources: string[];
   coefficients: number[];
-  std_errors: number[];
+  std_errors: (number | null)[];
+  z_scores?: (number | null)[];
+  coef_p_values?: (number | null)[];  // Individual coefficient p-values (renamed from p_values)
   passed: boolean;
   ancestry_breakdown?: {
     source: string;
     percentage: number;
     std_error: number | null;
+    z_score?: number | null;
+    coef_p_value?: number | null;  // Individual coefficient p-value (renamed from p_value)
   }[];
   target_population: string;
   source_populations: string[];
   right_populations: string[];
+  dataset_type?: string;
   execution_time_seconds: number;
 }
 

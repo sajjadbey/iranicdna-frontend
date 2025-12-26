@@ -25,7 +25,6 @@ export const QpAdmHistory: React.FC<QpAdmHistoryProps> = ({ onSelectRun }) => {
       const data = await qpadmService.getRuns();
       console.log('Loaded runs:', data); // Debug log
       
-      // Ensure data is an array
       if (Array.isArray(data)) {
         setRuns(data);
       } else {
@@ -46,9 +45,7 @@ export const QpAdmHistory: React.FC<QpAdmHistoryProps> = ({ onSelectRun }) => {
   useEffect(() => {
     loadRuns();
     
-    // Auto-refresh every 10 seconds if there are processing/queued tasks
     const interval = setInterval(() => {
-      // Check current runs state without adding it to dependencies
       setRuns(currentRuns => {
         const hasActiveRuns = currentRuns.some(run => 
           run.status === 'processing' || run.status === 'queued'
@@ -58,7 +55,6 @@ export const QpAdmHistory: React.FC<QpAdmHistoryProps> = ({ onSelectRun }) => {
           loadRuns(true);
         }
         
-        // Return unchanged to avoid re-render
         return currentRuns;
       });
     }, 10000);
@@ -174,133 +170,136 @@ export const QpAdmHistory: React.FC<QpAdmHistoryProps> = ({ onSelectRun }) => {
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
-      {Array.isArray(runs) && runs.map(run => (
-        <div
-          key={run.id}
-          className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-6 hover:border-teal-500/50 transition-colors"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-semibold text-white">
-                  Target: {run.target_population}
-                </h3>
-                <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
-                  {run.dataset_type}
-                </span>
-              </div>
-              <p className="text-sm text-slate-400">
-                {formatDate(run.created_at)}
-              </p>
-            </div>
-            {getStatusBadge(run.status, run.queue_info)}
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Sources ({run.source_populations.length})</p>
-              <div className="flex flex-wrap gap-1">
-                {run.source_populations.slice(0, 3).map(pop => (
-                  <span key={pop} className="text-xs px-2 py-1 bg-teal-500/20 text-teal-300 rounded">
-                    {pop}
-                  </span>
-                ))}
-                {run.source_populations.length > 3 && (
-                  <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
-                    +{run.source_populations.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400 mb-1">Rights ({run.right_populations.length})</p>
-              <div className="flex flex-wrap gap-1">
-                {run.right_populations.slice(0, 3).map(pop => (
-                  <span key={pop} className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded">
-                    {pop}
-                  </span>
-                ))}
-                {run.right_populations.length > 3 && (
-                  <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
-                    +{run.right_populations.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+      {runs.map(run => {
+        // Derive pass/fail directly from p-value (ADMIXTOOLS-2)
+        const p = run.results?.p_value;
+        const passed = typeof p === 'number' && p > 0.05;
 
-          {run.status === 'completed' && run.results && (
-            <div className={`flex items-center justify-between p-3 rounded-lg mb-4 ${
-              run.results.passed 
-                ? 'bg-green-500/10 border border-green-500/30' 
-                : 'bg-red-500/10 border border-red-500/30'
-            }`}>
-              <div className="text-sm">
-                <span className="text-slate-400">P-value: </span>
-                <span className={`font-semibold ${
-                  run.results.passed ? 'text-green-300' : 'text-red-300'
-                }`}>
-                  {run.results.p_value?.toFixed(6) || 'N/A'}
-                </span>
-                <span className={`ml-2 text-xs ${
-                  run.results.passed ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {run.results.passed ? '(Passed)' : '(Failed)'}
-                </span>
-              </div>
-              {run.execution_time_seconds && (
-                <div className="text-sm text-slate-400">
-                  {run.execution_time_seconds.toFixed(2)}s
+        return (
+          <div
+            key={run.id}
+            className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-6 hover:border-teal-500/50 transition-colors"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-semibold text-white">
+                    Target: {run.target_population}
+                  </h3>
+                  <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
+                    {run.dataset_type}
+                  </span>
                 </div>
-              )}
+                <p className="text-sm text-slate-400">{formatDate(run.created_at)}</p>
+              </div>
+              {getStatusBadge(run.status, run.queue_info)}
             </div>
-          )}
 
-          {/* Queued Info */}
-          {run.status === 'queued' && run.queue_info && (
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg mb-4">
-              <div className="text-sm text-yellow-300">
-                <p className="font-semibold mb-1">In Queue</p>
-                <div className="flex items-center justify-between text-xs">
-                  <span>Position: #{run.queue_info.position_in_queue}</span>
-                  <span>{run.queue_info.tasks_ahead} task(s) ahead</span>
-                  <span>~{run.queue_info.estimated_wait_minutes} min wait</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <p className="text-xs text-slate-400 mb-1">Sources ({run.source_populations.length})</p>
+                <div className="flex flex-wrap gap-1">
+                  {run.source_populations.slice(0, 3).map(pop => (
+                    <span key={pop} className="text-xs px-2 py-1 bg-teal-500/20 text-teal-300 rounded">
+                      {pop}
+                    </span>
+                  ))}
+                  {run.source_populations.length > 3 && (
+                    <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
+                      +{run.source_populations.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 mb-1">Rights ({run.right_populations.length})</p>
+                <div className="flex flex-wrap gap-1">
+                  {run.right_populations.slice(0, 3).map(pop => (
+                    <span key={pop} className="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded">
+                      {pop}
+                    </span>
+                  ))}
+                  {run.right_populations.length > 3 && (
+                    <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
+                      +{run.right_populations.length - 3} more
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Processing Info */}
-          {run.status === 'processing' && (
-            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-4">
-              <div className="text-sm text-blue-300 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Analysis is currently running...</span>
+            {run.status === 'completed' && run.results && (
+              <div className={`flex items-center justify-between p-3 rounded-lg mb-4 ${
+                passed
+                  ? 'bg-green-500/10 border border-green-500/30'
+                  : 'bg-red-500/10 border border-red-500/30'
+              }`}>
+                <div className="text-sm">
+                  <span className="text-slate-400">P-value: </span>
+                  <span className={`font-semibold ${passed ? 'text-green-300' : 'text-red-300'}`}>
+                    {p !== null && p !== undefined
+                      ? (p < 0.0001 ? p.toExponential(2) : p.toFixed(6))
+                      : 'N/A'}
+                  </span>
+                  <span className={`ml-2 text-xs ${passed ? 'text-green-400' : 'text-red-400'}`}>
+                    {passed ? '(Accepted)' : '(Rejected)'}
+                  </span>
+                </div>
+                {run.execution_time_seconds && (
+                  <div className="text-sm text-slate-400">
+                    {run.execution_time_seconds.toFixed(2)}s
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Failed Info */}
-          {run.status === 'failed' && run.error_message && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mb-4">
-              <p className="text-sm text-red-300 font-semibold mb-1">Error:</p>
-              <p className="text-sm text-red-300">{run.error_message}</p>
-              <p className="text-xs text-red-400 mt-2">This task did not count against your daily limit.</p>
-            </div>
-          )}
+            {/* Queued Info */}
+            {run.status === 'queued' && run.queue_info && (
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg mb-4">
+                <div className="text-sm text-yellow-300">
+                  <p className="font-semibold mb-1">In Queue</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Position: #{run.queue_info.position_in_queue}</span>
+                    <span>{run.queue_info.tasks_ahead} task(s) ahead</span>
+                    <span>~{run.queue_info.estimated_wait_minutes} min wait</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-          {/* View Results Button */}
-          {run.status === 'completed' && (
-            <button
-              onClick={() => onSelectRun(run)}
-              className="w-full py-2 px-4 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <Eye className="w-4 h-4" />
-              View Results
-            </button>
-          )}
-        </div>
-      ))}
+            {/* Processing Info */}
+            {run.status === 'processing' && (
+              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-4">
+                <div className="text-sm text-blue-300 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Analysis is currently running...</span>
+                </div>
+              </div>
+            )}
+
+            {/* Failed Info */}
+            {run.status === 'failed' && run.error_message && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mb-4">
+                <p className="text-sm text-red-300 font-semibold mb-1">Error:</p>
+                <p className="text-sm text-red-300">{run.error_message}</p>
+                <p className="text-xs text-red-400 mt-2">This task did not count against your daily limit.</p>
+              </div>
+            )}
+
+            {/* View Results Button */}
+            {run.status === 'completed' && (
+              <button
+                onClick={() => onSelectRun(run)}
+                className="w-full py-2 px-4 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                View Results
+              </button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

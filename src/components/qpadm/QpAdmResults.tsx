@@ -90,18 +90,34 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
             Target: <span className="text-white font-bold">{target || run.target_population}</span>
           </h2>
           
-          <div className="flex items-center gap-8 text-lg font-mono">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400">p-value:</span>
-              <span className={`font-bold ${passed ? 'text-white' : 'text-red-400'}`}>
-                {p_value?.toFixed(4) || 'N/A'}
+          <div className="text-base font-mono space-y-2">
+            {/* P-Value Display */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-slate-400">P-Value:</span>
+              <span className={`font-bold ${passed ? 'text-green-400' : 'text-red-400'}`}>
+                {p_value !== null && p_value !== undefined ? (
+                  <>
+                    {p_value.toExponential(2)} / {p_value < 0.0001 ? '<0.0001' : p_value.toFixed(4)}
+                  </>
+                ) : 'N/A'}
               </span>
-              {passed ? (
-                <span className="text-amber-400 font-bold">(OK)</span>
-              ) : (
-                <span className="text-red-400 font-bold">(FAIL)</span>
-              )}
+              <span className="text-slate-500">||</span>
+              <span className={`font-semibold ${passed ? 'text-green-400' : 'text-red-400'}`}>
+                {passed ? (
+                  'Pass > 0.05'
+                ) : (
+                  p_value !== null && p_value <= 0.05 ? 'Fail: p ≤ 0.05 (Poor model fit)' : 'Fail'
+                )}
+              </span>
             </div>
+            
+            {/* Show interpretation when rejected */}
+            {!passed && p_value !== null && p_value < 0.05 && (
+              <div className="text-xs text-slate-400 pl-20">
+                The source populations do not adequately explain the target population's ancestry.
+                {p_value < 1e-50 && ' (Extremely poor fit - consider different source populations)'}
+              </div>
+            )}
           </div>
         </div>
 
@@ -114,19 +130,31 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
                 <div key={idx} className="group">
                   <div className="flex items-start gap-4">
                     <span className="text-2xl font-mono font-bold text-white min-w-[70px] pt-1">
-                      {item.percentage.toFixed(1)}
+                      {item.percentage.toFixed(1)}%
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-start justify-between gap-2 mb-1">
                         <span className="text-sm font-mono text-slate-200 text-wrap flex-1">
                           {item.source}
                         </span>
-                        {item.std_error !== null && (
-                          <span className="text-xs font-mono text-slate-400 whitespace-nowrap">
-                            SE: {item.std_error.toFixed(2)}
+                      </div>
+                      
+                      {/* Statistics row with more precision */}
+                      <div className="flex items-center gap-3 mb-2 text-xs font-mono">
+                        {item.std_error !== null && item.std_error !== undefined && (
+                          <span className="text-slate-400">SE:{item.std_error.toFixed(4)}</span>
+                        )}
+                        {item.z_score !== null && item.z_score !== undefined && (
+                          <span className="text-slate-400">Z: {item.z_score.toFixed(2)}</span>
+                        )}
+                        {item.coef_p_value !== null && item.coef_p_value !== undefined && (
+                          <span className={item.coef_p_value < 0.05 ? 'text-yellow-400' : 'text-slate-400'}>
+                            p: {item.coef_p_value < 0.0001 ? item.coef_p_value.toExponential(2) : item.coef_p_value.toFixed(4)}
+                            {item.coef_p_value < 0.05 && ' ⚠️'}
                           </span>
                         )}
                       </div>
+                      
                       <div className="w-full bg-slate-800 rounded-full h-5 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
@@ -205,21 +233,35 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
 
         {/* Status Footer */}
         <div className="mt-8 pt-6 border-t border-slate-700">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
               {passed ? (
                 <>
                   <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span className="text-green-400 font-mono font-semibold">
-                    Model Accepted (p &gt; 0.05)
-                  </span>
+                  <div>
+                    <div className="text-green-400 font-mono font-semibold">
+                      Model Accepted (p &gt; 0.05)
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      Source populations adequately explain target ancestry
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
                   <XCircle className="w-5 h-5 text-red-400" />
-                  <span className="text-red-400 font-mono font-semibold">
-                    Model Rejected (p ≤ 0.05)
-                  </span>
+                  <div>
+                    <div className="text-red-400 font-mono font-semibold">
+                      Model Rejected (p ≤ 0.05)
+                    </div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {p_value !== null && p_value < 1e-10 ? (
+                        <>Extremely poor fit - try different source populations</>
+                      ) : (
+                        <>Suggested: Add more sources or adjust populations</>
+                      )}
+                    </div>
+                  </div>
                 </>
               )}
             </div>
