@@ -30,8 +30,11 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
 
   const { p_value, passed, ancestry_breakdown = [], target } = run.results;
 
-  // Prepare data for donut chart
-  const chartData = ancestry_breakdown.map((item, idx) => ({
+  // Sort ancestry breakdown by percentage (descending order)
+  const sortedAncestry = [...ancestry_breakdown].sort((a, b) => b.percentage - a.percentage);
+
+  // Prepare data for donut chart (using sorted data)
+  const chartData = sortedAncestry.map((item, idx) => ({
     name: item.source,
     value: item.percentage,
     color: COLORS[idx % COLORS.length],
@@ -125,8 +128,8 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Ancestry Breakdown List */}
           <div className="space-y-4">
-            {ancestry_breakdown.length > 0 ? (
-              ancestry_breakdown.map((item, idx) => (
+            {sortedAncestry.length > 0 ? (
+              sortedAncestry.map((item, idx) => (
                 <div key={idx} className="group">
                   <div className="flex items-start gap-4">
                     <span className="text-2xl font-mono font-bold text-white min-w-[70px] pt-1">
@@ -148,9 +151,8 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
                           <span className="text-slate-400">Z: {item.z_score.toFixed(2)}</span>
                         )}
                         {item.coef_p_value !== null && item.coef_p_value !== undefined && (
-                          <span className={item.coef_p_value < 0.05 ? 'text-yellow-400' : 'text-slate-400'}>
+                          <span className="text-slate-400">
                             p: {item.coef_p_value < 0.0001 ? item.coef_p_value.toExponential(2) : item.coef_p_value.toFixed(4)}
-                            {item.coef_p_value < 0.05 && ' ⚠️'}
                           </span>
                         )}
                       </div>
@@ -175,12 +177,12 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
             )}
 
             {/* Total */}
-            {ancestry_breakdown.length > 0 && (
+            {sortedAncestry.length > 0 && (
               <div className="pt-4 border-t border-slate-700">
                 <div className="flex items-center justify-between font-mono">
                   <span className="text-slate-400">Total:</span>
                   <span className="text-xl font-bold text-white">
-                    {ancestry_breakdown.reduce((sum, item) => sum + item.percentage, 0).toFixed(1)}%
+                    {sortedAncestry.reduce((sum, item) => sum + item.percentage, 0).toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -188,7 +190,7 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
           </div>
 
           {/* Donut Chart */}
-          {ancestry_breakdown.length > 0 && (
+          {sortedAncestry.length > 0 && (
             <div className="flex items-center justify-center">
               <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
