@@ -6,7 +6,7 @@ import compression from 'vite-plugin-compression';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), compression({algorithm: 'gzip'})],
-  base: '/idimzpoenafh',
+  base: '/',
   server: {
     host: '0.0.0.0',
     port: 5173,
