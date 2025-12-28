@@ -61,7 +61,9 @@ const PROVINCE_COORDINATES: Record<string, [number, number]> = {
   'Alborz': [35.9968, 50.9289],
   'Gorno-Badakhshan': [38.4127, 73.0877],
   'Khatlon': [37.9114, 69.0970],
-  'Sughd': [39.5155, 69.0970]
+  'Sughd': [39.5155, 69.0970],
+  'Dushanbe': [38.5514, 68.7713],
+  'Districts of Republican Subordination': [38.8879, 70.1271]
 };
 
 // Function to create a pie chart SVG icon
