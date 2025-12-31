@@ -46,8 +46,8 @@ export const CommunitiesPage: React.FC = () => {
 
         // Count samples for each entity
         const countrySampleCounts = new Map<string, number>();
-        const tribeSampleCounts = new Map<string, Map<string, number>>(); // country -> tribe -> count
-        const clanSampleCounts = new Map<string, Map<string, Map<string, number>>>(); // country -> tribe -> clan -> count
+        const tribeSampleCounts: Map<string, Map<string, number>> = new Map(); // country -> tribe -> count
+        const clanSampleCounts: Map<string, Map<string, Map<string, number>>> = new Map(); // country -> tribe -> clan -> count
 
         // Process samples to build counts
         samplesData.forEach((sample) => {
@@ -89,8 +89,8 @@ export const CommunitiesPage: React.FC = () => {
         const countries = Array.from(tribeSampleCounts.keys()).sort();
 
         countries.forEach((country) => {
-          const countryTribes = tribeSampleCounts.get(country) || new Map();
-          const countryClans = clanSampleCounts.get(country) || new Map();
+          const countryTribes: Map<string, number> = tribeSampleCounts.get(country) || new Map();
+          const countryClans: Map<string, Map<string, number>> = clanSampleCounts.get(country) || new Map();
 
           const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
 
@@ -106,11 +106,11 @@ export const CommunitiesPage: React.FC = () => {
               sample_count: countryTribes.get(tribeName) || 0,
             };
 
-            const tribeClansMap = countryClans.get(tribeName) || new Map();
+            const tribeClansMap: Map<string, number> = countryClans.get(tribeName) || new Map();
             const clans: Clan[] = [];
 
             // Sort clans by name
-            const clanNames = Array.from(tribeClansMap.keys()).sort();
+            const clanNames: string[] = Array.from(tribeClansMap.keys()).sort();
 
             clanNames.forEach((clanName) => {
               const clanData = clansMap.get(clanName);
