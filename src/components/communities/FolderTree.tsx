@@ -4,43 +4,211 @@ import { ChevronRight, Users2, Crown, Dna, Globe } from 'lucide-react';
 import Twemoji from 'react-twemoji';
 import type { Tribe, Clan } from '../../types';
 
-// Map country names to their flag emojis
+// Comprehensive map of country names and ethnicities to their flag emojis
 const COUNTRY_FLAGS: Record<string, string> = {
+  // Middle East & Central Asia
   'Iran': '🇮🇷',
   'Kurd': '🇮🇷',
+  'Kurdish': '🇮🇷',
   'Lur': '🇮🇷',
+  'Lurish': '🇮🇷',
   'Türk': '🇮🇷',
+  'Turkish': '🇹🇷',
   'Nuristani': '🇦🇫',
-  'Arab': '🇮🇶',
   'Afghanistan': '🇦🇫',
+  'Afghan': '🇦🇫',
   'Pashtun': '🇦🇫',
+  'Pashto': '🇦🇫',
   'Tajikistan': '🇹🇯',
+  'Tajik': '🇹🇯',
   'Uzbekistan': '🇺🇿',
+  'Uzbek': '🇺🇿',
   'Turkmenistan': '🇹🇲',
+  'Turkmen': '🇹🇲',
   'Pakistan': '🇵🇰',
+  'Pakistani': '🇵🇰',
   'Turkey': '🇹🇷',
+  'Turk': '🇹🇷',
+  'Azerbaijan': '🇦🇿',
   'Azerbaijani': '🇦🇿',
+  'Azeri': '🇦🇿',
   'Iraq': '🇮🇶',
+  'Iraqi': '🇮🇶',
+  'Arab': '🇮🇶',
+  'Arabic': '🇸🇦',
   'Syria': '🇸🇾',
+  'Syrian': '🇸🇾',
   'Armenia': '🇦🇲',
+  'Armenian': '🇦🇲',
   'Georgia': '🇬🇪',
+  'Georgian': '🇬🇪',
   'Kazakhstan': '🇰🇿',
+  'Kazakh': '🇰🇿',
   'Kyrgyzstan': '🇰🇬',
+  'Kyrgyz': '🇰🇬',
+  'Saudi Arabia': '🇸🇦',
+  'Saudi': '🇸🇦',
+  'UAE': '🇦🇪',
+  'United Arab Emirates': '🇦🇪',
+  'Kuwait': '🇰🇼',
+  'Kuwaiti': '🇰🇼',
+  'Bahrain': '🇧🇭',
+  'Qatar': '🇶🇦',
+  'Oman': '🇴🇲',
+  'Yemen': '🇾🇪',
+  'Jordan': '🇯🇴',
+  'Lebanon': '🇱🇧',
+  'Lebanese': '🇱🇧',
+  'Israel': '🇮🇱',
+  'Palestine': '🇵🇸',
+  'Palestinian': '🇵🇸',
+  
+  // South Asia
   'India': '🇮🇳',
+  'Indian': '🇮🇳',
+  'Bangladesh': '🇧🇩',
+  'Bengali': '🇧🇩',
+  'Nepal': '🇳🇵',
+  'Nepali': '🇳🇵',
+  'Bhutan': '🇧🇹',
+  'Sri Lanka': '🇱🇰',
+  'Maldives': '🇲🇻',
+  
+  // East Asia
   'China': '🇨🇳',
+  'Chinese': '🇨🇳',
+  'Japan': '🇯🇵',
+  'Japanese': '🇯🇵',
+  'Korea': '🇰🇷',
+  'South Korea': '🇰🇷',
+  'Korean': '🇰🇷',
+  'North Korea': '🇰🇵',
+  'Mongolia': '🇲🇳',
+  'Mongolian': '🇲🇳',
+  
+  // Russia & Eastern Europe
   'Russia': '🇷🇺',
+  'Russian': '🇷🇺',
+  'Ukraine': '🇺🇦',
+  'Ukrainian': '🇺🇦',
+  'Belarus': '🇧🇾',
+  'Moldova': '🇲🇩',
+  
+  // Europe
+  'Germany': '🇩🇪',
+  'German': '🇩🇪',
+  'France': '🇫🇷',
+  'French': '🇫🇷',
+  'Italy': '🇮🇹',
+  'Italian': '🇮🇹',
+  'Spain': '🇪🇸',
+  'Spanish': '🇪🇸',
+  'Portugal': '🇵🇹',
+  'Portuguese': '🇵🇹',
+  'United Kingdom': '🇬🇧',
+  'UK': '🇬🇧',
+  'Britain': '🇬🇧',
+  'British': '🇬🇧',
+  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+  'Ireland': '🇮🇪',
+  'Greek': '🇬🇷',
+  'Greece': '🇬🇷',
+  'Poland': '🇵🇱',
+  'Polish': '🇵🇱',
+  'Romania': '🇷🇴',
+  'Romanian': '🇷🇴',
+  'Czech Republic': '🇨🇿',
+  'Czech': '🇨🇿',
+  'Hungary': '🇭🇺',
+  'Hungarian': '🇭🇺',
+  'Austria': '🇦🇹',
+  'Austrian': '🇦🇹',
+  'Switzerland': '🇨🇭',
+  'Swiss': '🇨🇭',
+  'Sweden': '🇸🇪',
+  'Swedish': '🇸🇪',
+  'Norway': '🇳🇴',
+  'Norwegian': '🇳🇴',
+  'Denmark': '🇩🇰',
+  'Danish': '🇩🇰',
+  'Finland': '🇫🇮',
+  'Finnish': '🇫🇮',
+  'Netherlands': '🇳🇱',
+  'Dutch': '🇳🇱',
+  'Belgium': '🇧🇪',
+  'Belgian': '🇧🇪',
+  
+  // Balkans
+  'Albania': '🇦🇱',
+  'Albanian': '🇦🇱',
+  'Bosnia': '🇧🇦',
+  'Bosnia and Herzegovina': '🇧🇦',
+  'Croatia': '🇭🇷',
+  'Croatian': '🇭🇷',
+  'Serbia': '🇷🇸',
+  'Serbian': '🇷🇸',
+  'Montenegro': '🇲🇪',
+  'North Macedonia': '🇲🇰',
+  'Macedonia': '🇲🇰',
+  'Bulgaria': '🇧🇬',
+  'Bulgarian': '🇧🇬',
+  'Kosovo': '🇽🇰',
+  'Slovenia': '🇸🇮',
+  'Slovenian': '🇸🇮',
+  
+  // Africa (selection)
+  'Egypt': '🇪🇬',
+  'Egyptian': '🇪🇬',
+  'Morocco': '🇲🇦',
+  'Moroccan': '🇲🇦',
+  'Algeria': '🇩🇿',
+  'Algerian': '🇩🇿',
+  'Tunisia': '🇹🇳',
+  'Tunisian': '🇹🇳',
+  'Libya': '🇱🇾',
+  'Ethiopia': '🇪🇹',
+  'Ethiopian': '🇪🇹',
+  'Somalia': '🇸🇴',
+  'Somali': '🇸🇴',
+  'Kenya': '🇰🇪',
+  'South Africa': '🇿🇦',
+  'Nigeria': '🇳🇬',
 };
 
-// Function to get flag emoji for a country
+// Function to get flag emoji for a country or ethnicity
 const getCountryFlag = (countryName: string): string | null => {
-  // Check if it's a direct match
+  // Check if country name ends with "Tribes" (ethnicity grouping)
+  if (countryName.includes('Tribes')) {
+    return null; // No flag for ethnicity groupings
+  }
+  
+  // Direct match (case-sensitive)
   if (COUNTRY_FLAGS[countryName]) {
     return COUNTRY_FLAGS[countryName];
   }
   
-  // Check if country name ends with "Tribes" (ethnicity grouping)
-  if (countryName.includes('Tribes')) {
-    return null; // No flag for ethnicity groupings
+  // Try case-insensitive match
+  const lowerCountryName = countryName.toLowerCase();
+  const matchedKey = Object.keys(COUNTRY_FLAGS).find(
+    key => key.toLowerCase() === lowerCountryName
+  );
+  
+  if (matchedKey) {
+    return COUNTRY_FLAGS[matchedKey];
+  }
+  
+  // Try partial match (country name contains or is contained in the key)
+  const partialMatchKey = Object.keys(COUNTRY_FLAGS).find(
+    key => {
+      const lowerKey = key.toLowerCase();
+      return lowerCountryName.includes(lowerKey) || lowerKey.includes(lowerCountryName);
+    }
+  );
+  
+  if (partialMatchKey) {
+    return COUNTRY_FLAGS[partialMatchKey];
   }
   
   return null;
