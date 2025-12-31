@@ -272,9 +272,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
         <div className="bg-gradient-to-r from-teal-900/60 to-cyan-900/60 px-3 sm:px-6 py-3 sm:py-4 border-b-2 border-teal-600/30">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="text-2xl flex-shrink-0">
-              <Twemoji options={{ className: 'emoji-icon' }}>
-                🌍
-              </Twemoji>
+              <Globe className="text-teal-300 flex-shrink-0" size={20} />
             </div>
             <h2 className="text-base sm:text-xl font-bold text-teal-100 truncate">
               Communities by Region
@@ -316,7 +314,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           const flag = getCountryFlag(countryData.country);
                           if (flag) {
                             return (
-                              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0 text-2xl">
+                              <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0 text-2xl sm:text-3xl">
                                 <Twemoji options={{ className: 'emoji-flag' }}>
                                   {flag}
                                 </Twemoji>
@@ -325,7 +323,9 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           }
                           return (
                             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0 text-xl">
-                              <Globe className="text-teal-300 flex-shrink-0" size={20} />
+                              <Twemoji options={{ className: 'emoji-icon' }}>
+                                🌐
+                              </Twemoji>
                             </div>
                           );
                         })()}
