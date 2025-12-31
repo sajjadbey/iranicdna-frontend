@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   // Analytics API endpoints 
   samples: `${ANALYTICS_API_URL}/samples/`,
   countries: `${ANALYTICS_API_URL}/countries/`,
+  provinces: `${ANALYTICS_API_URL}/provinces/`,
   ethnicities: `${ANALYTICS_API_URL}/ethnicities/`,
   tribes: `${ANALYTICS_API_URL}/tribes/`,
   clans: `${ANALYTICS_API_URL}/clans/`,

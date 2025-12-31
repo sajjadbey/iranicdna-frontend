@@ -30,6 +30,12 @@ export interface Country {
 export interface Province {
     name: string;
     country: string;
+    latitude: number;
+    longitude: number;
+    geometry?: {
+        type: string;
+        coordinates: number[][][][];
+    };
 }
 
 export interface City {

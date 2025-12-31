@@ -1,10 +1,11 @@
 // MapCard.tsx
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin } from 'lucide-react';
-import { type Sample } from '../../types';
+import { MapPin, Loader2 } from 'lucide-react';
+import { type Sample, type Province } from '../../types';
 import { generateUniqueColors } from '../../utils/colors';
+import { API_ENDPOINTS } from '../../config/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -22,49 +23,6 @@ interface Props {
   onProvinceClick?: (province: string) => void;
 }
 
-// Approximate coordinates for Iranian provinces (latitude, longitude)
-const PROVINCE_COORDINATES: Record<string, [number, number]> = {
-  'Tehran': [35.6892, 51.3890],
-  'Isfahan': [32.6546, 51.6680],
-  'Shiraz': [29.5918, 52.5836],
-  'Fars': [29.5918, 52.5836],
-  'Tabriz': [38.0800, 46.2919],
-  'East Azerbaijan': [38.0800, 46.2919],
-  'West Azerbaijan': [37.4550, 45.0000],
-  'Mashhad': [36.2605, 59.6168],
-  'Khorasan': [36.2605, 59.6168],
-  'Khuzestan': [31.3203, 48.6693],
-  'Ahvaz': [31.3203, 48.6693],
-  'Kerman': [30.2839, 57.0834],
-  'Kermanshah': [34.3142, 47.0650],
-  'Qom': [34.6416, 50.8746],
-  'Yazd': [31.8974, 54.3569],
-  'Ardebil': [38.2498, 48.2933],
-  'Hamadan': [34.7992, 48.5146],
-  'Zanjan': [36.6736, 48.4787],
-  'Qazvin': [36.2688, 50.0041],
-  'Semnan': [35.5769, 53.3920],
-  'Gilan': [37.2808, 49.5926],
-  'Mazandaran': [36.5659, 52.6783],
-  'Golestan': [37.2895, 55.1376],
-  'Bushehr': [28.9684, 50.8385],
-  'Hormozgan': [27.1865, 56.2773],
-  'Sistan and Baluchestan': [27.5295, 60.5820],
-  'Chaharmahal and Bakhtiari': [31.9613, 50.8454],
-  'Kohgiluyeh and Boyer-Ahmad': [30.6509, 51.6050],
-  'Lorestan': [33.5819, 48.3623],
-  'Markazi': [34.6149, 49.7008],
-  'Ilam': [33.6374, 46.4227],
-  'Kurdistan': [35.9553, 47.1362],
-  'North Khorasan': [37.4711, 57.3317],
-  'South Khorasan': [32.8663, 59.2164],
-  'Alborz': [35.9968, 50.9289],
-  'Gorno-Badakhshan': [38.4127, 73.0877],
-  'Khatlon': [37.9114, 69.0970],
-  'Sughd': [39.5155, 69.0970],
-  'Dushanbe': [38.5514, 68.7713],
-  'Districts of Republican Subordination': [38.8879, 70.1271]
-};
 
 // Function to create a pie chart SVG icon
 const createPieChartIcon = (
@@ -127,6 +85,42 @@ const MapViewController: React.FC<{ center: [number, number]; zoom: number }> = 
 };
 
 export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvinceClick }) => {
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch provinces from API
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(API_ENDPOINTS.provinces);
+        if (!response.ok) {
+          throw new Error('Failed to fetch provinces');
+        }
+        const data: Province[] = await response.json();
+        setProvinces(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching provinces:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load provinces');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  // Create province coordinates map from fetched data
+  const provinceCoordinates = useMemo(() => {
+    const coordsMap: Record<string, [number, number]> = {};
+    provinces.forEach((province) => {
+      coordsMap[province.name] = [province.latitude, province.longitude];
+    });
+    return coordsMap;
+  }, [provinces]);
+
   // Calculate province statistics
   const provinceStats = useMemo(() => {
     const statsMap = new Map<string, ProvinceStats>();
@@ -137,7 +131,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
       const count = sample.count ?? 1;
       
       // Skip if we don't have coordinates for this province
-      if (!PROVINCE_COORDINATES[province]) return;
+      if (!provinceCoordinates[province]) return;
       
       if (!statsMap.has(province)) {
         statsMap.set(province, {
@@ -145,7 +139,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
           sampleCount: 0,
           dominantHaplogroup: null,
           haplogroupCounts: {},
-          coordinates: PROVINCE_COORDINATES[province],
+          coordinates: provinceCoordinates[province],
         });
       }
       
@@ -167,7 +161,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
     });
     
     return Array.from(statsMap.values());
-  }, [samples]);
+  }, [samples, provinceCoordinates]);
 
   // Generate colors for haplogroups
   const allHaplogroups = useMemo(() => {
@@ -186,9 +180,9 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
 
   // Calculate map center and zoom based on selected province or all data
   const { mapCenter, mapZoom } = useMemo(() => {
-    if (selectedProvince && PROVINCE_COORDINATES[selectedProvince]) {
+    if (selectedProvince && provinceCoordinates[selectedProvince]) {
       return {
-        mapCenter: PROVINCE_COORDINATES[selectedProvince] as [number, number],
+        mapCenter: provinceCoordinates[selectedProvince] as [number, number],
         mapZoom: 8,
       };
     }
@@ -197,7 +191,38 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
       mapCenter: [32.4279, 53.6880] as [number, number],
       mapZoom: 5,
     };
-  }, [selectedProvince]);
+  }, [selectedProvince, provinceCoordinates]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
+        <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
+          <MapPin size={20} />
+          Geographic Distribution
+        </h3>
+        <div className="flex items-center justify-center py-20 text-teal-400">
+          <Loader2 className="animate-spin mr-2" size={24} />
+          <span>Loading map data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
+        <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
+          <MapPin size={20} />
+          Geographic Distribution
+        </h3>
+        <div className="text-center py-8 text-red-400">
+          Error loading map: {error}
+        </div>
+      </div>
+    );
+  }
 
   if (provinceStats.length === 0) {
     return (
