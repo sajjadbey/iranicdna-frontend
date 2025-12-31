@@ -5,6 +5,8 @@ export interface Sample {
     province: string | null;
     city: string | null;
     ethnicity: string | null;
+    tribe: string | null;
+    clan: string | null;
     y_dna: {
         name: string;
         root_haplogroup: string;
