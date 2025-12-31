@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Users2, Crown, Dna } from 'lucide-react';
+import { ChevronRight, Users2, Crown, Dna, Globe } from 'lucide-react';
 import Twemoji from 'react-twemoji';
 import type { Tribe, Clan } from '../../types';
 
@@ -325,9 +325,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                           }
                           return (
                             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0 text-xl">
-                              <Twemoji options={{ className: 'emoji-icon' }}>
-                                🌐
-                              </Twemoji>
+                              <Globe className="text-teal-300 flex-shrink-0" size={20} />
                             </div>
                           );
                         })()}
