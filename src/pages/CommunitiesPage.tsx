@@ -91,46 +91,46 @@ export const CommunitiesPage: React.FC = () => {
         if (countries.length > 0) {
           // Build hierarchy from samples
           countries.forEach((country) => {
-          const countryTribes: Map<string, number> = tribeSampleCounts.get(country) || new Map();
-          const countryClans: Map<string, Map<string, number>> = clanSampleCounts.get(country) || new Map();
+            const countryTribes: Map<string, number> = tribeSampleCounts.get(country) || new Map();
+            const countryClans: Map<string, Map<string, number>> = clanSampleCounts.get(country) || new Map();
 
-          const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
+            const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
 
-          // Sort tribes by name
-          const tribeNames = Array.from(countryTribes.keys()).sort();
+            // Sort tribes by name
+            const tribeNames = Array.from(countryTribes.keys()).sort();
 
-          tribeNames.forEach((tribeName) => {
-            const tribeData = tribesMap.get(tribeName);
-            if (!tribeData) return;
+            tribeNames.forEach((tribeName) => {
+              const tribeData = tribesMap.get(tribeName);
+              if (!tribeData) return;
 
-            const tribeWithCount: Tribe = {
-              ...tribeData,
-              sample_count: countryTribes.get(tribeName) || 0,
-            };
-
-            const tribeClansMap: Map<string, number> = countryClans.get(tribeName) || new Map();
-            const clans: Clan[] = [];
-
-            // Sort clans by name
-            const clanNames: string[] = Array.from(tribeClansMap.keys()).sort();
-
-            clanNames.forEach((clanName) => {
-              const clanData = clansMap.get(clanName);
-              if (!clanData) return;
-
-              const clanWithCount: Clan = {
-                ...clanData,
-                sample_count: tribeClansMap.get(clanName) || 0,
+              const tribeWithCount: Tribe = {
+                ...tribeData,
+                sample_count: countryTribes.get(tribeName) || 0,
               };
 
-              clans.push(clanWithCount);
-            });
+              const tribeClansMap: Map<string, number> = countryClans.get(tribeName) || new Map();
+              const clans: Clan[] = [];
 
-            tribes.push({
-              tribe: tribeWithCount,
-              clans,
+              // Sort clans by name
+              const clanNames: string[] = Array.from(tribeClansMap.keys()).sort();
+
+              clanNames.forEach((clanName) => {
+                const clanData = clansMap.get(clanName);
+                if (!clanData) return;
+
+                const clanWithCount: Clan = {
+                  ...clanData,
+                  sample_count: tribeClansMap.get(clanName) || 0,
+                };
+
+                clans.push(clanWithCount);
+              });
+
+              tribes.push({
+                tribe: tribeWithCount,
+                clans,
+              });
             });
-          });
 
             if (tribes.length > 0) {
               hierarchyData.push({
@@ -139,28 +139,46 @@ export const CommunitiesPage: React.FC = () => {
               });
             }
           });
-        } else {
-          // Fallback: If no samples have tribe info, group all tribes under their countries
-          // or under "Unknown" if we can't determine the country
-          console.warn('No tribe information found in samples, showing all tribes without country grouping');
+        }
+        
+        // Fallback: If no tribes with samples found, show all tribes grouped by ethnicity
+        if (hierarchyData.length === 0 && tribesData.length > 0) {
+          console.log('No tribe data in samples, showing all tribes grouped by ethnicity');
           
-          // Group all tribes under "Unknown" country as fallback
-          const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
+          // Group tribes by their primary ethnicity
+          const tribesByEthnicity = new Map<string, Tribe[]>();
           
           tribesData.forEach((tribe) => {
-            const tribeClans = clansData.filter((c: Clan) => c.tribe === tribe.name);
-            tribes.push({
-              tribe: { ...tribe, sample_count: 0 },
-              clans: tribeClans.map((c: Clan) => ({ ...c, sample_count: 0 })),
-            });
+            const ethnicity = tribe.ethnicities && tribe.ethnicities.length > 0 
+              ? tribe.ethnicities[0] 
+              : 'Other';
+            
+            if (!tribesByEthnicity.has(ethnicity)) {
+              tribesByEthnicity.set(ethnicity, []);
+            }
+            tribesByEthnicity.get(ethnicity)!.push(tribe);
           });
 
-          if (tribes.length > 0) {
-            hierarchyData.push({
-              country: 'All Tribes',
-              tribes,
+          // Convert to hierarchy format
+          Array.from(tribesByEthnicity.keys()).sort().forEach((ethnicity) => {
+            const ethnicityTribes = tribesByEthnicity.get(ethnicity) || [];
+            const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
+            
+            ethnicityTribes.forEach((tribe) => {
+              const tribeClans = clansData.filter((c: Clan) => c.tribe === tribe.name);
+              tribes.push({
+                tribe: { ...tribe, sample_count: 0 },
+                clans: tribeClans.map((c: Clan) => ({ ...c, sample_count: 0 })),
+              });
             });
-          }
+
+            if (tribes.length > 0) {
+              hierarchyData.push({
+                country: `${ethnicity} Tribes`,
+                tribes,
+              });
+            }
+          });
         }
 
         setHierarchy(hierarchyData);
