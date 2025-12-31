@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Users2, Crown, Dna, Globe } from 'lucide-react';
+import { ChevronRight, Users2, Crown, Dna } from 'lucide-react';
 import Twemoji from 'react-twemoji';
 import type { Tribe, Clan } from '../../types';
 
@@ -179,20 +179,23 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 // Function to get flag emoji for a country or ethnicity
 const getCountryFlag = (countryName: string): string | null => {
-  // Check if country name ends with "Tribes" (ethnicity grouping)
+  let lookupName = countryName;
+  
+  // If country name ends with "Tribes", extract the ethnicity name
   if (countryName.includes('Tribes')) {
-    return null; // No flag for ethnicity groupings
+    // Extract ethnicity name before "Tribes" (e.g., "Arab Tribes" -> "Arab")
+    lookupName = countryName.replace(/\s*Tribes\s*$/i, '').trim();
   }
   
   // Direct match (case-sensitive)
-  if (COUNTRY_FLAGS[countryName]) {
-    return COUNTRY_FLAGS[countryName];
+  if (COUNTRY_FLAGS[lookupName]) {
+    return COUNTRY_FLAGS[lookupName];
   }
   
   // Try case-insensitive match
-  const lowerCountryName = countryName.toLowerCase();
+  const lowerLookupName = lookupName.toLowerCase();
   const matchedKey = Object.keys(COUNTRY_FLAGS).find(
-    key => key.toLowerCase() === lowerCountryName
+    key => key.toLowerCase() === lowerLookupName
   );
   
   if (matchedKey) {
@@ -203,7 +206,7 @@ const getCountryFlag = (countryName: string): string | null => {
   const partialMatchKey = Object.keys(COUNTRY_FLAGS).find(
     key => {
       const lowerKey = key.toLowerCase();
-      return lowerCountryName.includes(lowerKey) || lowerKey.includes(lowerCountryName);
+      return lowerLookupName.includes(lowerKey) || lowerKey.includes(lowerLookupName);
     }
   );
   
@@ -268,7 +271,11 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
         {/* Header */}
         <div className="bg-gradient-to-r from-teal-900/60 to-cyan-900/60 px-3 sm:px-6 py-3 sm:py-4 border-b-2 border-teal-600/30">
           <div className="flex items-center gap-2 sm:gap-3">
-            <Globe className="text-teal-300 flex-shrink-0" size={20} />
+            <div className="text-2xl flex-shrink-0">
+              <Twemoji options={{ className: 'emoji-icon' }}>
+                🌍
+              </Twemoji>
+            </div>
             <h2 className="text-base sm:text-xl font-bold text-teal-100 truncate">
               Communities by Region
             </h2>
@@ -317,8 +324,10 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                             );
                           }
                           return (
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0">
-                              <Globe className="text-blue-300" size={18} />
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0 text-xl">
+                              <Twemoji options={{ className: 'emoji-icon' }}>
+                                🌐
+                              </Twemoji>
                             </div>
                           );
                         })()}
