@@ -83,12 +83,14 @@ export const CommunitiesPage: React.FC = () => {
         });
 
         // Build hierarchy
-        const hierarchyData: CountryHierarchy[] = [];
+        let hierarchyData: CountryHierarchy[] = [];
 
         // Sort countries alphabetically
         const countries = Array.from(tribeSampleCounts.keys()).sort();
 
-        countries.forEach((country) => {
+        if (countries.length > 0) {
+          // Build hierarchy from samples
+          countries.forEach((country) => {
           const countryTribes: Map<string, number> = tribeSampleCounts.get(country) || new Map();
           const countryClans: Map<string, Map<string, number>> = clanSampleCounts.get(country) || new Map();
 
@@ -130,13 +132,36 @@ export const CommunitiesPage: React.FC = () => {
             });
           });
 
+            if (tribes.length > 0) {
+              hierarchyData.push({
+                country,
+                tribes,
+              });
+            }
+          });
+        } else {
+          // Fallback: If no samples have tribe info, group all tribes under their countries
+          // or under "Unknown" if we can't determine the country
+          console.warn('No tribe information found in samples, showing all tribes without country grouping');
+          
+          // Group all tribes under "Unknown" country as fallback
+          const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
+          
+          tribesData.forEach((tribe) => {
+            const tribeClans = clansData.filter((c: Clan) => c.tribe === tribe.name);
+            tribes.push({
+              tribe: { ...tribe, sample_count: 0 },
+              clans: tribeClans.map((c: Clan) => ({ ...c, sample_count: 0 })),
+            });
+          });
+
           if (tribes.length > 0) {
             hierarchyData.push({
-              country,
+              country: 'All Tribes',
               tribes,
             });
           }
-        });
+        }
 
         setHierarchy(hierarchyData);
       } catch (err) {
