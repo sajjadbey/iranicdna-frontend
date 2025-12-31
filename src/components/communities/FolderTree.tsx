@@ -59,10 +59,10 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <Globe className="text-teal-300 flex-shrink-0" size={20} />
             <h2 className="text-base sm:text-xl font-bold text-teal-100 truncate">
-              Communities by Country
+              Communities
             </h2>
             <div className="ml-auto text-xs sm:text-sm text-teal-300/80 whitespace-nowrap">
-              {hierarchy.length} countries, {totalTribes} tribes, {totalClans} clans
+              {totalTribes} tribes, {totalClans} clans
             </div>
           </div>
         </div>
