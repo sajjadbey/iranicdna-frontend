@@ -34,7 +34,31 @@ const createPieChartIcon = (
   const total = Object.values(haplogroupCounts).reduce((sum, count) => sum + count, 0);
   const entries = Object.entries(haplogroupCounts).sort((a, b) => b[1] - a[1]);
   
-  // Create SVG pie chart
+  const borderColor = isSelected ? '#fbbf24' : '#5eead4';
+  const borderWidth = isSelected ? 3 : 2;
+  
+  // Special case: if there's only one haplogroup, just draw a filled circle
+  if (entries.length === 1) {
+    const [haplogroup] = entries[0];
+    const color = colorMap[haplogroup];
+    
+    const svgContent = `
+      <svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="rgba(15, 23, 42, 0.8)" stroke="${borderColor}" stroke-width="${borderWidth}" />
+        <circle cx="50" cy="50" r="45" fill="${color}" opacity="0.9" />
+        <circle cx="50" cy="50" r="48" fill="none" stroke="${borderColor}" stroke-width="${borderWidth}" />
+      </svg>
+    `;
+    
+    return L.divIcon({
+      html: svgContent,
+      className: 'pie-chart-marker',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  }
+  
+  // Create SVG pie chart for multiple haplogroups
   let currentAngle = -90; // Start from top
   const slices = entries.map(([haplogroup, count]) => {
     const percentage = count / total;
@@ -55,9 +79,6 @@ const createPieChartIcon = (
     
     return { path, color: colorMap[haplogroup] };
   });
-  
-  const borderColor = isSelected ? '#fbbf24' : '#5eead4';
-  const borderWidth = isSelected ? 3 : 2;
   
   const svgContent = `
     <svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
