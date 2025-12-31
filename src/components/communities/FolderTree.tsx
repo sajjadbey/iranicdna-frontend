@@ -1,7 +1,50 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Users2, Crown, Dna, Globe } from 'lucide-react';
+import Twemoji from 'react-twemoji';
 import type { Tribe, Clan } from '../../types';
+
+// Map country names to their flag emojis
+const COUNTRY_FLAGS: Record<string, string> = {
+  'Iran': '🇮🇷',
+  'Kurd': '🇮🇷',
+  'Lur': '🇮🇷',
+  'Türk': '🇮🇷',
+  'Nuristani': '🇦🇫',
+  'Arab': '🇮🇶',
+  'Afghanistan': '🇦🇫',
+  'Pashtun': '🇦🇫',
+  'Tajikistan': '🇹🇯',
+  'Uzbekistan': '🇺🇿',
+  'Turkmenistan': '🇹🇲',
+  'Pakistan': '🇵🇰',
+  'Turkey': '🇹🇷',
+  'Azerbaijani': '🇦🇿',
+  'Iraq': '🇮🇶',
+  'Syria': '🇸🇾',
+  'Armenia': '🇦🇲',
+  'Georgia': '🇬🇪',
+  'Kazakhstan': '🇰🇿',
+  'Kyrgyzstan': '🇰🇬',
+  'India': '🇮🇳',
+  'China': '🇨🇳',
+  'Russia': '🇷🇺',
+};
+
+// Function to get flag emoji for a country
+const getCountryFlag = (countryName: string): string | null => {
+  // Check if it's a direct match
+  if (COUNTRY_FLAGS[countryName]) {
+    return COUNTRY_FLAGS[countryName];
+  }
+  
+  // Check if country name ends with "Tribes" (ethnicity grouping)
+  if (countryName.includes('Tribes')) {
+    return null; // No flag for ethnicity groupings
+  }
+  
+  return null;
+};
 
 interface CountryHierarchy {
   country: string;
@@ -59,7 +102,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <Globe className="text-teal-300 flex-shrink-0" size={20} />
             <h2 className="text-base sm:text-xl font-bold text-teal-100 truncate">
-              Communities
+              Communities by Region
             </h2>
             <div className="ml-auto text-xs sm:text-sm text-teal-300/80 whitespace-nowrap">
               {totalTribes} tribes, {totalClans} clans
@@ -93,10 +136,24 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                         className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 rounded-xl hover:bg-teal-900/30 transition-all border border-transparent hover:border-teal-600/40 cursor-pointer"
                         onClick={() => toggleCountry(countryData.country)}
                       >
-                        {/* Country Icon */}
-                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0">
-                          <Globe className="text-blue-300" size={18} />
-                        </div>
+                        {/* Country Icon/Flag */}
+                        {(() => {
+                          const flag = getCountryFlag(countryData.country);
+                          if (flag) {
+                            return (
+                              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0 text-2xl">
+                                <Twemoji options={{ className: 'emoji-flag' }}>
+                                  {flag}
+                                </Twemoji>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-700/50 to-blue-900/50 flex items-center justify-center flex-shrink-0">
+                              <Globe className="text-blue-300" size={18} />
+                            </div>
+                          );
+                        })()}
 
                         {/* Expand/Collapse Icon */}
                         <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
