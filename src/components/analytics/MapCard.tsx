@@ -123,6 +123,11 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
 
   // Calculate province statistics
   const provinceStats = useMemo(() => {
+    // Don't calculate stats if provinces aren't loaded yet
+    if (isLoading || Object.keys(provinceCoordinates).length === 0) {
+      return [];
+    }
+    
     const statsMap = new Map<string, ProvinceStats>();
     
     samples.forEach((sample) => {
@@ -131,7 +136,10 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
       const count = sample.count ?? 1;
       
       // Skip if we don't have coordinates for this province
-      if (!provinceCoordinates[province]) return;
+      const coords = provinceCoordinates[province];
+      if (!coords || coords.length !== 2 || coords[0] == null || coords[1] == null) {
+        return;
+      }
       
       if (!statsMap.has(province)) {
         statsMap.set(province, {
@@ -139,7 +147,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
           sampleCount: 0,
           dominantHaplogroup: null,
           haplogroupCounts: {},
-          coordinates: provinceCoordinates[province],
+          coordinates: coords,
         });
       }
       
@@ -161,7 +169,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
     });
     
     return Array.from(statsMap.values());
-  }, [samples, provinceCoordinates]);
+  }, [samples, provinceCoordinates, isLoading]);
 
   // Generate colors for haplogroups
   const allHaplogroups = useMemo(() => {
@@ -181,10 +189,14 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, onProvince
   // Calculate map center and zoom based on selected province or all data
   const { mapCenter, mapZoom } = useMemo(() => {
     if (selectedProvince && provinceCoordinates[selectedProvince]) {
-      return {
-        mapCenter: provinceCoordinates[selectedProvince] as [number, number],
-        mapZoom: 8,
-      };
+      const coords = provinceCoordinates[selectedProvince];
+      // Validate coordinates
+      if (coords && coords.length === 2 && coords[0] != null && coords[1] != null) {
+        return {
+          mapCenter: coords as [number, number],
+          mapZoom: 8,
+        };
+      }
     }
     // Default to Iran's center
     return {
