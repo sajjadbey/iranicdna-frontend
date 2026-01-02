@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { qpadmService } from '../../services/qpadmService';
 import type { QpAdmRun } from '../../types/qpadm';
-import { Clock, CheckCircle, XCircle, Loader2, Eye, RefreshCw, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Loader2, Eye, RefreshCw, AlertCircle, User, Database } from 'lucide-react';
 
 interface QpAdmHistoryProps {
   onSelectRun: (run: QpAdmRun) => void;
@@ -184,8 +184,18 @@ export const QpAdmHistory: React.FC<QpAdmHistoryProps> = ({ onSelectRun }) => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-semibold text-white">
-                    Target: {run.target_population}
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    {run.user_dna_file_id ? (
+                      <>
+                        <User className="w-4 h-4 text-teal-400" />
+                        <span>Your DNA: {run.user_dna_filename || 'DNA File'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-4 h-4 text-blue-400" />
+                        <span>Target: {run.target_population}</span>
+                      </>
+                    )}
                   </h3>
                   <span className="text-xs px-2 py-1 bg-slate-600 text-slate-300 rounded">
                     {run.dataset_type}

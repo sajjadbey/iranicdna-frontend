@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import type { QpAdmRun } from '../../types/qpadm';
-import { CheckCircle, XCircle, Download, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle, Download, TrendingUp, User, Database } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 interface QpAdmResultsProps {
@@ -89,9 +89,26 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
       >
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-mono text-slate-200 mb-4">
-            Target: <span className="text-white font-bold">{target || run.target_population}</span>
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            {run.user_dna_file_id ? (
+              <User className="w-6 h-6 text-teal-400" />
+            ) : (
+              <Database className="w-6 h-6 text-blue-400" />
+            )}
+            <h2 className="text-2xl font-mono text-slate-200">
+              Target: <span className="text-white font-bold">
+                {run.user_dna_file_id 
+                  ? (run.user_dna_filename || 'Your DNA')
+                  : (target || run.target_population)
+                }
+              </span>
+            </h2>
+          </div>
+          {run.user_dna_file_id && (
+            <p className="text-sm text-teal-400/70 font-mono mb-2">
+              Personal DNA Analysis
+            </p>
+          )}
           
           <div className="text-base font-mono space-y-2">
             {/* P-Value Display */}

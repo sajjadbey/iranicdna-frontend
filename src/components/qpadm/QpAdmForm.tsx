@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { qpadmService } from '../../services/qpadmService';
 import type { QpAdmRun, QpAdmPopulations } from '../../types/qpadm';
-import { PlayCircle, Loader2, AlertCircle, ChevronDown, X } from 'lucide-react';
+import { PlayCircle, Loader2, AlertCircle, ChevronDown, X, User, Database } from 'lucide-react';
+import { DNAFileSelector } from '../vcf/DNAFileSelector';
 
 interface QpAdmFormProps {
   onRunComplete: (run: QpAdmRun) => void;
@@ -15,11 +16,17 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
   const [error, setError] = useState<string | null>(null);
 
   const [dataset, setDataset] = useState<'1240k' | 'HO'>('1240k');
+  const [targetMode, setTargetMode] = useState<'population' | 'dna'>('population');
   const [target, setTarget] = useState('');
+  const [selectedDNAFileId, setSelectedDNAFileId] = useState<string | null>(null);
   const [sources, setSources] = useState<string[]>([]);
   const [rights, setRights] = useState<string[]>(['Mbuti.DG']);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeField, setActiveField] = useState<'target' | 'source' | 'right' | null>(null);
+  const [sourceTextInput, setSourceTextInput] = useState('');
+  const [rightTextInput, setRightTextInput] = useState('');
+  const [showSourceDropdown, setShowSourceDropdown] = useState(false);
+  const [showRightDropdown, setShowRightDropdown] = useState(false);
 
   useEffect(() => {
     loadPopulations();
@@ -38,8 +45,17 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
     setDataset(newDataset);
     // Reset selections when dataset changes
     setTarget('');
+    setSelectedDNAFileId(null);
     setSources([]);
     setRights(['Mbuti.DG']);
+  };
+
+  const handleTargetModeChange = (mode: 'population' | 'dna') => {
+    setTargetMode(mode);
+    // Clear selections when mode changes
+    setTarget('');
+    setSelectedDNAFileId(null);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,8 +66,13 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
       return;
     }
 
-    if (!target) {
+    if (targetMode === 'population' && !target) {
       setError('Please select a target population');
+      return;
+    }
+
+    if (targetMode === 'dna' && !selectedDNAFileId) {
+      setError('Please select your DNA file');
       return;
     }
 
@@ -69,12 +90,19 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
     setError(null);
 
     try {
-      const run = await qpadmService.createRun({
-        target_population: target,
+      const requestData: any = {
         source_populations: sources,
         right_populations: rights,
         dataset_type: dataset,
-      });
+      };
+
+      if (targetMode === 'population') {
+        requestData.target_population = target;
+      } else {
+        requestData.dna_file_id = selectedDNAFileId;
+      }
+
+      const run = await qpadmService.createRun(requestData);
       
       // Show success message if queued
       if (run.status === 'queued' && run.queue_info) {
@@ -113,6 +141,48 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
   const removeRight = (pop: string) => {
     if (pop !== 'Mbuti.DG') { // Don't allow removing Mbuti.DG
       setRights(rights.filter(r => r !== pop));
+    }
+  };
+
+  const handleSourceTextAdd = () => {
+    if (!sourceTextInput.trim()) return;
+    
+    const newPops = sourceTextInput
+      .split(',')
+      .map(p => p.trim())
+      .filter(p => p && !sources.includes(p) && p !== target && !rights.includes(p));
+    
+    if (newPops.length > 0) {
+      setSources([...sources, ...newPops]);
+      setSourceTextInput('');
+    }
+  };
+
+  const handleRightTextAdd = () => {
+    if (!rightTextInput.trim()) return;
+    
+    const newPops = rightTextInput
+      .split(',')
+      .map(p => p.trim())
+      .filter(p => p && !rights.includes(p) && p !== target && !sources.includes(p));
+    
+    if (newPops.length > 0) {
+      setRights([...rights, ...newPops]);
+      setRightTextInput('');
+    }
+  };
+
+  const handleSourceTextKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSourceTextAdd();
+    }
+  };
+
+  const handleRightTextKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRightTextAdd();
     }
   };
 
@@ -174,47 +244,91 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
         </p>
       </div>
 
-      {/* Target Population */}
+      {/* Target Selection Mode */}
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2">
-          Target Population *
+        <label className="block text-sm font-medium text-slate-300 mb-3">
+          Target Type *
         </label>
-        <div className="relative">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             type="button"
-            onClick={() => setActiveField(activeField === 'target' ? null : 'target')}
-            className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-left text-white hover:border-teal-500 focus:border-teal-500 focus:outline-none transition-colors flex items-center justify-between"
+            onClick={() => handleTargetModeChange('population')}
+            className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+              targetMode === 'population'
+                ? 'bg-teal-500/20 border-2 border-teal-500 text-teal-300'
+                : 'bg-slate-700 border-2 border-slate-600 text-slate-400 hover:border-slate-500'
+            }`}
           >
-            <span className={target ? 'text-white' : 'text-slate-400'}>
-              {target || 'Select target population'}
-            </span>
-            <ChevronDown className="w-5 h-5 text-slate-400" />
+            <Database className="w-4 h-4" />
+            <span>Dataset Population</span>
           </button>
-
-          {activeField === 'target' && (
-            <div className="absolute z-10 w-full mt-2 bg-slate-700 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto">
-              <input
-                type="text"
-                placeholder="Search populations..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-800 text-white border-b border-slate-600 focus:outline-none"
-              />
-              <div className="max-h-48 overflow-auto">
-                {filteredPopulations.map(pop => (
-                  <button
-                    key={pop}
-                    type="button"
-                    onClick={() => addPopulation('target', pop)}
-                    className="w-full px-4 py-2 text-left text-white hover:bg-slate-600 transition-colors"
-                  >
-                    {pop}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => handleTargetModeChange('dna')}
+            className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+              targetMode === 'dna'
+                ? 'bg-teal-500/20 border-2 border-teal-500 text-teal-300'
+                : 'bg-slate-700 border-2 border-slate-600 text-slate-400 hover:border-slate-500'
+            }`}
+          >
+            <User className="w-4 h-4" />
+            <span>Your DNA</span>
+          </button>
         </div>
+
+        {/* Target Population Selection */}
+        {targetMode === 'population' && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setActiveField(activeField === 'target' ? null : 'target')}
+              className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-left text-white hover:border-teal-500 focus:border-teal-500 focus:outline-none transition-colors flex items-center justify-between"
+            >
+              <span className={target ? 'text-white' : 'text-slate-400'}>
+                {target || 'Select target population'}
+              </span>
+              <ChevronDown className="w-5 h-5 text-slate-400" />
+            </button>
+
+            {activeField === 'target' && (
+              <div className="absolute z-10 w-full mt-2 bg-slate-700 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto">
+                <input
+                  type="text"
+                  placeholder="Search populations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-800 text-white border-b border-slate-600 focus:outline-none"
+                />
+                <div className="max-h-48 overflow-auto">
+                  {filteredPopulations.map(pop => (
+                    <button
+                      key={pop}
+                      type="button"
+                      onClick={() => addPopulation('target', pop)}
+                      className="w-full px-4 py-2 text-left text-white hover:bg-slate-600 transition-colors"
+                    >
+                      {pop}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* DNA File Selection */}
+        {targetMode === 'dna' && (
+          <div>
+            <p className="text-sm text-slate-400 mb-3">
+              Select your uploaded DNA file to analyze your ancestry composition
+            </p>
+            <DNAFileSelector
+              selectedFileId={selectedDNAFileId}
+              onFileSelect={setSelectedDNAFileId}
+              onError={setError}
+            />
+          </div>
+        )}
       </div>
 
       {/* Source Populations */}
@@ -240,17 +354,46 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
           </div>
         )}
 
+        {/* Text Input for comma-separated values */}
+        <div className="mb-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Type population names separated by commas (e.g., Yamnaya_Samara, WHG, Anatolia_N)"
+              value={sourceTextInput}
+              onChange={(e) => setSourceTextInput(e.target.value)}
+              onKeyPress={handleSourceTextKeyPress}
+              className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-teal-500 focus:outline-none transition-colors"
+            />
+            <button
+              type="button"
+              onClick={handleSourceTextAdd}
+              disabled={!sourceTextInput.trim()}
+              className="px-6 py-3 bg-teal-500/20 text-teal-300 rounded-lg hover:bg-teal-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Tip: Press Enter to add populations
+          </p>
+        </div>
+
+        {/* Dropdown selector */}
         <div className="relative">
           <button
             type="button"
-            onClick={() => setActiveField(activeField === 'source' ? null : 'source')}
+            onClick={() => {
+              setShowSourceDropdown(!showSourceDropdown);
+              setActiveField(showSourceDropdown ? null : 'source');
+            }}
             className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-left text-slate-400 hover:border-teal-500 focus:border-teal-500 focus:outline-none transition-colors flex items-center justify-between"
           >
-            <span>Add source population</span>
+            <span>Or select from list</span>
             <ChevronDown className="w-5 h-5" />
           </button>
 
-          {activeField === 'source' && (
+          {activeField === 'source' && showSourceDropdown && (
             <div className="absolute z-10 w-full mt-2 bg-slate-700 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto">
               <input
                 type="text"
@@ -264,7 +407,10 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
                   <button
                     key={pop}
                     type="button"
-                    onClick={() => addPopulation('source', pop)}
+                    onClick={() => {
+                      addPopulation('source', pop);
+                      setShowSourceDropdown(false);
+                    }}
                     className="w-full px-4 py-2 text-left text-white hover:bg-slate-600 transition-colors"
                   >
                     {pop}
@@ -301,17 +447,46 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
           </div>
         )}
 
+        {/* Text Input for comma-separated values */}
+        <div className="mb-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Type population names separated by commas (e.g., Mbuti.DG, Ust_Ishim.DG, MA1)"
+              value={rightTextInput}
+              onChange={(e) => setRightTextInput(e.target.value)}
+              onKeyPress={handleRightTextKeyPress}
+              className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-teal-500 focus:outline-none transition-colors"
+            />
+            <button
+              type="button"
+              onClick={handleRightTextAdd}
+              disabled={!rightTextInput.trim()}
+              className="px-6 py-3 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Tip: Press Enter to add populations
+          </p>
+        </div>
+
+        {/* Dropdown selector */}
         <div className="relative">
           <button
             type="button"
-            onClick={() => setActiveField(activeField === 'right' ? null : 'right')}
+            onClick={() => {
+              setShowRightDropdown(!showRightDropdown);
+              setActiveField(showRightDropdown ? null : 'right');
+            }}
             className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-left text-slate-400 hover:border-teal-500 focus:border-teal-500 focus:outline-none transition-colors flex items-center justify-between"
           >
-            <span>Add right population</span>
+            <span>Or select from list</span>
             <ChevronDown className="w-5 h-5" />
           </button>
 
-          {activeField === 'right' && (
+          {activeField === 'right' && showRightDropdown && (
             <div className="absolute z-10 w-full mt-2 bg-slate-700 border border-slate-600 rounded-lg shadow-xl max-h-64 overflow-auto">
               <input
                 type="text"
@@ -325,7 +500,10 @@ export const QpAdmForm: React.FC<QpAdmFormProps> = ({ onRunComplete, canRun, run
                   <button
                     key={pop}
                     type="button"
-                    onClick={() => addPopulation('right', pop)}
+                    onClick={() => {
+                      addPopulation('right', pop);
+                      setShowRightDropdown(false);
+                    }}
                     className="w-full px-4 py-2 text-left text-white hover:bg-slate-600 transition-colors"
                   >
                     {pop}

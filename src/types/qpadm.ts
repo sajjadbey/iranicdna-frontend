@@ -4,6 +4,8 @@ export interface QpAdmRun {
   id: string;
   username: string;
   target_population: string;
+  user_dna_file_id: string | null;
+  user_dna_filename: string | null;
   source_populations: string[];
   right_populations: string[];
   dataset_type: '1240k' | 'HO';
@@ -67,7 +69,8 @@ export interface QpAdmPopulations {
 }
 
 export interface QpAdmRunRequest {
-  target_population: string;
+  target_population?: string;
+  dna_file_id?: string;
   source_populations: string[];
   right_populations: string[];
   dataset_type?: '1240k' | 'HO';
