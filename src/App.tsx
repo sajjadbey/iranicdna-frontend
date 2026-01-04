@@ -36,7 +36,7 @@ const App: React.FC = () => {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
 
   return (
-    <ThemeProvider forcedTheme="christmas">
+    <ThemeProvider forcedTheme="default">
       <BrowserRouter basename={basename}>
         <AuthProvider>
           <Suspense fallback={<PageLoader />}>
