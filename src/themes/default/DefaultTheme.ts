@@ -21,7 +21,7 @@ export const defaultTheme: ThemeConfig = {
     text: '#ffffff',
   },
   particles: {
-    enabled: true,
+    enabled: false,
     particleCount: 250,
     particleSpeed: 1.2,
     colorTheme: 'gold',
