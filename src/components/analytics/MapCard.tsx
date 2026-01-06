@@ -353,6 +353,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     };
   }, [selectedCity, selectedProvince, cityCoordinates, provinceCoordinates]);
 
+  // Check if we have cities available for the selected province
+  // IMPORTANT: This must be called BEFORE any early returns to avoid hook order issues
+  const hasCitiesInProvince = useMemo(() => {
+    if (!selectedProvince) return false;
+    return cities.some(city => city.province === selectedProvince);
+  }, [selectedProvince, cities]);
+
   // Show loading state
   if (isLoading) {
     return (
@@ -397,12 +404,6 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       </div>
     );
   }
-
-  // Check if we have cities available for the selected province
-  const hasCitiesInProvince = useMemo(() => {
-    if (!selectedProvince) return false;
-    return cities.some(city => city.province === selectedProvince);
-  }, [selectedProvince, cities]);
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">

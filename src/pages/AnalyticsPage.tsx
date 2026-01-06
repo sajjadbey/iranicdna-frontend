@@ -73,27 +73,51 @@ export const AnalyticsPage: React.FC = () => {
   // Get animation config based on device
   const animConfig = getAnimationConfig();
 
-  // Fetch countries, provinces, cities, and ethnicities on mount
+  // Fetch countries, provinces, and cities on mount
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        const [countriesData, provincesData, citiesData, ethnicitiesData] = await Promise.all([
+        const [countriesData, provincesData, citiesData] = await Promise.all([
           cachedFetch<CountryDTO[]>(API_ENDPOINTS.countries),
           cachedFetch<ProvinceDTO[]>(API_ENDPOINTS.provinces),
           cachedFetch<CityDTO[]>(API_ENDPOINTS.cities),
-          cachedFetch<EthnicityDTO[]>(API_ENDPOINTS.ethnicities),
         ]);
         
         setAllCountries(countriesData.map(c => c.name).sort());
         setAllProvinces(provincesData);
         setAllCities(citiesData);
-        setAllEthnicities(ethnicitiesData.map(e => e.name).sort());
       } catch (err) {
         console.error('Failed to fetch filter options:', err);
       }
     };
     fetchFilterOptions();
   }, []);
+
+  // Fetch ethnicities based on selected location (hierarchical filtering)
+  useEffect(() => {
+    const fetchEthnicities = async () => {
+      try {
+        let url = API_ENDPOINTS.ethnicities;
+        
+        // Apply hierarchical filtering - most specific first
+        if (selectedCity) {
+          url += `?city=${encodeURIComponent(selectedCity)}`;
+        } else if (selectedProvince) {
+          url += `?province=${encodeURIComponent(selectedProvince)}`;
+        } else if (selectedCountry) {
+          url += `?country=${encodeURIComponent(selectedCountry)}`;
+        }
+        
+        const ethnicitiesData = await cachedFetch<EthnicityDTO[]>(url);
+        setAllEthnicities(ethnicitiesData.map(e => e.name).sort());
+      } catch (err) {
+        console.error('Failed to fetch ethnicities:', err);
+        setAllEthnicities([]);
+      }
+    };
+    
+    fetchEthnicities();
+  }, [selectedCountry, selectedProvince, selectedCity]);
 
   // Filter countries based on selected ethnicity (client-side optimization)
   const filteredCountries = useMemo(() => {
@@ -132,7 +156,7 @@ export const AnalyticsPage: React.FC = () => {
     return cities.sort();
   }, [selectedProvince, allCities, selectedEthnicity, samples]);
 
-  // Filter ethnicities (show all for now - server will filter)
+  // Ethnicities are already filtered by the server based on location
   const filteredEthnicities = useMemo(() => {
     return allEthnicities;
   }, [allEthnicities]);
