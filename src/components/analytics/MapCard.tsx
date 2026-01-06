@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, Building2, Map } from 'lucide-react';
 import { type Sample, type Province, type City } from '../../types';
 import { generateUniqueColors } from '../../utils/colors';
 import { API_ENDPOINTS } from '../../config/api';
@@ -119,6 +119,14 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
   const [cities, setCities] = useState<City[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewLevel, setViewLevel] = useState<'province' | 'city'>('province');
+  
+  // Reset view level when selections change
+  useEffect(() => {
+    if (!selectedProvince) {
+      setViewLevel('province');
+    }
+  }, [selectedProvince, selectedCity]);
 
   // Fetch provinces and cities from API
   useEffect(() => {
@@ -181,6 +189,11 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       return [];
     }
     
+    // If city view is selected and we have a province selected, don't show province markers
+    if (selectedProvince && viewLevel === 'city') {
+      return [];
+    }
+    
     const statsMap = new Map<string, ProvinceStats>();
     
     samples.forEach((sample) => {
@@ -190,11 +203,6 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       
       // If a province is selected, only show data for that province
       if (selectedProvince && province !== selectedProvince) {
-        return;
-      }
-      
-      // If a province is selected and the sample has city data, skip it (will be shown in cityStats)
-      if (selectedProvince && sample.city) {
         return;
       }
       
@@ -236,8 +244,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
 
   // Calculate city statistics when a province is selected
   const cityStats = useMemo(() => {
-    // Only show cities when a province is selected
+    // Only show cities when a province is selected and city view is active
     if (!selectedProvince || isLoading || Object.keys(cityCoordinates).length === 0) {
+      return [];
+    }
+    
+    // Don't show cities if province view is selected
+    if (viewLevel === 'province') {
       return [];
     }
     
@@ -287,7 +300,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     });
     
     return Array.from(statsMap.values());
-  }, [samples, cityCoordinates, isLoading, selectedProvince, selectedCity]);
+  }, [samples, cityCoordinates, isLoading, selectedProvince, selectedCity, viewLevel]);
 
   // Generate colors for haplogroups
   const allHaplogroups = useMemo(() => {
@@ -385,20 +398,56 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     );
   }
 
+  // Check if we have cities available for the selected province
+  const hasCitiesInProvince = useMemo(() => {
+    if (!selectedProvince) return false;
+    return cities.some(city => city.province === selectedProvince);
+  }, [selectedProvince, cities]);
+
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
-        <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-teal-200 flex items-center gap-2">
           <MapPin size={20} />
           Geographic Distribution
           {selectedProvince && (provinceStats.length > 0 || cityStats.length > 0) && (
             <span className="text-sm font-normal text-teal-300/70">
               {selectedCity 
-                ? `(Showing ${selectedCity})`
-                : `(Showing ${selectedProvince}${cityStats.length > 0 ? ' - cities' : ''})`
+                ? `(${selectedCity})`
+                : `(${selectedProvince})`
               }
             </span>
           )}
         </h3>
+        
+        {/* View Level Toggle - only show when province is selected and has cities */}
+        {selectedProvince && !selectedCity && hasCitiesInProvince && (
+          <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg p-1 border border-teal-700/30">
+            <button
+              onClick={() => setViewLevel('province')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                viewLevel === 'province'
+                  ? 'bg-teal-600 text-white shadow-md'
+                  : 'text-teal-300 hover:text-teal-100'
+              }`}
+            >
+              <Map size={14} />
+              Province
+            </button>
+            <button
+              onClick={() => setViewLevel('city')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                viewLevel === 'city'
+                  ? 'bg-teal-600 text-white shadow-md'
+                  : 'text-teal-300 hover:text-teal-100'
+              }`}
+            >
+              <Building2 size={14} />
+              Cities
+            </button>
+          </div>
+        )}
+      </div>
       
       <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
         <MapContainer
@@ -536,7 +585,8 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       <div className="mt-4 pt-4 border-t border-teal-700/30">
         <p className="text-xs text-teal-300/70 mb-2">
           Circle size represents sample count • Color shows dominant haplogroup
-          {selectedProvince && cityStats.length > 0 && ' • Showing city-level data'}
+          {selectedProvince && cityStats.length > 0 && ' • City-level view'}
+          {selectedProvince && provinceStats.length > 0 && cityStats.length === 0 && ' • Province-level view'}
         </p>
         <div className="flex flex-wrap gap-2">
           {allHaplogroups.slice(0, 8).map((hg) => (
