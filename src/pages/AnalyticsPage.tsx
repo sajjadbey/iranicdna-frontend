@@ -20,13 +20,6 @@ import { buildSamplesUrl, FILTER_PRESETS } from '../utils/apiFilters';
 // API DTOs
 interface CountryDTO { name: string }
 interface ProvinceDTO { name: string; country: string }
-interface CityDTO { 
-  name: string; 
-  province: string; 
-  is_capital: boolean; 
-  latitude: number; 
-  longitude: number; 
-}
 interface EthnicityDTO { name: string }
 
 // Helper functions
@@ -56,7 +49,6 @@ export const AnalyticsPage: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [allCountries, setAllCountries] = useState<string[]>([]);
   const [allProvinces, setAllProvinces] = useState<ProvinceDTO[]>([]);
-  const [allCities, setAllCities] = useState<CityDTO[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
