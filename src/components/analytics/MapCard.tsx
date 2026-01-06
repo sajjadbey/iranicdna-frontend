@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin, Loader2, Building2, Map } from 'lucide-react';
+import { MapPin, Loader2, Building2, Map as MapIcon } from 'lucide-react';
 import { type Sample, type Province, type City } from '../../types';
 import { generateUniqueColors } from '../../utils/colors';
 import { API_ENDPOINTS } from '../../config/api';
@@ -178,7 +178,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
   }, [cities]);
 
   // Calculate province statistics
-  const provinceStats = useMemo(() => {
+  const provinceStats = useMemo<ProvinceStats[]>(() => {
     // Don't calculate stats if provinces aren't loaded yet
     if (isLoading || Object.keys(provinceCoordinates).length === 0) {
       return [];
@@ -194,7 +194,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       return [];
     }
     
-    const statsMap = new Map<string, ProvinceStats>();
+    const statsMap = new Map() as Map<string, ProvinceStats>;
     
     samples.forEach((sample) => {
       const province = sample.province || 'Unknown';
@@ -231,7 +231,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     });
     
     // Determine dominant haplogroup for each province
-    statsMap.forEach((stats) => {
+    statsMap.forEach((stats: ProvinceStats) => {
       const entries = Object.entries(stats.haplogroupCounts);
       if (entries.length > 0) {
         entries.sort((a, b) => b[1] - a[1]);
@@ -243,7 +243,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
   }, [samples, provinceCoordinates, isLoading, selectedProvince, selectedCity]);
 
   // Calculate city statistics when a province is selected
-  const cityStats = useMemo(() => {
+  const cityStats = useMemo<CityStats[]>(() => {
     // Only show cities when a province is selected and city view is active
     if (!selectedProvince || isLoading || Object.keys(cityCoordinates).length === 0) {
       return [];
@@ -254,7 +254,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       return [];
     }
     
-    const statsMap = new Map<string, CityStats>();
+    const statsMap = new Map() as Map<string, CityStats>;
     
     samples.forEach((sample) => {
       const city = sample.city || 'Unknown';
@@ -291,7 +291,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     });
     
     // Determine dominant haplogroup for each city
-    statsMap.forEach((stats) => {
+    statsMap.forEach((stats: CityStats) => {
       const entries = Object.entries(stats.haplogroupCounts);
       if (entries.length > 0) {
         entries.sort((a, b) => b[1] - a[1]);
@@ -431,7 +431,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
                   : 'text-teal-300 hover:text-teal-100'
               }`}
             >
-              <Map size={14} />
+              <MapIcon size={14} />
               Province
             </button>
             <button
@@ -507,13 +507,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
                         {Object.entries(stats.haplogroupCounts)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 5)
-                          .map(([hg, count]) => (
+                          .map(([hg, count]: [string, number]) => (
                             <li key={hg} className="flex items-center gap-2">
                               <span
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: colorMap[hg] }}
                               />
-                              {hg}: {count}
+                              {hg}: {count as React.ReactNode}
                             </li>
                           ))}
                       </ul>
@@ -562,13 +562,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
                         {Object.entries(stats.haplogroupCounts)
                           .sort((a, b) => b[1] - a[1])
                           .slice(0, 5)
-                          .map(([hg, count]) => (
+                          .map(([hg, count]: [string, number]) => (
                             <li key={hg} className="flex items-center gap-2">
                               <span
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: colorMap[hg] }}
                               />
-                              {hg}: {count}
+                              {hg}: {count as React.ReactNode}
                             </li>
                           ))}
                       </ul>

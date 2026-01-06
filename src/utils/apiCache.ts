@@ -10,7 +10,8 @@ interface CacheOptions {
 
 class ApiCache {
   private memoryCache = new Map<string, CacheEntry<unknown>>();
-  private defaultTTL = 2 * 60 * 1000; // 2 minutes in milliseconds
+  private defaultTTL = 2 * 60 * 1000; // 2 minutes in milliseconds (increased from 2 minutes)
+  private pendingRequests = new Map<string, Promise<unknown>>(); // Request deduplication
 
   /**
    * Get cached data if available and not expired
@@ -89,6 +90,27 @@ class ApiCache {
   }
 
   /**
+   * Get pending request if exists
+   */
+  getPendingRequest<T>(key: string): Promise<T> | null {
+    return this.pendingRequests.get(key) as Promise<T> | null ?? null;
+  }
+
+  /**
+   * Set pending request
+   */
+  setPendingRequest<T>(key: string, promise: Promise<T>): void {
+    this.pendingRequests.set(key, promise);
+  }
+
+  /**
+   * Delete pending request
+   */
+  deletePendingRequest(key: string): void {
+    this.pendingRequests.delete(key);
+  }
+
+  /**
    * Clear all cache entries
    */
   clearAll(): void {
@@ -113,8 +135,8 @@ class ApiCache {
 export const apiCache = new ApiCache();
 
 /**
- * Cached fetch wrapper
- * Automatically caches GET requests
+ * Cached fetch wrapper with request deduplication
+ * Automatically caches GET requests and deduplicates concurrent requests
  */
 export async function cachedFetch<T>(
   url: string,
@@ -140,18 +162,48 @@ export async function cachedFetch<T>(
     return cached;
   }
 
-  // Fetch from API
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  // Check if there's already a pending request for this URL (request deduplication)
+  const pendingRequest = apiCache.getPendingRequest<T>(cacheKey);
+  if (pendingRequest) {
+    return pendingRequest;
   }
 
-  const data: T = await response.json();
+  // Create new request
+  const requestPromise = (async () => {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
 
-  // Store in cache
-  apiCache.set(cacheKey, data, options?.cacheOptions);
+      const data: T = await response.json();
 
-  return data;
+      // Store in cache with longer TTL for filter options
+      const isFilterEndpoint = url.includes('/countries/') || 
+                               url.includes('/provinces/') || 
+                               url.includes('/cities/') || 
+                               url.includes('/ethnicities/');
+      
+      const cacheTTL = isFilterEndpoint 
+        ? 30 * 60 * 1000  // 30 minutes for filter options
+        : (options?.cacheOptions?.ttl ?? 2 * 60 * 1000); // 2 minutes for samples
+      
+      apiCache.set(cacheKey, data, { 
+        ...options?.cacheOptions, 
+        ttl: cacheTTL 
+      });
+
+      return data;
+    } finally {
+      // Clean up pending request
+      apiCache.deletePendingRequest(cacheKey);
+    }
+  })();
+
+  // Store pending request
+  apiCache.setPendingRequest(cacheKey, requestPromise);
+
+  return requestPromise;
 }
 
 /**

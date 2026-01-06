@@ -110,15 +110,27 @@ export const AnalyticsPage: React.FC = () => {
       .sort();
   }, [selectedCountry, allProvinces]);
 
-  // Filter cities based on selected province
+  // Filter cities based on selected province and ethnicity
   const filteredCities = useMemo(() => {
     if (!selectedProvince) return [];
     
-    return allCities
+    // Get all cities in the province
+    let cities = allCities
       .filter(c => c.province === selectedProvince)
-      .map(c => c.name)
-      .sort();
-  }, [selectedProvince, allCities]);
+      .map(c => c.name);
+    
+    // If ethnicity is selected, only show cities that have samples with that ethnicity
+    if (selectedEthnicity && samples.length > 0) {
+      const citiesWithEthnicity = new Set(
+        samples
+          .filter(s => s.ethnicity === selectedEthnicity && s.city)
+          .map(s => s.city)
+      );
+      cities = cities.filter(c => citiesWithEthnicity.has(c));
+    }
+    
+    return cities.sort();
+  }, [selectedProvince, allCities, selectedEthnicity, samples]);
 
   // Filter ethnicities (show all for now - server will filter)
   const filteredEthnicities = useMemo(() => {
