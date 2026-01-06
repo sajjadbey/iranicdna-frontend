@@ -171,8 +171,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
 
   // Calculate province statistics
   const provinceStats = useMemo(() => {
-    // Don't calculate stats if provinces aren't loaded yet or if we're showing cities
-    if (isLoading || Object.keys(provinceCoordinates).length === 0 || selectedProvince) {
+    // Don't calculate stats if provinces aren't loaded yet
+    if (isLoading || Object.keys(provinceCoordinates).length === 0) {
+      return [];
+    }
+    
+    // If a specific city is selected, don't show province markers
+    if (selectedCity) {
       return [];
     }
     
@@ -182,6 +187,16 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       const province = sample.province || 'Unknown';
       const haplogroup = sample.y_dna?.root_haplogroup;
       const count = sample.count ?? 1;
+      
+      // If a province is selected, only show data for that province
+      if (selectedProvince && province !== selectedProvince) {
+        return;
+      }
+      
+      // If a province is selected and the sample has city data, skip it (will be shown in cityStats)
+      if (selectedProvince && sample.city) {
+        return;
+      }
       
       // Skip if we don't have coordinates for this province
       const coords = provinceCoordinates[province];
@@ -217,7 +232,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     });
     
     return Array.from(statsMap.values());
-  }, [samples, provinceCoordinates, isLoading, selectedProvince]);
+  }, [samples, provinceCoordinates, isLoading, selectedProvince, selectedCity]);
 
   // Calculate city statistics when a province is selected
   const cityStats = useMemo(() => {
@@ -375,11 +390,11 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
         <h3 className="text-xl font-bold text-teal-200 mb-4 flex items-center gap-2">
           <MapPin size={20} />
           Geographic Distribution
-          {selectedProvince && cityStats.length > 0 && (
+          {selectedProvince && (provinceStats.length > 0 || cityStats.length > 0) && (
             <span className="text-sm font-normal text-teal-300/70">
               {selectedCity 
                 ? `(Showing ${selectedCity})`
-                : `(Showing cities in ${selectedProvince})`
+                : `(Showing ${selectedProvince}${cityStats.length > 0 ? ' - cities' : ''})`
               }
             </span>
           )}
@@ -400,7 +415,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
           
-          {/* Province pie chart markers (when no province is selected) */}
+          {/* Province pie chart markers */}
           {provinceStats.map((stats) => {
             const size = Math.max(40, Math.min(80, (stats.sampleCount / maxSamples) * 80));
             const isSelected = selectedProvince === stats.name;
@@ -460,7 +475,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
             );
           })}
           
-          {/* City pie chart markers (when a province is selected but no specific city) */}
+          {/* City pie chart markers (when a province is selected) */}
           {cityStats.map((stats) => {
             const size = Math.max(30, Math.min(60, (stats.sampleCount / maxSamples) * 60));
             const isSelected = selectedCity === stats.name;
