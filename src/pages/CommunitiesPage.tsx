@@ -7,7 +7,7 @@ import { TribeDetailModal } from '../components/communities/TribeDetailModal';
 import { AboutContribute } from '../components/AboutContribute';
 import { API_ENDPOINTS, ANALYTICS_API_URL } from '../config/api';
 import type { Tribe, Clan, Sample } from '../types';
-import { cachedFetch } from '../utils/apiCache';
+import { cachedFetch, cachedFetchNormalized } from '../utils/apiCache';
 
 interface CountryHierarchy {
   country: string;
@@ -33,12 +33,14 @@ export const CommunitiesPage: React.FC = () => {
       setError(null);
 
       try {
-        // Fetch all data in parallel
-        const [samplesData, tribesData, clansData] = await Promise.all([
-          cachedFetch<Sample[]>(API_ENDPOINTS.samples),
+        // Fetch all data in parallel with page_size=all
+        const [samplesResponse, tribesData, clansData] = await Promise.all([
+          cachedFetchNormalized<Sample>(`${API_ENDPOINTS.samples}?page_size=all&has_y_dna=true`),
           cachedFetch<Tribe[]>(API_ENDPOINTS.tribes),
           cachedFetch<Clan[]>(API_ENDPOINTS.clans),
         ]);
+        
+        const samplesData = samplesResponse.results;
 
         // Create maps for quick lookup
         const tribesMap = new Map(tribesData.map(t => [t.name, t]));

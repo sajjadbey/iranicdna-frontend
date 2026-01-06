@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ComparisonDonutChart } from './ComparisonDonutChart';
 import { type Sample } from '../../types';
 import { API_ENDPOINTS } from '../../config/api';
-import { cachedFetch } from '../../utils/apiCache';
+import { cachedFetchNormalized } from '../../utils/apiCache';
 
 interface Props {
   isOpen: boolean;
@@ -47,14 +47,18 @@ export const ProvinceComparisonModal: React.FC<Props> = ({ isOpen, onClose, allP
     
     setLoading(true);
     try {
-      // Fetch samples for both provinces
+      // Fetch samples for both provinces using new API with page_size=all and has_y_dna filter
       const [data1, data2] = await Promise.all([
-        cachedFetch<Sample[]>(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province1)}`),
-        cachedFetch<Sample[]>(`${API_ENDPOINTS.samples}?province=${encodeURIComponent(province2)}`)
+        cachedFetchNormalized<Sample>(
+          `${API_ENDPOINTS.samples}?province=${encodeURIComponent(province1)}&page_size=all&has_y_dna=true`
+        ),
+        cachedFetchNormalized<Sample>(
+          `${API_ENDPOINTS.samples}?province=${encodeURIComponent(province2)}&page_size=all&has_y_dna=true`
+        )
       ]);
 
-      setSamples1(data1 || []);
-      setSamples2(data2 || []);
+      setSamples1(data1.results);
+      setSamples2(data2.results);
       setShowResults(true);
     } catch (error) {
       console.error('Error fetching comparison data:', error);

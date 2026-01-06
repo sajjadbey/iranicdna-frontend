@@ -29,8 +29,8 @@ export const API_ENDPOINTS = {
   checkEmail: `${API_BASE_URL}/auth/email/check/`,
   
   // DNA File Management
-  dnaFiles: `${API_BASE_URL}/dna-files/`,
-  dnaFileUpload: `${API_BASE_URL}/dna-files/upload/`,
+  dnaFiles: `${API_BASE_URL}/genetics/dna-files/`,
+  dnaFileUpload: `${API_BASE_URL}/genetics/dna-files/upload/`,
   
   // VCF Tools
   vcfToPlink: `${API_BASE_URL}/tools/vcf-to-plink/`,
@@ -38,26 +38,27 @@ export const API_ENDPOINTS = {
   vcfAnalyses: `${API_BASE_URL}/tools/vcf-analyses/`,
   
   // Blog
-  blog: `${API_BASE_URL}/blog/`,
-  blogPost: (slug: string) => `${API_BASE_URL}/blog/${slug}/`,
-  blogComments: (slug: string) => `${API_BASE_URL}/blog/${slug}/comments/`,
-  blogCommentCreate: (slug: string) => `${API_BASE_URL}/blog/${slug}/comments/create/`,
-  blogCommentDelete: (id: number) => `${API_BASE_URL}/blog/comments/${id}/`,
-  blogCommentUpdate: (id: number) => `${API_BASE_URL}/blog/comments/${id}/update/`,
-  blogCommentReport: (commentId: number) => `${API_BASE_URL}/blog/comments/${commentId}/report/`,
+  blog: `${API_BASE_URL}/genetics/blog/`,
+  blogPost: (slug: string) => `${API_BASE_URL}/genetics/blog/${slug}/`,
+  blogComments: (slug: string) => `${API_BASE_URL}/genetics/blog/${slug}/comments/`,
+  blogCommentCreate: (slug: string) => `${API_BASE_URL}/genetics/blog/${slug}/comments/create/`,
+  blogCommentDelete: (id: number) => `${API_BASE_URL}/genetics/blog/comments/${id}/`,
+  blogCommentUpdate: (id: number) => `${API_BASE_URL}/genetics/blog/comments/${id}/update/`,
+  blogCommentReport: (commentId: number) => `${API_BASE_URL}/genetics/blog/comments/${commentId}/report/`,
   
-  // Analytics API endpoints 
-  samples: `${ANALYTICS_API_URL}/samples/`,
-  countries: `${ANALYTICS_API_URL}/countries/`,
-  provinces: `${ANALYTICS_API_URL}/provinces/`,
-  ethnicities: `${ANALYTICS_API_URL}/ethnicities/`,
-  tribes: `${ANALYTICS_API_URL}/tribes/`,
-  clans: `${ANALYTICS_API_URL}/clans/`,
+  // Analytics API endpoints (with comprehensive filtering support)
+  samples: `${ANALYTICS_API_URL}/genetics/samples/`,
+  countries: `${ANALYTICS_API_URL}/genetics/countries/`,
+  provinces: `${ANALYTICS_API_URL}/genetics/provinces/`,
+  cities: `${ANALYTICS_API_URL}/genetics/cities/`,
+  ethnicities: `${ANALYTICS_API_URL}/genetics/ethnicities/`,
+  tribes: `${ANALYTICS_API_URL}/genetics/tribes/`,
+  clans: `${ANALYTICS_API_URL}/genetics/clans/`,
   
   // Haplogroup endpoints
-  haplogroupAll: `${ANALYTICS_API_URL}/haplogroup/all/`,
-  haplogroup: `${ANALYTICS_API_URL}/haplogroup/`,
-  haplogroupHeatmap: `${ANALYTICS_API_URL}/haplogroup/heatmap/`,
+  haplogroupAll: `${ANALYTICS_API_URL}/genetics/haplogroup/all/`,
+  haplogroup: `${ANALYTICS_API_URL}/genetics/haplogroup/`,
+  haplogroupHeatmap: `${ANALYTICS_API_URL}/genetics/haplogroup/heatmap/`,
   
   // qpAdm endpoints
   qpadmRun: `${API_BASE_URL}/tools/qpadm/run/`,

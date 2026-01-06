@@ -1,5 +1,6 @@
 // index.ts
 export interface Sample {
+    id: number;
     name: string;
     country: string | null;
     province: string | null;
@@ -10,19 +11,25 @@ export interface Sample {
     y_dna: {
         name: string;
         root_haplogroup: string;
+        full_path: string[];
     } | null;
     mt_dna: {
         name: string;
         root_haplogroup: string;
+        full_path: string[];
     } | null;
     historical_period: {
         name: string;
         start_year: number;
         end_year: number;
         display: string;
-    };
+    } | null;
     description: string;
     count: number;
+    coordinates: {
+        latitude: number;
+        longitude: number;
+    } | null;
 }
 
 export interface Country {
@@ -34,6 +41,7 @@ export interface Province {
     country: string;
     latitude: number;
     longitude: number;
+    capital: string | null;
     geometry?: {
         type: string;
         coordinates: number[][][][];
@@ -43,6 +51,9 @@ export interface Province {
 export interface City {
     name: string;
     province: string;
+    is_capital: boolean;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export interface Ethnicity {
@@ -114,6 +125,14 @@ export interface BlogComment {
     created_at: string;
     updated_at: string;
     is_approved: boolean;
+}
+
+// API Response Types
+export interface PaginatedResponse<T> {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: T[];
 }
 
 // Email Verification Types

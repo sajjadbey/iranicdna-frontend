@@ -65,21 +65,26 @@ export const HeatmapCard: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch heatmap data
+  // Fetch heatmap data with optimized filtering
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        // Fetch haplogroup-specific data
+        // Fetch haplogroup-specific data using root haplogroup filter
         const haplogroupParams = new URLSearchParams();
-        if (selectedHaplogroup) haplogroupParams.append('haplogroup', selectedHaplogroup);
+        if (selectedHaplogroup) {
+          // Use y_dna_root parameter to get all subclades
+          haplogroupParams.append('haplogroup', selectedHaplogroup);
+        }
         if (selectedCountry) haplogroupParams.append('country', selectedCountry);
         if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
         
         const haplogroupUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${haplogroupParams.toString()}`;
-        const haplogroupData = await cachedFetch<HeatmapPoint[]>(haplogroupUrl);
+        const haplogroupData = await cachedFetch<HeatmapPoint[]>(haplogroupUrl, {
+          cacheOptions: { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+        });
         
         // Fetch total data (without haplogroup filter) for percentage calculation
         const totalParams = new URLSearchParams();
@@ -87,7 +92,9 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
         
         const totalUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${totalParams.toString()}`;
-        const totalDataResult = await cachedFetch<HeatmapPoint[]>(totalUrl);
+        const totalDataResult = await cachedFetch<HeatmapPoint[]>(totalUrl, {
+          cacheOptions: { ttl: 5 * 60 * 1000 }
+        });
         
         setHeatmapData(haplogroupData || []);
         setTotalData(totalDataResult || []);

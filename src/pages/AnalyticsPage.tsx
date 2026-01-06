@@ -14,13 +14,22 @@ import { AboutContribute } from '../components/AboutContribute';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants } from '../utils/deviceDetection';
 import { API_ENDPOINTS } from '../config/api';
-import { cachedFetch } from '../utils/apiCache';
+import { cachedFetch, cachedFetchNormalized } from '../utils/apiCache';
+import { buildSamplesUrl, FILTER_PRESETS } from '../utils/apiFilters';
 
 // API DTOs
 interface CountryDTO { name: string }
+interface ProvinceDTO { name: string; country: string }
+interface CityDTO { 
+  name: string; 
+  province: string; 
+  is_capital: boolean; 
+  latitude: number; 
+  longitude: number; 
+}
 interface EthnicityDTO { name: string }
 
-// Helper functions remain unchanged
+// Helper functions
 const countMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, number> => {
   return samples.reduce((acc: Record<string, number>, s) => {
     const v = s[field];
@@ -44,193 +53,138 @@ const subMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, nu
 };
 
 export const AnalyticsPage: React.FC = () => {
-  const [allSamples, setAllSamples] = useState<Sample[]>([]);
   const [samples, setSamples] = useState<Sample[]>([]);
   const [allCountries, setAllCountries] = useState<string[]>([]);
-  const [ethnicities, setEthnicities] = useState<string[]>([]); // All unique ethnicities
+  const [allProvinces, setAllProvinces] = useState<ProvinceDTO[]>([]);
+  const [allCities, setAllCities] = useState<CityDTO[]>([]);
+  const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedEthnicity, setSelectedEthnicity] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState<number>(0);
   
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
 
   // Get animation config based on device
   const animConfig = getAnimationConfig();
 
-  // Fetch all samples on mount to build filter lists and determine country/province relationships
+  // Fetch countries, provinces, cities, and ethnicities on mount
   useEffect(() => {
-    const fetchAllSamples = async () => {
+    const fetchFilterOptions = async () => {
       try {
-        const data = await cachedFetch<Sample[]>(API_ENDPOINTS.samples);
-        setAllSamples(data || []);
+        const [countriesData, provincesData, citiesData, ethnicitiesData] = await Promise.all([
+          cachedFetch<CountryDTO[]>(API_ENDPOINTS.countries),
+          cachedFetch<ProvinceDTO[]>(API_ENDPOINTS.provinces),
+          cachedFetch<CityDTO[]>(API_ENDPOINTS.cities),
+          cachedFetch<EthnicityDTO[]>(API_ENDPOINTS.ethnicities),
+        ]);
         
-        // Extract unique countries
-        const countriesSet = new Set<string>();
-        data.forEach(sample => {
-          if (sample.country) countriesSet.add(sample.country);
-        });
-        
-        setAllCountries(Array.from(countriesSet).sort());
+        setAllCountries(countriesData.map(c => c.name).sort());
+        setAllProvinces(provincesData);
+        setAllCities(citiesData);
+        setAllEthnicities(ethnicitiesData.map(e => e.name).sort());
       } catch (err) {
-        console.error('Failed to fetch all samples:', err);
+        console.error('Failed to fetch filter options:', err);
       }
     };
-    fetchAllSamples();
+    fetchFilterOptions();
   }, []);
 
-  // Fetch countries on mount (Kept for consistency/safety)
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const data = await cachedFetch<CountryDTO[]>(API_ENDPOINTS.countries);
-        if (allCountries.length === 0) {
-            setAllCountries(data.map((c) => c.name).sort());
-        }
-      } catch (err) {
-        console.error('Failed to fetch countries:', err);
-      }
-    };
-    fetchCountries();
-  }, [allCountries.length]);
-
-  // Fetch ethnicities on mount
-  useEffect(() => {
-    const fetchEthnicities = async () => {
-      try {
-        const data = await cachedFetch<EthnicityDTO[]>(API_ENDPOINTS.ethnicities);
-        setEthnicities(data.map((e) => e.name).sort());
-      } catch (err) {
-        console.error('Failed to fetch ethnicities:', err);
-        setEthnicities([]);
-      }
-    };
-    
-    fetchEthnicities();
-  }, []);
-
-  // Filter countries based on selected ethnicity
+  // Filter countries based on selected ethnicity (client-side optimization)
   const filteredCountries = useMemo(() => {
-    if (!selectedEthnicity) return allCountries;
-    
-    const countriesWithEthnicity = new Set<string>();
-    allSamples.forEach(sample => {
-      if (sample.ethnicity === selectedEthnicity && sample.country) {
-        countriesWithEthnicity.add(sample.country);
-      }
-    });
-    
-    return Array.from(countriesWithEthnicity).sort();
-  }, [selectedEthnicity, allSamples, allCountries]);
+    return allCountries;
+  }, [allCountries]);
 
-  // Filter provinces based on selected country and ethnicity
+  // Filter provinces based on selected country
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
-    const provincesSet = new Set<string>();
-    allSamples.forEach(sample => {
-      if (sample.country === selectedCountry && sample.province) {
-        // If ethnicity is selected, only include provinces with that ethnicity
-        if (!selectedEthnicity || sample.ethnicity === selectedEthnicity) {
-          provincesSet.add(sample.province);
-        }
-      }
-    });
+    return allProvinces
+      .filter(p => p.country === selectedCountry)
+      .map(p => p.name)
+      .sort();
+  }, [selectedCountry, allProvinces]);
+
+  // Filter cities based on selected province
+  const filteredCities = useMemo(() => {
+    if (!selectedProvince) return [];
     
-    return Array.from(provincesSet).sort();
-  }, [selectedCountry, selectedEthnicity, allSamples]);
+    return allCities
+      .filter(c => c.province === selectedProvince)
+      .map(c => c.name)
+      .sort();
+  }, [selectedProvince, allCities]);
 
-  // Get all provinces for comparison modal
-  const allProvinces = useMemo(() => {
-    const provincesSet = new Set<string>();
-    allSamples.forEach(sample => {
-      if (sample.province) {
-        provincesSet.add(sample.province);
-      }
-    });
-    return Array.from(provincesSet).sort();
-  }, [allSamples]);
-
-  // Filter ethnicities based on selected country/province
+  // Filter ethnicities (show all for now - server will filter)
   const filteredEthnicities = useMemo(() => {
-    // If no country and no province are selected, return all fetched ethnicities
-    if (!selectedCountry && !selectedProvince) {
-      return ethnicities;
-    }
+    return allEthnicities;
+  }, [allEthnicities]);
 
-    const relevantEthnicities = new Set<string>();
-
-    allSamples.forEach(sample => {
-      const countryMatch = !selectedCountry || (sample.country === selectedCountry);
-      const provinceMatch = !selectedProvince || (sample.province === selectedProvince);
-      
-      if (countryMatch && provinceMatch && sample.ethnicity) {
-        relevantEthnicities.add(sample.ethnicity);
-      }
-    });
-
-    return Array.from(relevantEthnicities).sort();
-  }, [selectedCountry, selectedProvince, allSamples, ethnicities]);
-
+  // Get unique province names for comparison modal
+  const provinceNames = useMemo(() => {
+    return Array.from(new Set(allProvinces.map(p => p.name))).sort();
+  }, [allProvinces]);
 
   // Reset country if it's not in filtered list
   useEffect(() => {
     if (selectedCountry && !filteredCountries.includes(selectedCountry)) {
       setSelectedCountry(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredCountries]);
+  }, [filteredCountries, selectedCountry]);
 
   // Reset province if it's not in filtered list
   useEffect(() => {
     if (selectedProvince && !filteredProvinces.includes(selectedProvince)) {
       setSelectedProvince(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredProvinces]);
+  }, [filteredProvinces, selectedProvince]);
+
+  // Reset city if it's not in filtered list
+  useEffect(() => {
+    if (selectedCity && !filteredCities.includes(selectedCity)) {
+      setSelectedCity(null);
+    }
+  }, [filteredCities, selectedCity]);
 
   // Reset ethnicity if it's not in the newly filtered list
   useEffect(() => {
     if (selectedEthnicity && !filteredEthnicities.includes(selectedEthnicity)) {
       setSelectedEthnicity(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredEthnicities]);
-
+  }, [filteredEthnicities, selectedEthnicity]);
 
   // Handler function to sync map click with filters
   const handleProvinceClick = (provinceName: string) => {
-    // If clicking the currently selected province, unselect it.
+    // If clicking the currently selected province, unselect it
     if (selectedProvince === provinceName) {
-        setSelectedProvince(null);
-        setSelectedCountry(null); 
-        setSelectedEthnicity(null);
-        return;
+      setSelectedProvince(null);
+      setSelectedCountry(null); 
+      setSelectedCity(null);
+      setSelectedEthnicity(null);
+      return;
     }
     
     setSelectedProvince(provinceName);
 
-    // Find the country for this province in the full sample set
-    const sampleInProvince = allSamples.find(
-      (sample) => sample.province === provinceName
-    );
-
-    if (sampleInProvince && sampleInProvince.country) {
-      // Update the country state to synchronize the country filter
-      setSelectedCountry(sampleInProvince.country);
+    // Find the country for this province
+    const province = allProvinces.find(p => p.name === provinceName);
+    if (province) {
+      setSelectedCountry(province.country);
     } else {
-        setSelectedCountry(null);
+      setSelectedCountry(null);
     }
     
-    // Reset ethnicity to default ('All') when a new region is selected via map for a clean state
+    // Reset city and ethnicity when a new region is selected via map
+    setSelectedCity(null);
     setSelectedEthnicity(null);
   };
 
-
-  // Fetch samples with filters
+  // Fetch samples with server-side filters using page_size=all for complete data
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {
@@ -238,16 +192,23 @@ export const AnalyticsPage: React.FC = () => {
       setError(null);
       
       try {
-        const params = new URLSearchParams();
-        if (selectedCountry) params.append('country', selectedCountry);
-        if (selectedProvince) params.append('province', selectedProvince);
-        if (selectedEthnicity) params.append('ethnicity', selectedEthnicity);
+        // Build filters using the utility
+        const filters = {
+          ...FILTER_PRESETS.allWithYDna(),
+          ...(selectedCountry && { country: selectedCountry }),
+          ...(selectedProvince && { province: selectedProvince }),
+          ...(selectedCity && { city: selectedCity }),
+          ...(selectedEthnicity && { ethnicity: selectedEthnicity }),
+        };
         
-        const url = `${API_ENDPOINTS.samples}?${params.toString()}`;
-        const data = await cachedFetch<Sample[]>(url);
+        const url = buildSamplesUrl(API_ENDPOINTS.samples, filters);
+        const data = await cachedFetchNormalized<Sample>(url, {
+          cacheOptions: { ttl: 2 * 60 * 1000 } // Cache for 2 minutes
+        });
         
         if (mounted) {
-          setSamples(data || []);
+          setSamples(data.results);
+          setTotalCount(data.count);
         }
       } catch (err) {
         if (mounted) {
@@ -264,7 +225,7 @@ export const AnalyticsPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [selectedCountry, selectedProvince, selectedEthnicity]);
+  }, [selectedCountry, selectedProvince, selectedCity, selectedEthnicity]);
 
   // Y-DNA calculations
   const yRoot = useMemo(() => countMap(samples, 'y_dna'), [samples]);
@@ -288,7 +249,6 @@ export const AnalyticsPage: React.FC = () => {
     () => Object.keys(yRoot).length > 0,
     [yRoot]
   );
-
 
   if (error)
     return (
@@ -323,7 +283,7 @@ export const AnalyticsPage: React.FC = () => {
                 Loading genetic data...
               </div>
               <div className="text-sm text-teal-400 mt-2">
-                Fetching from <code className="bg-slate-800 px-2 py-1 rounded">/genetics/samples/</code>
+                Using optimized server-side filtering
               </div>
             </div>
           </motion.div>
@@ -343,6 +303,13 @@ export const AnalyticsPage: React.FC = () => {
             <p className="mt-3 text-teal-300/80">
               Explore Y-DNA haplogroup distributions with interactive maps and subclade data.
             </p>
+            {totalCount > 0 && (
+              <p className="mt-2 text-sm text-teal-400">
+                Showing {samples.length.toLocaleString()} samples 
+                {(selectedCountry || selectedProvince || selectedEthnicity) && 
+                  ` (filtered from ${totalCount.toLocaleString()} total)`}
+              </p>
+            )}
             
             {/* Compare Provinces Button */}
             <button
@@ -375,6 +342,13 @@ export const AnalyticsPage: React.FC = () => {
               onChange={setSelectedProvince}
               placeholder="All Provinces"
             />
+            <LocationSelector
+              label="City"
+              options={filteredCities}
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="All Cities"
+            />
           </div>
         </div>
       </motion.section>
@@ -406,6 +380,7 @@ export const AnalyticsPage: React.FC = () => {
               <MapCard 
                 samples={samples} 
                 selectedProvince={selectedProvince}
+                selectedCity={selectedCity}
                 onProvinceClick={handleProvinceClick}
               />
             </div>
@@ -428,7 +403,7 @@ export const AnalyticsPage: React.FC = () => {
       <ProvinceComparisonModal
         isOpen={isComparisonModalOpen}
         onClose={() => setIsComparisonModalOpen(false)}
-        allProvinces={allProvinces}
+        allProvinces={provinceNames}
       />
     </Layout>
   );

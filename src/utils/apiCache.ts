@@ -153,3 +153,33 @@ export async function cachedFetch<T>(
 
   return data;
 }
+
+/**
+ * Cached fetch wrapper that normalizes paginated responses
+ * Handles both paginated responses and plain arrays
+ */
+export async function cachedFetchNormalized<T>(
+  url: string,
+  options?: RequestInit & { cacheOptions?: CacheOptions }
+): Promise<{ count: number; results: T[] }> {
+  const data = await cachedFetch<any>(url, options);
+  
+  // If it's already a paginated response
+  if (data && typeof data === 'object' && 'results' in data) {
+    return {
+      count: data.count || data.results.length,
+      results: data.results
+    };
+  }
+  
+  // If it's a plain array (when page_size=all)
+  if (Array.isArray(data)) {
+    return {
+      count: data.length,
+      results: data
+    };
+  }
+  
+  // Fallback
+  return { count: 0, results: [] };
+}
