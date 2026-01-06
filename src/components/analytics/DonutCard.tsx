@@ -29,6 +29,9 @@ interface ChartDataItem {
 }
 
 export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
+  // Early return BEFORE any hooks if no data
+  if (Object.keys(dataMap).length === 0) return null;
+  
   const reduceAnimations = shouldReduceAnimations();
   
   const sortedItems = useMemo(() => {
@@ -46,9 +49,6 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
       percentage: formatPercent(value, total)
     }));
   }, [sortedItems, total]);
-
-  // Early return before any hooks if no data
-  if (Object.keys(dataMap).length === 0) return null;
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
