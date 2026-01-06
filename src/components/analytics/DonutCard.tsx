@@ -47,7 +47,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
     }));
   }, [sortedItems, total]);
 
-  if (labels.length === 0) return null;
+  // Early return before any hooks if no data
+  if (Object.keys(dataMap).length === 0) return null;
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -73,8 +74,8 @@ export const DonutCard: React.FC<Props> = ({ title, dataMap, total }) => {
       
       <div className="flex flex-col items-center gap-6 flex-1">
         {/* Chart Section */}
-        <div className="relative w-full max-w-[280px] sm:max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none">
-          <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
+        <div className="relative w-full max-w-[280px] sm:max-w-[350px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none" style={{ minHeight: '280px' }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={280} className="outline-none focus:outline-none">
             <PieChart>
               <Pie
                 data={chartData}
