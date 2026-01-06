@@ -189,8 +189,8 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       return [];
     }
     
-    // If city view is selected and we have a province selected, don't show province markers
-    if (selectedProvince && viewLevel === 'city') {
+    // Hide province markers when city view is active
+    if (viewLevel === 'city') {
       return [];
     }
     

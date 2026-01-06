@@ -186,7 +186,7 @@ export async function cachedFetch<T>(
       
       const cacheTTL = isFilterEndpoint 
         ? 30 * 60 * 1000  // 30 minutes for filter options
-        : (options?.cacheOptions?.ttl ?? 2 * 60 * 1000); // 2 minutes for samples
+        : (options?.cacheOptions?.ttl ?? 15 * 60 * 1000); // 15 minutes for samples (increased from 2)
       
       apiCache.set(cacheKey, data, { 
         ...options?.cacheOptions, 
