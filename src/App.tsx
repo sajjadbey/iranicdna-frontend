@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './themes/theme';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { DNAMatrixBackground } from './components/DNAMatrixBackground';
 
 // Lazy load all page components for better code splitting
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
@@ -37,6 +38,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider forcedTheme="default">
+      <DNAMatrixBackground opacity={0.12} />
       <BrowserRouter basename={basename}>
         <AuthProvider>
           <Suspense fallback={<PageLoader />}>
