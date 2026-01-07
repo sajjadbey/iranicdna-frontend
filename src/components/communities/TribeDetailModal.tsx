@@ -15,6 +15,7 @@ interface Props {
 }
 
 const countMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, number> => {
+  if (!Array.isArray(samples)) return {};
   return samples.reduce((acc: Record<string, number>, s) => {
     const v = s[field];
     if (v && v.root_haplogroup) {
@@ -26,6 +27,7 @@ const countMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, 
 };
 
 const subMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, number> => {
+  if (!Array.isArray(samples)) return {};
   return samples.reduce((acc: Record<string, number>, s) => {
     const v = s[field];
     if (v && v.name) {
@@ -60,9 +62,17 @@ export const TribeDetailModal: React.FC<Props> = ({ isOpen, onClose, tribe, clan
           params.append('tribe', tribe.name);
         }
         
-        const url = `${apiBase}/samples/?${params.toString()}`;
-        const data = await cachedFetch<Sample[]>(url);
-        setSamples(data || []);
+        const url = `${apiBase}/genetics/samples/?${params.toString()}`;
+        const data = await cachedFetch<Sample[] | { results: Sample[] }>(url);
+        
+        // Handle both direct array and paginated response
+        if (Array.isArray(data)) {
+          setSamples(data);
+        } else if (data && typeof data === 'object' && 'results' in data && Array.isArray(data.results)) {
+          setSamples(data.results);
+        } else {
+          setSamples([]);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
