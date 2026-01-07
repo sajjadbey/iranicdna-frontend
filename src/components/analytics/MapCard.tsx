@@ -189,11 +189,6 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
       return [];
     }
     
-    // Hide province markers when city view is active
-    if (viewLevel === 'city') {
-      return [];
-    }
-    
     const statsMap = new Map() as Map<string, ProvinceStats>;
     
     samples.forEach((sample) => {
@@ -244,13 +239,8 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
 
   // Calculate city statistics when a province is selected
   const cityStats = useMemo<CityStats[]>(() => {
-    // Only show cities when a province is selected and city view is active
+    // Only show cities when a province is selected
     if (!selectedProvince || isLoading || Object.keys(cityCoordinates).length === 0) {
-      return [];
-    }
-    
-    // Don't show cities if province view is selected
-    if (viewLevel === 'province') {
       return [];
     }
     
@@ -300,7 +290,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     });
     
     return Array.from(statsMap.values());
-  }, [samples, cityCoordinates, isLoading, selectedProvince, selectedCity, viewLevel]);
+  }, [samples, cityCoordinates, isLoading, selectedProvince, selectedCity]);
 
   // Generate colors for haplogroups
   const allHaplogroups = useMemo(() => {
@@ -407,12 +397,13 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
 
   return (
     <div className="bg-slate-800/60 rounded-2xl p-6 border border-teal-700/30">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-teal-200 flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <h3 className="text-lg sm:text-xl font-bold text-teal-200 flex items-center gap-2">
           <MapPin size={20} />
-          Geographic Distribution
+          <span className="hidden sm:inline">Geographic Distribution</span>
+          <span className="sm:hidden">Distribution</span>
           {selectedProvince && (provinceStats.length > 0 || cityStats.length > 0) && (
-            <span className="text-sm font-normal text-teal-300/70">
+            <span className="text-xs sm:text-sm font-normal text-teal-300/70">
               {selectedCity 
                 ? `(${selectedCity})`
                 : `(${selectedProvince})`
@@ -423,34 +414,34 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
         
         {/* View Level Toggle - only show when province is selected and has cities */}
         {selectedProvince && !selectedCity && hasCitiesInProvince && (
-          <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg p-1 border border-teal-700/30">
+          <div className="flex items-center gap-1 sm:gap-2 bg-slate-900/60 rounded-lg p-1 border border-teal-700/30 w-full sm:w-auto">
             <button
               onClick={() => setViewLevel('province')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-4 sm:px-3 py-2 sm:py-1.5 rounded text-sm sm:text-xs font-medium transition-all flex-1 sm:flex-initial ${
                 viewLevel === 'province'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-teal-300 hover:text-teal-100'
               }`}
             >
-              <MapIcon size={14} />
-              Province
+              <MapIcon size={16} className="sm:w-3.5 sm:h-3.5" />
+              <span>Province</span>
             </button>
             <button
               onClick={() => setViewLevel('city')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-4 sm:px-3 py-2 sm:py-1.5 rounded text-sm sm:text-xs font-medium transition-all flex-1 sm:flex-initial ${
                 viewLevel === 'city'
                   ? 'bg-teal-600 text-white shadow-md'
                   : 'text-teal-300 hover:text-teal-100'
               }`}
             >
-              <Building2 size={14} />
-              Cities
+              <Building2 size={16} className="sm:w-3.5 sm:h-3.5" />
+              <span>Cities</span>
             </button>
           </div>
         )}
       </div>
       
-      <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
+      <div className="h-[400px] sm:h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}
@@ -465,8 +456,8 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
           
-          {/* Province pie chart markers */}
-          {provinceStats.map((stats) => {
+          {/* Province pie chart markers - only show in province view */}
+          {viewLevel === 'province' && provinceStats.map((stats) => {
             const size = Math.max(40, Math.min(80, (stats.sampleCount / maxSamples) * 80));
             const isSelected = selectedProvince === stats.name;
             const icon = createPieChartIcon(stats.haplogroupCounts, colorMap, size, isSelected);
@@ -525,9 +516,9 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
             );
           })}
           
-          {/* City pie chart markers (when a province is selected) */}
-          {cityStats.map((stats) => {
-            const size = Math.max(30, Math.min(60, (stats.sampleCount / maxSamples) * 60));
+          {/* City pie chart markers (when a province is selected and city view is active) */}
+          {viewLevel === 'city' && cityStats.map((stats) => {
+            const size = Math.max(50, Math.min(100, (stats.sampleCount / maxSamples) * 100));
             const isSelected = selectedCity === stats.name;
             const icon = createPieChartIcon(stats.haplogroupCounts, colorMap, size, isSelected);
             
