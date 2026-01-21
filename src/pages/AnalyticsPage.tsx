@@ -1,7 +1,7 @@
 // AnalyticsPage.tsx
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dna, BarChart3 } from 'lucide-react';
+import { Dna, BarChart3, Download } from 'lucide-react';
 import { type Sample } from '../types';
 import { Layout } from '../components/Layout';
 import { LocationSelector } from '../components/analytics/LocationSelector';
@@ -239,6 +239,16 @@ export const AnalyticsPage: React.FC = () => {
     [yRoot]
   );
 
+  // Handle Excel export
+  const handleExportExcel = () => {
+    const link = document.createElement('a');
+    link.href = API_ENDPOINTS.exportExcel;
+    link.download = 'genetic_samples.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (error)
     return (
       <Layout>
@@ -300,14 +310,24 @@ export const AnalyticsPage: React.FC = () => {
               </p>
             )}
             
-            {/* Compare Provinces Button */}
-            <button
-              onClick={() => setIsComparisonModalOpen(true)}
-              className="mt-4 px-6 py-3 bg-slate-800/80 hover:bg-slate-700/80 border border-teal-700/30 hover:border-teal-500/50 rounded-xl transition-all flex items-center gap-2 text-teal-200 font-semibold shadow-lg hover:shadow-xl"
-            >
-              <BarChart3 size={20} />
-              Compare Provinces
-            </button>
+            {/* Action Buttons */}
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                onClick={() => setIsComparisonModalOpen(true)}
+                className="px-6 py-3 bg-slate-800/80 hover:bg-slate-700/80 border border-teal-700/30 hover:border-teal-500/50 rounded-xl transition-all flex items-center gap-2 text-teal-200 font-semibold shadow-lg hover:shadow-xl"
+              >
+                <BarChart3 size={20} />
+                Compare Provinces
+              </button>
+              
+              <button
+                onClick={handleExportExcel}
+                className="px-6 py-3 bg-emerald-800/80 hover:bg-emerald-700/80 border border-emerald-700/30 hover:border-emerald-500/50 rounded-xl transition-all flex items-center gap-2 text-emerald-200 font-semibold shadow-lg hover:shadow-xl"
+              >
+                <Download size={20} />
+                Export to Excel
+              </button>
+            </div>
           </div>
           <div className="col-span-1 md:col-span-2 flex flex-col sm:flex-row gap-4">
             <LocationSelector

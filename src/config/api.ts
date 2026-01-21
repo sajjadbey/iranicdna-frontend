@@ -1,8 +1,8 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.qizilbash.ir';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 // Analytics API
-export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://api.qizilbash.ir';
+export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'http://127.0.0.1:8000';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -59,6 +59,9 @@ export const API_ENDPOINTS = {
   haplogroupAll: `${ANALYTICS_API_URL}/genetics/haplogroup/all/`,
   haplogroup: `${ANALYTICS_API_URL}/genetics/haplogroup/`,
   haplogroupHeatmap: `${ANALYTICS_API_URL}/genetics/haplogroup/heatmap/`,
+  
+  // Export endpoints
+  exportExcel: `${ANALYTICS_API_URL}/genetics/get_excel`,
   
   // qpAdm endpoints
   qpadmRun: `${API_BASE_URL}/tools/qpadm/run/`,
