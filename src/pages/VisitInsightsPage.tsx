@@ -90,19 +90,11 @@ export const VisitInsightsPage: React.FC = () => {
   const fetchInsights = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
-      
-      if (!token) {
-        setError('Authentication required');
-        setLoading(false);
-        return;
-      }
 
       const response = await fetch(
         `${API_ENDPOINTS.profile.replace('/auth/profile/', '/security/visit-insights/')}?days=${days}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
