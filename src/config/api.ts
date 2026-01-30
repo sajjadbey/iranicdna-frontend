@@ -4,6 +4,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.qi
 // Analytics API
 export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://api.qizilbash.ir';
 
+// GraphQL API
+export const GRAPHQL_URL = `${API_BASE_URL}/graphql/`;
+
 // API endpoints
 export const API_ENDPOINTS = {
   // Authentication

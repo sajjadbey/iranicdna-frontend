@@ -15,7 +15,7 @@ import {
   LineElement,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import { API_ENDPOINTS } from '../config/api';
+import { GRAPHQL_URL } from '../config/api';
 
 // Register ChartJS components
 ChartJS.register(
@@ -91,21 +91,71 @@ export const VisitInsightsPage: React.FC = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${API_ENDPOINTS.profile.replace('/auth/profile/', '/security/visit-insights/')}?days=${days}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      const query = `
+        query GetVisitInsights($days: Int!) {
+          visitInsights(days: $days) {
+            totalVisits
+            uniqueIps
+            ipv4Count
+            ipv6Count
+            topIsps {
+              isp
+              count
+              percentage
+            }
+            topPaths {
+              path
+              count
+              percentage
+            }
+            topCountries {
+              country
+              count
+              percentage
+            }
+            visitsByDate {
+              date
+              count
+            }
+          }
         }
-      );
+      `;
+
+      const response = await fetch(GRAPHQL_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query,
+          variables: { days },
+        }),
+      });
 
       if (!response.ok) {
         throw new Error('Failed to fetch insights');
       }
 
-      const data = await response.json();
-      setInsights(data);
+      const result = await response.json();
+      
+      if (result.errors) {
+        throw new Error(result.errors[0].message);
+      }
+
+      // Transform GraphQL response to match the expected format
+      const graphqlData = result.data.visitInsights;
+      const transformedData = {
+        total_visits: graphqlData.totalVisits,
+        unique_ips: graphqlData.uniqueIps,
+        ipv4_count: graphqlData.ipv4Count,
+        ipv6_count: graphqlData.ipv6Count,
+        top_isps: graphqlData.topIsps,
+        top_paths: graphqlData.topPaths,
+        top_countries: graphqlData.topCountries,
+        visits_by_date: graphqlData.visitsByDate,
+      };
+
+      setInsights(transformedData);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
