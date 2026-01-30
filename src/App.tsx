@@ -78,9 +78,7 @@ const App: React.FC = () => {
               <Route
                 path="/admin/insights"
                 element={
-                  <ProtectedRoute>
-                    <VisitInsightsPage />
-                  </ProtectedRoute>
+                  <VisitInsightsPage />
                 }
               />
             </Routes>
