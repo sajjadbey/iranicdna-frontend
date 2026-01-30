@@ -22,6 +22,7 @@ const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage').then(m => (
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const VisitInsightsPage = lazy(() => import('./pages/VisitInsightsPage').then(m => ({ default: m.VisitInsightsPage })));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -69,6 +70,16 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* Admin Routes */}
+              <Route
+                path="/admin/insights"
+                element={
+                  <ProtectedRoute>
+                    <VisitInsightsPage />
                   </ProtectedRoute>
                 }
               />

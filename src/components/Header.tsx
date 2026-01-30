@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut } from 'lucide-react';
+import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
@@ -105,6 +105,19 @@ export const Header: React.FC = () => {
             {/* Auth Links */}
             {isAuthenticated ? (
               <>
+                {/* Admin Insights Link - Only for staff/superuser */}
+                {(user?.is_staff || user?.is_superuser) && (
+                  <Link
+                    to="/admin/insights"
+                    className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                      isActive('/admin/insights')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Activity size={14} /> Insights
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
@@ -301,6 +314,29 @@ export const Header: React.FC = () => {
                 {/* Mobile Auth Links */}
                 {isAuthenticated ? (
                   <>
+                    {/* Admin Insights Link - Mobile */}
+                    {(user?.is_staff || user?.is_superuser) && (
+                      <motion.div
+                        variants={{
+                          open: { x: 0, opacity: 1 },
+                          closed: { x: -100, opacity: 0 }
+                        }}
+                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                      >
+                        <Link
+                          to="/admin/insights"
+                          onClick={closeMobileMenu}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                            isActive('/admin/insights')
+                              ? 'bg-white/10 text-white'
+                              : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                          }`}
+                        >
+                          <Activity size={18} />
+                          <span className="font-medium">Insights</span>
+                        </Link>
+                      </motion.div>
+                    )}
                     <motion.div
                       variants={{
                         open: { x: 0, opacity: 1 },

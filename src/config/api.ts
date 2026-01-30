@@ -70,4 +70,8 @@ export const API_ENDPOINTS = {
   qpadmStatus: `${API_BASE_URL}/tools/qpadm/status/`,
   qpadmQueueStatus: `${API_BASE_URL}/tools/qpadm/queue/status/`,
   qpadmPopulations: `${API_BASE_URL}/tools/qpadm/populations/`,
+  
+  // Security/Visit Insights endpoints
+  visitInsights: `${API_BASE_URL}/security/visit-insights/`,
+  ipDistribution: `${API_BASE_URL}/security/ip-distribution/`,
 } as const;
