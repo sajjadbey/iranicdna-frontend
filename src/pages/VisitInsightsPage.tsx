@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
-import { Activity, BarChart3, Globe, TrendingUp, Users, MapPin } from 'lucide-react';
+import { Activity, Globe, TrendingUp, Users, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   Chart as ChartJS,
