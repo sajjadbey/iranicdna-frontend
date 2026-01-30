@@ -133,6 +133,9 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        console.log('[DEBUG:MapCard] Fetching provinces from:', API_ENDPOINTS.provinces);
+        console.log('[DEBUG:MapCard] Fetching cities from:', API_ENDPOINTS.cities);
+        
         const [provincesData, citiesData] = await Promise.all([
           fetch(API_ENDPOINTS.provinces).then(res => {
             if (!res.ok) throw new Error('Failed to fetch provinces');
@@ -143,11 +146,15 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
             return res.json();
           })
         ]);
+        
+        console.log('[DEBUG:MapCard] Provinces received:', provincesData?.length, provincesData);
+        console.log('[DEBUG:MapCard] Cities received:', citiesData?.length, citiesData);
+        
         setProvinces(provincesData);
         setCities(citiesData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('[DEBUG:MapCard] Error fetching data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load map data');
       } finally {
         setIsLoading(false);
@@ -179,13 +186,22 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
 
   // Calculate province statistics
   const provinceStats = useMemo<ProvinceStats[]>(() => {
+    console.log('[DEBUG:MapCard] Calculating province stats...');
+    console.log('[DEBUG:MapCard] - isLoading:', isLoading);
+    console.log('[DEBUG:MapCard] - provinceCoordinates keys:', Object.keys(provinceCoordinates).length);
+    console.log('[DEBUG:MapCard] - samples count:', samples.length);
+    console.log('[DEBUG:MapCard] - selectedCity:', selectedCity);
+    console.log('[DEBUG:MapCard] - selectedProvince:', selectedProvince);
+    
     // Don't calculate stats if provinces aren't loaded yet
     if (isLoading || Object.keys(provinceCoordinates).length === 0) {
+      console.log('[DEBUG:MapCard] Returning empty stats - loading or no coordinates');
       return [];
     }
     
     // If a specific city is selected, don't show province markers
     if (selectedCity) {
+      console.log('[DEBUG:MapCard] Returning empty stats - city selected');
       return [];
     }
     

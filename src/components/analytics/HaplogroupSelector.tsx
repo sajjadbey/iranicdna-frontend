@@ -59,24 +59,45 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     const fetchTreeAndCounts = async () => {
       try {
         setLoading(true);
-        const data = await cachedFetch<HaplogroupNode[]>(API_ENDPOINTS.haplogroupAll);
-        
-        // Fetch counts for all root haplogroups
-        const rootHaplogroups = data.map(node => node.name);
-        const countPromises = rootHaplogroups.map(async (name) => {
-          try {
-            const countData = await cachedFetch<HaplogroupCount>(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
-            return { name, count: countData };
-          } catch {
-            return null;
+        const data = await cachedFetch<HaplogroupNode[]>(API_ENDPOINTS.haplogroupAll, {
+          cacheOptions: {
+            ttl: 120 * 60 * 1000, // 2 hour cache for tree structure (rarely changes)
+            maxRetries: 4
           }
         });
         
-        const counts = await Promise.all(countPromises);
+        // Fetch counts for root haplogroups sequentially in batches
+        // to avoid overwhelming the API with parallel requests
+        const rootHaplogroups = data.map(node => node.name);
         const countsMap: Record<string, HaplogroupCount> = {};
-        counts.forEach(item => {
-          if (item) countsMap[item.name] = item.count;
-        });
+        
+        // Process in batches of 5 to avoid rate limiting
+        const batchSize = 5;
+        for (let i = 0; i < rootHaplogroups.length; i += batchSize) {
+          const batch = rootHaplogroups.slice(i, i + batchSize);
+          const batchPromises = batch.map(async (name) => {
+            try {
+              const countData = await cachedFetch<HaplogroupCount>(
+                `${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`,
+                {
+                  cacheOptions: {
+                    ttl: 60 * 60 * 1000, // 60 minutes cache to reduce API calls
+                    maxRetries: 4
+                  }
+                }
+              );
+              return { name, count: countData };
+            } catch (err) {
+              console.warn(`Failed to fetch count for ${name}:`, err);
+              return null;
+            }
+          });
+          
+          const batchResults = await Promise.all(batchPromises);
+          batchResults.forEach(item => {
+            if (item) countsMap[item.name] = item.count;
+          });
+        }
         
         // Sort tree by total_count (highest to lowest)
         const sortedData = [...data].sort((a, b) => {
@@ -102,9 +123,15 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
     if (haplogroupCounts[name]) return;
     
     try {
-      const res = await fetch(`${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: HaplogroupCount = await res.json();
+      const data = await cachedFetch<HaplogroupCount>(
+        `${API_ENDPOINTS.haplogroup}?name=${encodeURIComponent(name)}`,
+        {
+          cacheOptions: {
+            ttl: 60 * 60 * 1000, // 60 minutes cache to reduce API calls
+            maxRetries: 4
+          }
+        }
+      );
       setHaplogroupCounts(prev => ({ ...prev, [name]: data }));
     } catch (err) {
       console.error(`Failed to fetch count for ${name}:`, err);
@@ -119,10 +146,16 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
         newSet.delete(name);
       } else {
         newSet.add(name);
-        // Fetch counts for children when expanding
+        // Fetch counts for children when expanding (they'll be queued automatically)
         const node = findNodeByName(haplogroupTree, name);
         if (node && node.children) {
-          node.children.forEach(child => fetchCount(child.name));
+          // Fetch children counts asynchronously without blocking UI
+          node.children.forEach(child => {
+            // Only fetch if not already in cache
+            if (!haplogroupCounts[child.name]) {
+              fetchCount(child.name);
+            }
+          });
         }
       }
       return newSet;

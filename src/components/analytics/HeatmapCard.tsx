@@ -82,9 +82,16 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
         
         const haplogroupUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${haplogroupParams.toString()}`;
+        console.log('[DEBUG:HeatmapCard] Fetching haplogroup data from:', haplogroupUrl);
+        
         const haplogroupData = await cachedFetch<HeatmapPoint[]>(haplogroupUrl, {
-          cacheOptions: { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+          cacheOptions: { 
+            ttl: 60 * 60 * 1000, // Cache for 60 minutes (heatmap data is stable)
+            maxRetries: 4
+          }
         });
+        
+        console.log('[DEBUG:HeatmapCard] Haplogroup data received:', haplogroupData?.length, haplogroupData);
         
         // Fetch total data (without haplogroup filter) for percentage calculation
         const totalParams = new URLSearchParams();
@@ -92,14 +99,21 @@ export const HeatmapCard: React.FC<Props> = ({
         if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
         
         const totalUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${totalParams.toString()}`;
+        console.log('[DEBUG:HeatmapCard] Fetching total data from:', totalUrl);
+        
         const totalDataResult = await cachedFetch<HeatmapPoint[]>(totalUrl, {
-          cacheOptions: { ttl: 5 * 60 * 1000 }
+          cacheOptions: { 
+            ttl: 60 * 60 * 1000, // Cache for 60 minutes
+            maxRetries: 4
+          }
         });
+        
+        console.log('[DEBUG:HeatmapCard] Total data received:', totalDataResult?.length, totalDataResult);
         
         setHeatmapData(haplogroupData || []);
         setTotalData(totalDataResult || []);
       } catch (err) {
-        console.error('Failed to fetch heatmap data:', err);
+        console.error('[DEBUG:HeatmapCard] Failed to fetch heatmap data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load heatmap data');
         setHeatmapData([]);
         setTotalData([]);
@@ -113,11 +127,18 @@ export const HeatmapCard: React.FC<Props> = ({
 
   // Calculate Empirical Bayes shrunk frequencies and statistics
   const statisticalData = useMemo(() => {
+    console.log('[DEBUG:HeatmapCard] Calculating statistical data...');
+    console.log('[DEBUG:HeatmapCard] - selectedHaplogroup:', selectedHaplogroup);
+    console.log('[DEBUG:HeatmapCard] - heatmapData length:', heatmapData.length);
+    console.log('[DEBUG:HeatmapCard] - totalData length:', totalData.length);
+    
     if (!selectedHaplogroup) {
+      console.log('[DEBUG:HeatmapCard] No haplogroup selected');
       return [];
     }
     
     if (heatmapData.length === 0 || totalData.length === 0) {
+      console.log('[DEBUG:HeatmapCard] No data available');
       return [];
     }
     

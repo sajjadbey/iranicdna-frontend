@@ -1,3 +1,5 @@
+import { requestQueue, retryWithBackoff } from './requestQueue';
+
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -6,11 +8,13 @@ interface CacheEntry<T> {
 interface CacheOptions {
   ttl?: number; // Time to live in milliseconds
   useSessionStorage?: boolean; // Use sessionStorage instead of memory
+  skipQueue?: boolean; // Skip request queue (use for urgent requests)
+  maxRetries?: number; // Maximum retry attempts for 429 errors
 }
 
 class ApiCache {
   private memoryCache = new Map<string, CacheEntry<unknown>>();
-  private defaultTTL = 2 * 60 * 1000; // 2 minutes in milliseconds (increased from 2 minutes)
+  private defaultTTL = 30 * 60 * 1000; // 30 minutes - increased to reduce API calls and prevent 429 errors
   private pendingRequests = new Map<string, Promise<unknown>>(); // Request deduplication
 
   /**
@@ -168,25 +172,45 @@ export async function cachedFetch<T>(
     return pendingRequest;
   }
 
-  // Create new request
+  // Create new request with queue and retry logic
   const requestPromise = (async () => {
     try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+      const skipQueue = options?.cacheOptions?.skipQueue ?? false;
+      const maxRetries = options?.cacheOptions?.maxRetries ?? 4; // Increased from 3 to 4
 
-      const data: T = await response.json();
+      // Execute request with queue and retry logic
+      const fetchFn = async () => {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      };
 
-      // Store in cache with longer TTL for filter options
+      // Wrap fetch in retry logic
+      const fetchWithRetry = () => retryWithBackoff(fetchFn, maxRetries);
+
+      // Queue the request unless skipQueue is true
+      const data: T = skipQueue 
+        ? await fetchWithRetry()
+        : await requestQueue.enqueue(fetchWithRetry);
+
+      // Store in cache with longer TTL for stable data to reduce API calls
       const isFilterEndpoint = url.includes('/countries/') || 
                                url.includes('/provinces/') || 
                                url.includes('/cities/') || 
                                url.includes('/ethnicities/');
       
+      const isHaplogroupEndpoint = url.includes('/haplogroup/');
+      const isSamplesEndpoint = url.includes('/samples/');
+      
       const cacheTTL = isFilterEndpoint 
-        ? 30 * 60 * 1000  // 30 minutes for filter options
-        : (options?.cacheOptions?.ttl ?? 15 * 60 * 1000); // 15 minutes for samples (increased from 2)
+        ? 120 * 60 * 1000  // 120 minutes (2 hours) for filter options (rarely change)
+        : isHaplogroupEndpoint
+        ? 60 * 60 * 1000   // 60 minutes for haplogroup data (stable)
+        : isSamplesEndpoint
+        ? 30 * 60 * 1000   // 30 minutes for samples data
+        : (options?.cacheOptions?.ttl ?? 30 * 60 * 1000); // 30 minutes default (increased from 15)
       
       apiCache.set(cacheKey, data, { 
         ...options?.cacheOptions, 

@@ -192,7 +192,7 @@ export const AnalyticsPage: React.FC = () => {
         
         const url = buildSamplesUrl(API_ENDPOINTS.samples, filters);
         const data = await cachedFetchNormalized<Sample>(url, {
-          cacheOptions: { ttl: 15 * 60 * 1000 } // Cache for 15 minutes (increased from 2)
+          cacheOptions: { ttl: 30 * 60 * 1000, maxRetries: 4 } // Cache for 30 minutes to reduce 429 errors
         });
         
         if (mounted) {
