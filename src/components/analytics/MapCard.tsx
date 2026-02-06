@@ -469,7 +469,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
           {/* Dark theme tile layer */}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           />
           
           {/* Province pie chart markers - only show in province view */}
