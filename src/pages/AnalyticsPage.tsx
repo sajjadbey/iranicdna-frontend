@@ -345,7 +345,7 @@ export const AnalyticsPage: React.FC = () => {
               placeholder="All Countries"
             />
             <LocationSelector
-              label="Province"
+              label="Province/Region"
               options={filteredProvinces}
               value={selectedProvince}
               onChange={setSelectedProvince}
