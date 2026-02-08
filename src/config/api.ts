@@ -1,8 +1,8 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.qizilbash.ir';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.iranicdna.com';
 
 // Analytics API
-export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://api.qizilbash.ir';
+export const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://api.iranicdna.com';
 
 // GraphQL API
 export const GRAPHQL_URL = `${API_BASE_URL}/graphql/`;
