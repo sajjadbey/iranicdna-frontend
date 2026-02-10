@@ -8,6 +8,7 @@ Allow: /
 # Specific pages
 Allow: /analytics
 Allow: /communities
+Allow: /pages
 
 # Disallow crawling of assets and build files
 Disallow: /assets/
@@ -16,7 +17,7 @@ Disallow: /*.css$
 Disallow: /*.json$
 
 # Sitemap location (update with your actual domain when deployed)
-# Sitemap: https://qizilbash.ir/iranicdna/sitemap.xml
+# Sitemap: https://iranicdna.com/iranicdna/sitemap.xml
 
 # Crawl-delay for polite crawling (optional)
 Crawl-delay: 1
