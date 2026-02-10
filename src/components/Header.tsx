@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut, Activity } from 'lucide-react';
+import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut, Activity, Coffee } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
@@ -101,6 +101,17 @@ export const Header: React.FC = () => {
             >
               <Mail size={14} /> Contact Us
             </Link>
+            
+            {/* Ko-fi Donate Link */}
+            <a
+              href="https://ko-fi.com/iranicdna"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-amber-300 hover:text-amber-200 flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+              title="Support us on Ko-fi"
+            >
+              <Coffee size={14} /> Donate
+            </a>
             
             {/* Auth Links */}
             {isAuthenticated ? (
@@ -309,6 +320,26 @@ export const Header: React.FC = () => {
                     <Mail size={18} />
                     <span className="font-medium">Contact Us</span>
                   </Link>
+                </motion.div>
+                
+                {/* Ko-fi Donate Link - Mobile */}
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <a
+                    href="https://ko-fi.com/dummy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-amber-300 hover:text-amber-200 hover:bg-white/5 transition-colors"
+                  >
+                    <Coffee size={18} />
+                    <span className="font-medium">Donate</span>
+                  </a>
                 </motion.div>
                 
                 {/* Mobile Auth Links */}
