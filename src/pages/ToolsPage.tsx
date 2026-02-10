@@ -71,7 +71,6 @@ export const ToolsPage: React.FC = () => {
         {tools.map((tool, index) => {
           const Icon = tool.icon;
           const isDisabled = tool.disabled;
-          const CardWrapper = isDisabled ? 'div' : Link;
           
           return (
             <motion.div
@@ -81,24 +80,42 @@ export const ToolsPage: React.FC = () => {
               transition={{ duration: 0.3, delay: 0.1 + index * 0.1 }}
               className="h-full relative"
             >
-              <CardWrapper
-                {...(!isDisabled && { to: tool.path })}
-                className={`flex h-full rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} ${!isDisabled && tool.hoverBorder} transition-all duration-300 ${!isDisabled && 'hover:shadow-lg hover:shadow-teal-500/10'} group ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg bg-teal-400/10 ${!isDisabled && 'group-hover:scale-110'} transition-transform duration-300`}>
-                    <Icon className="text-teal-400" size={28} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`text-xl font-semibold text-teal-100 mb-2 ${!isDisabled && 'group-hover:text-white'} transition-colors`}>
-                      {tool.title}
-                    </h3>
-                    <p className={`text-sm text-teal-300/80 ${!isDisabled && 'group-hover:text-teal-200/90'} transition-colors`}>
-                      {tool.description}
-                    </p>
+              {isDisabled ? (
+                <div className={`flex h-full rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} transition-all duration-300 group opacity-60 cursor-not-allowed`}>
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-teal-400/10 transition-transform duration-300">
+                      <Icon className="text-teal-400" size={28} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-teal-100 mb-2 transition-colors">
+                        {tool.title}
+                      </h3>
+                      <p className="text-sm text-teal-300/80 transition-colors">
+                        {tool.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </CardWrapper>
+              ) : (
+                <Link
+                  to={tool.path}
+                  className={`flex h-full rounded-xl p-6 bg-gradient-to-br ${tool.bgGradient} border ${tool.borderColor} ${tool.hoverBorder} transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10 group`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-teal-400/10 group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="text-teal-400" size={28} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-teal-100 mb-2 group-hover:text-white transition-colors">
+                        {tool.title}
+                      </h3>
+                      <p className="text-sm text-teal-300/80 group-hover:text-teal-200/90 transition-colors">
+                        {tool.description}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
               {isDisabled && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="bg-amber-500/90 text-slate-900 font-bold text-lg px-6 py-2 rounded-lg rotate-[-15deg] shadow-xl">
