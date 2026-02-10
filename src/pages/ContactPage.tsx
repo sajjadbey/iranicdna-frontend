@@ -14,29 +14,6 @@ export const ContactPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-5xl mx-auto mb-16"
         >
-          {/* Image Container */}
-          <div className="mb-10 flex justify-center">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-              className="relative"
-            >
-              {/* Decorative glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 via-amber-500/20 to-purple-500/20 blur-3xl opacity-50 rounded-3xl"></div>
-              
-              {/* Image frame */}
-              <div className="relative bg-gradient-to-br from-teal-900/30 to-amber-900/30 p-1 rounded-2xl backdrop-blur-sm border border-white/20 shadow-2xl">
-                <div className="bg-[var(--color-card)]/80 backdrop-blur-md rounded-xl overflow-hidden">
-                  <img
-                    src="/contact.webp"
-                    alt="Contact the IranicDNA Team"
-                    className="w-full max-w-2xl h-auto object-contain"
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </div>
 
           {/* Title Section */}
           <div className="text-center">
