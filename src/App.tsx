@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './themes/theme';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { StaffProtectedRoute } from './components/StaffProtectedRoute';
 import { DNAMatrixBackground } from './components/DNAMatrixBackground';
 
 // Lazy load all page components for better code splitting
@@ -78,7 +79,9 @@ const App: React.FC = () => {
               <Route
                 path="/admin/insights"
                 element={
-                  <VisitInsightsPage />
+                  <StaffProtectedRoute>
+                    <VisitInsightsPage />
+                  </StaffProtectedRoute>
                 }
               />
             </Routes>
