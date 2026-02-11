@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { Dna } from 'lucide-react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 interface DNAMatrixBackgroundProps {
   opacity?: number;
@@ -36,29 +38,31 @@ export const DNAMatrixBackground: React.FC<DNAMatrixBackgroundProps> = ({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       const accentColor = getAccentColor();
-      ctx.fillStyle = accentColor;
-      ctx.font = '12px monospace';
       
-      const lineHeight = 18;
-      const charSpacing = 7;
+      const iconSize = 20;
+      const spacing = 40;
       
-      // Calculate how many characters fit per row
-      const charsPerRow = Math.ceil(canvas.width / charSpacing);
-      const rows = Math.ceil(canvas.height / lineHeight) + 2;
+      const cols = Math.ceil(canvas.width / spacing);
+      const rows = Math.ceil(canvas.height / spacing);
       
-      const nucleotides = ['A', 'T', 'G', 'C'];
-
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < charsPerRow; col++) {
-          // Randomly pick a nucleotide
-          const char = nucleotides[Math.floor(Math.random() * nucleotides.length)];
-          
-          const x = col * charSpacing;
-          const y = row * lineHeight;
-          
-          ctx.fillText(char, x, y);
+      // Create DNA icon SVG
+      const iconSvg = renderToStaticMarkup(<Dna size={iconSize} color={accentColor} />);
+      const img = new Image();
+      const svgBlob = new Blob([iconSvg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      img.onload = () => {
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const x = col * spacing + (row % 2) * (spacing / 2);
+            const y = row * spacing;
+            ctx.drawImage(img, x, y, iconSize, iconSize);
+          }
         }
-      }
+        URL.revokeObjectURL(url);
+      };
+      
+      img.src = url;
     };
 
     // Draw once
