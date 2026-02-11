@@ -1,23 +1,36 @@
 # robots.txt for IranicDNA
-# Community-driven project to document and visualize genetic diversity across Iranian provinces
+# Community-driven genetic diversity visualization platform
 
-# Allow all search engines to crawl the site
 User-agent: *
 Allow: /
 
-# Specific pages
+# Public pages - encourage indexing
 Allow: /analytics
 Allow: /communities
-Allow: /pages
+Allow: /blog
+Allow: /contact
+Allow: /tools
 
-# Disallow crawling of assets and build files
+# Disallow authentication pages
+Disallow: /signin
+Disallow: /signup
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Disallow protected/admin pages
+Disallow: /profile
+Disallow: /admin
+
+# Disallow assets and build files
 Disallow: /assets/
 Disallow: /*.js$
 Disallow: /*.css$
 Disallow: /*.json$
+Disallow: /*.map$
 
-# Sitemap location (update with your actual domain when deployed)
-# Sitemap: https://iranicdna.com/iranicdna/sitemap.xml
+# Sitemap location
+Sitemap: https://iranicdna.com/sitemap.xml
 
-# Crawl-delay for polite crawling (optional)
+# Crawl-delay for polite crawling
 Crawl-delay: 1
