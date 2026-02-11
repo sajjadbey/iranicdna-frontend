@@ -84,13 +84,6 @@ export const Header: React.FC = () => {
             >
               <Wrench size={14} /> Tools
             </Link>
-            <a
-              href="#about"
-              className="text-sm font-medium text-teal-100/90 hover:text-white flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
-              onClick={scrollToAbout}
-            >
-              <Info size={14} /> About
-            </a>
             <Link
               to="/contact"
               className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
