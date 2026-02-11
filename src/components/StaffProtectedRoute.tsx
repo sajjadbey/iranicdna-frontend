@@ -21,7 +21,7 @@ export const StaffProtectedRoute: React.FC<StaffProtectedRouteProps> = ({ childr
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/signin" state={{ from: window.location.pathname }} replace />;
   }
 
   if (!user?.is_staff) {

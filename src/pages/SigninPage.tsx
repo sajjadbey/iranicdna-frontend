@@ -12,6 +12,9 @@ export const SigninPage: React.FC = () => {
   const location = useLocation();
   const { signin } = useAuth();
   
+  // Get redirect path from location state
+  const from = (location.state as { from?: string })?.from || '/';
+  
   // Get state from navigation (from signup page)
   const locationState = location.state as { message?: string; email?: string } | null;
   
@@ -56,7 +59,7 @@ export const SigninPage: React.FC = () => {
     try {
       await signin({ ...formData, turnstile_token: turnstileToken });
       setSuccess('Login successful! Redirecting...');
-      setTimeout(() => navigate('/'), 1500);
+      setTimeout(() => navigate(from, { replace: true }), 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
       setError(errorMessage);
