@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { graphqlService, FamousPerson } from '../services/graphqlService';
+import { graphqlService, type FamousPerson } from '../services/graphqlService';
 
 export const FamousIraniansPage: React.FC = () => {
   const [people, setPeople] = useState<FamousPerson[]>([]);
