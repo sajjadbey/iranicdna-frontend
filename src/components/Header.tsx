@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
                 Iranic<span className="text-amber-300">DNA</span>
               </h1>
               <p className="text-[0.6rem] md:text-[0.65rem] text-teal-200/80 mt-0.5 flex items-center gap-1">
-                <Dna size={10} /> Y-DNA & mtDNA by Province
+                <Dna size={10} /> Y-DNA by Province
               </p>
             </div>
           </Link>

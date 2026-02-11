@@ -18,12 +18,12 @@ export const HomePage: React.FC = () => {
               <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-teal-300 to-amber-300 bg-clip-text text-transparent">
                 Iranic<span className="text-amber-300"> DNA</span>
               </h1>
-              <p className="text-sm text-teal-300/80 mt-2">Mapping Genetic Diversity of Iranian Peoples</p>
+              <p className="text-sm text-teal-300/80 mt-2">Mapping Genetic Diversity of Peoples</p>
             </div>
           </div>
           
           <p className="text-lg text-teal-200/90 mb-8 max-w-2xl mx-auto">
-            A community-driven initiative to visualize Y-DNA and mtDNA haplogroup distributions 
+            A community-driven initiative to visualize Y-DNA haplogroup distributions 
             across Iranian provinces.
           </p>
 
