@@ -79,7 +79,7 @@ export const FamousIraniansPage: React.FC = () => {
       <div className="max-w-7xl mx-auto py-8 md:py-16 px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-teal-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
-            Famous Iranian People
+            Historical Figures and Lineages
           </h1>
           <p className="text-teal-300/70 text-lg">Discover the legends who shaped history</p>
         </div>
