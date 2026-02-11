@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { ChevronLeft, ChevronRight, Dna, Calendar } from 'lucide-react';
-import { graphqlService, FamousPerson } from '../services/graphqlService';
+import { graphqlService, type FamousPerson } from '../services/graphqlService';
 import { API_BASE_URL } from '../config/api';
 
 export const FamousIraniansPage: React.FC = () => {
