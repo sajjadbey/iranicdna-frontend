@@ -24,6 +24,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const VisitInsightsPage = lazy(() => import('./pages/VisitInsightsPage').then(m => ({ default: m.VisitInsightsPage })));
+const FamousIraniansPage = lazy(() => import('./pages/FamousIraniansPage').then(m => ({ default: m.FamousIraniansPage })));
 
 // Loading fallback component
 const PageLoader: React.FC = () => (
@@ -52,6 +53,7 @@ const App: React.FC = () => {
               <Route path="/blog" element={<BlogPostsPage />} />
               <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/famous-iranians" element={<FamousIraniansPage />} />
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/tools/admixture" element={<AdmixturePage />} />
               <Route path="/tools/file-converter" element={<FileConverterPage />} />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Dna, Info, Send, Globe, Users, BookOpen, Wrench } from 'lucide-react';
+import { Dna, Info, Send, Globe, Users, BookOpen, Wrench, Star } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { AboutContribute } from '../components/AboutContribute';
 import mainLogo from '../assets/logo.png';
@@ -39,6 +39,12 @@ export const HomePage: React.FC = () => {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cyan-800/30 backdrop-blur-md hover:bg-cyan-700/40 text-white font-medium transition-all border border-cyan-600/30 hover:border-cyan-500/50"
             >
               <Users size={20} /> View Communities
+            </Link>
+            <Link
+              to="/famous-iranians"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-rose-800/30 backdrop-blur-md hover:bg-rose-700/40 text-white font-medium transition-all border border-rose-600/30 hover:border-rose-500/50"
+            >
+              <Star size={20} /> Famous Iranians
             </Link>
             <Link
               to="/tools"
