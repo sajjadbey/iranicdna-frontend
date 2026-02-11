@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
-import { ChevronLeft, ChevronRight, Dna } from 'lucide-react';
-import { graphqlService, type FamousPerson } from '../services/graphqlService';
+import { ChevronLeft, ChevronRight, Dna, Calendar } from 'lucide-react';
+import { graphqlService, FamousPerson } from '../services/graphqlService';
 import { API_BASE_URL } from '../config/api';
 
 export const FamousIraniansPage: React.FC = () => {
@@ -30,7 +30,7 @@ export const FamousIraniansPage: React.FC = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="max-w-6xl mx-auto py-12 text-center">
+        <div className="min-h-[60vh] flex items-center justify-center">
           <div className="inline-block w-12 h-12 border-4 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
         </div>
       </Layout>
@@ -40,7 +40,7 @@ export const FamousIraniansPage: React.FC = () => {
   if (people.length === 0) {
     return (
       <Layout>
-        <div className="max-w-6xl mx-auto py-12 text-center text-teal-300">
+        <div className="min-h-[60vh] flex items-center justify-center text-teal-300">
           No famous people data available.
         </div>
       </Layout>
@@ -69,109 +69,109 @@ export const FamousIraniansPage: React.FC = () => {
     const parts = text.split(new RegExp(`(${haplogroup})`, 'gi'));
     return parts.map((part, i) => 
       part.toLowerCase() === haplogroup.toLowerCase() 
-        ? <strong key={i} className="font-bold text-amber-400">{part}</strong>
+        ? <span key={i} className="font-bold text-amber-300">{part}</span>
         : part
     );
   };
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto py-12 px-4">
-        <h1 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-teal-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
-          Famous Iranian People
-        </h1>
+      <div className="max-w-7xl mx-auto py-8 md:py-16 px-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-teal-300 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
+            Famous Iranian People
+          </h1>
+          <p className="text-teal-300/70 text-lg">Discover the legends who shaped history</p>
+        </div>
 
-        <div className="relative">
-          <div className="bg-gradient-to-br from-teal-900/30 via-cyan-900/20 to-indigo-900/30 backdrop-blur-xl rounded-3xl p-8 md:p-12 ring-1 ring-teal-500/20 shadow-2xl">
-            <div className="grid lg:grid-cols-5 gap-8 items-start">
-              <div className="lg:col-span-2">
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 via-cyan-500 to-amber-500 rounded-2xl blur opacity-25 group-hover:opacity-40 transition"></div>
-                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden ring-2 ring-teal-400/30">
-                    <img
-                      src={`${API_BASE_URL}${currentPerson.image}`}
-                      alt={currentPerson.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/400x500?text=' + encodeURIComponent(currentPerson.name);
-                      }}
-                    />
-                  </div>
-                </div>
+        <div className="relative max-w-6xl mx-auto">
+          <div className="bg-gradient-to-br from-slate-900/50 via-teal-900/30 to-slate-900/50 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="relative aspect-[4/5] md:aspect-auto">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-amber-500/10"></div>
+                <img
+                  src={currentPerson.imageUrl ? `${API_BASE_URL}${currentPerson.imageUrl}` : `https://via.placeholder.com/600x750?text=${encodeURIComponent(currentPerson.name)}`}
+                  alt={currentPerson.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              <div className="lg:col-span-3 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-teal-400 text-sm font-semibold tracking-wider uppercase">{currentPerson.years}</span>
+              <div className="p-8 md:p-12 flex flex-col justify-between">
+                <div className="space-y-6">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 ring-1 ring-teal-500/20">
+                      <Calendar size={16} className="text-teal-400" />
+                      <span className="text-teal-300 text-sm font-medium">{currentPerson.years}</span>
+                    </div>
                     {currentPerson.haplogroup && (
-                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 ring-1 ring-amber-500/30">
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 ring-1 ring-amber-500/20">
                         <Dna size={16} className="text-amber-400" />
                         <span className="text-amber-300 text-sm font-bold">{currentPerson.haplogroup}</span>
                       </div>
                     )}
                   </div>
                   
-                  <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-cyan-200">
-                    {currentPerson.name}
-                  </h2>
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                      {currentPerson.name}
+                    </h2>
+                    <p className="text-xl text-amber-300/90 font-medium">{currentPerson.title}</p>
+                  </div>
                   
-                  <p className="text-2xl text-amber-300 font-medium">{currentPerson.title}</p>
+                  <div className="h-px bg-gradient-to-r from-teal-500/30 via-cyan-500/30 to-transparent"></div>
                   
-                  <div className="h-px bg-gradient-to-r from-teal-500/50 via-cyan-500/50 to-transparent"></div>
-                  
-                  <p className="text-lg text-teal-100/90 leading-relaxed">
+                  <p className="text-base md:text-lg text-slate-200/80 leading-relaxed">
                     {boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 pt-4">
-                  <button
-                    onClick={goToPrevious}
-                    className="p-4 rounded-xl bg-gradient-to-br from-teal-600/40 to-cyan-600/40 hover:from-teal-500/50 hover:to-cyan-500/50 text-teal-100 transition-all ring-1 ring-teal-400/30 shadow-lg"
-                    aria-label="Previous person"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-                  
-                  <div className="flex gap-2 flex-1 justify-center">
-                    {people.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => goToSlide(index)}
-                        className={`h-2 rounded-full transition-all ${
-                          index === currentIndex
-                            ? 'w-12 bg-gradient-to-r from-teal-400 to-cyan-400'
-                            : 'w-2 bg-teal-700/50 hover:bg-teal-600/70'
-                        }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
+                <div className="space-y-6 mt-8">
+                  <div className="flex items-center justify-between gap-4">
+                    <button
+                      onClick={goToPrevious}
+                      className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
+                      aria-label="Previous"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    
+                    <div className="flex gap-2">
+                      {people.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToSlide(index)}
+                          className={`h-2 rounded-full transition-all ${
+                            index === currentIndex
+                              ? 'w-8 bg-gradient-to-r from-teal-400 to-cyan-400'
+                              : 'w-2 bg-white/20 hover:bg-white/30'
+                          }`}
+                          aria-label={`Slide ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={goToNext}
+                      className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
+                      aria-label="Next"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
                   </div>
 
                   <button
-                    onClick={goToNext}
-                    className="p-4 rounded-xl bg-gradient-to-br from-teal-600/40 to-cyan-600/40 hover:from-teal-500/50 hover:to-cyan-500/50 text-teal-100 transition-all ring-1 ring-teal-400/30 shadow-lg"
-                    aria-label="Next person"
+                    onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600/20 to-cyan-600/20 hover:from-teal-600/30 hover:to-cyan-600/30 text-teal-200 font-medium transition-all ring-1 ring-teal-500/20"
                   >
-                    <ChevronRight size={24} />
+                    {isAutoPlaying ? '⏸ Pause' : '▶ Play'} Slideshow
                   </button>
-                </div>
 
-                <button
-                  onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                  className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-600/30 to-orange-600/30 hover:from-amber-500/40 hover:to-orange-500/40 text-amber-200 font-medium transition-all ring-1 ring-amber-500/30 shadow-lg"
-                >
-                  {isAutoPlaying ? '⏸ Pause' : '▶ Resume'} Slideshow
-                </button>
+                  <div className="text-center text-sm text-slate-400">
+                    {currentIndex + 1} of {people.length}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-6 text-center">
-            <span className="inline-block px-4 py-2 rounded-full bg-teal-900/40 text-teal-300/80 text-sm font-medium ring-1 ring-teal-600/30">
-              {currentIndex + 1} / {people.length}
-            </span>
           </div>
         </div>
       </div>

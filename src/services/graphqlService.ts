@@ -5,7 +5,7 @@ export interface FamousPerson {
   name: string;
   title: string;
   description: string;
-  image: string;
+  imageUrl: string;
   years: string;
   haplogroup: string;
 }
@@ -17,7 +17,7 @@ const FAMOUS_PEOPLE_QUERY = `
       name
       title
       description
-      image
+      imageUrl
       years
       haplogroup
     }
