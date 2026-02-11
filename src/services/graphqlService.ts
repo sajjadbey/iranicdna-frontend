@@ -7,6 +7,7 @@ export interface FamousPerson {
   description: string;
   image: string;
   years: string;
+  haplogroup: string;
 }
 
 const FAMOUS_PEOPLE_QUERY = `
@@ -18,6 +19,7 @@ const FAMOUS_PEOPLE_QUERY = `
       description
       image
       years
+      haplogroup
     }
   }
 `;
