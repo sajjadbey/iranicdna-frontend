@@ -1,5 +1,3 @@
-// AnalyticsPage.tsx
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { Dna, BarChart3, Download } from 'lucide-react';
 import { type Sample } from '../types';
@@ -14,11 +12,10 @@ import { AboutContribute } from '../components/AboutContribute';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants } from '../utils/deviceDetection';
 import { API_ENDPOINTS } from '../config/api';
-import { cachedFetch, cachedFetchNormalized } from '../utils/apiCache';
+import { cachedFetchNormalized } from '../utils/apiCache';
 import { buildSamplesUrl, FILTER_PRESETS } from '../utils/apiFilters';
+import { graphqlService } from '../services/graphqlService';
 
-// API DTOs
-interface CountryDTO { name: string }
 interface ProvinceDTO { name: string; country: string }
 interface EthnicityDTO { name: string }
 
@@ -69,12 +66,12 @@ export const AnalyticsPage: React.FC = () => {
     const fetchFilterOptions = async () => {
       try {
         const [countriesData, provincesData] = await Promise.all([
-          cachedFetch<CountryDTO[]>(API_ENDPOINTS.countries),
-          cachedFetch<ProvinceDTO[]>(API_ENDPOINTS.provinces),
+          graphqlService.fetchCountries(),
+          graphqlService.fetchProvinces(),
         ]);
         
         setAllCountries(countriesData.map(c => c.name).sort());
-        setAllProvinces(provincesData);
+        setAllProvinces(provincesData.map(p => ({ name: p.name, country: p.country.name })));
       } catch (err) {
         console.error('Failed to fetch filter options:', err);
       }
@@ -95,8 +92,9 @@ export const AnalyticsPage: React.FC = () => {
           url += `?country=${encodeURIComponent(selectedCountry)}`;
         }
         
-        const ethnicitiesData = await cachedFetch<EthnicityDTO[]>(url);
-        setAllEthnicities(ethnicitiesData.map(e => e.name).sort());
+        const response = await fetch(url);
+        const ethnicitiesData: EthnicityDTO[] = await response.json();
+        setAllEthnicities(ethnicitiesData.map((e: EthnicityDTO) => e.name).sort());
       } catch (err) {
         console.error('Failed to fetch ethnicities:', err);
         setAllEthnicities([]);

@@ -1,13 +1,18 @@
-// MapCard.tsx
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { MapPin, Loader2, Building2, Map as MapIcon } from 'lucide-react';
-import { type Sample, type Province, type City } from '../../types';
+import { type Sample, type City } from '../../types';
 import { generateUniqueColors } from '../../utils/colors';
-import { API_ENDPOINTS } from '../../config/api';
+import { graphqlService } from '../../services/graphqlService';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+interface Province {
+  name: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}
 
 interface ProvinceStats {
   name: string;
@@ -128,30 +133,24 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     }
   }, [selectedProvince, selectedCity]);
 
-  // Fetch provinces and cities from API
+  // Fetch provinces and cities from GraphQL
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        console.log('[DEBUG:MapCard] Fetching provinces from:', API_ENDPOINTS.provinces);
-        console.log('[DEBUG:MapCard] Fetching cities from:', API_ENDPOINTS.cities);
         
-        const [provincesData, citiesData] = await Promise.all([
-          fetch(API_ENDPOINTS.provinces).then(res => {
-            if (!res.ok) throw new Error('Failed to fetch provinces');
-            return res.json();
-          }),
-          fetch(API_ENDPOINTS.cities).then(res => {
-            if (!res.ok) throw new Error('Failed to fetch cities');
-            return res.json();
-          })
-        ]);
+        const provincesData = await graphqlService.fetchProvinces();
         
-        console.log('[DEBUG:MapCard] Provinces received:', provincesData?.length, provincesData);
-        console.log('[DEBUG:MapCard] Cities received:', citiesData?.length, citiesData);
+        const provincesFormatted: Province[] = provincesData.map(p => ({
+          name: p.name,
+          country: p.country.name,
+          latitude: p.latitude || 0,
+          longitude: p.longitude || 0,
+          capital: null
+        }));
         
-        setProvinces(provincesData);
-        setCities(citiesData);
+        setProvinces(provincesFormatted);
+        setCities([]);
         setError(null);
       } catch (err) {
         console.error('[DEBUG:MapCard] Error fetching data:', err);

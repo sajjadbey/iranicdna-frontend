@@ -44,7 +44,7 @@ export const HomePage: React.FC = () => {
               to="/famous-iranians"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-rose-800/30 backdrop-blur-md hover:bg-rose-700/40 text-white font-medium transition-all border border-rose-600/30 hover:border-rose-500/50"
             >
-              <Star size={20} /> Historical Figures and Lineages
+              <Star size={20} /> Historical Figures
             </Link>
             <Link
               to="/tools"
