@@ -13,6 +13,11 @@ export const PALETTE = [
   '#0097A7', // Dark Cyan
   '#C2185B', // Pink
   '#689F38', // Light Green
+  '#512CA3', // 
+  '#F57C00', // Orange
+  '#22DD22',
+  '#72CC22',
+  '#8D2E63'
 ];
 
 // NEW: Generate unique colors for a dataset (no duplicates)
