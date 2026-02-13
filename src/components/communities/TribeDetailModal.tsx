@@ -100,7 +100,9 @@ export const TribeDetailModal: React.FC<Props> = ({ isOpen, onClose, tribe, clan
   const hasData = useMemo(() => Object.keys(yRoot).length > 0, [yRoot]);
 
   const title = clan ? clan.name : tribe?.name || '';
-  const subtitle = clan ? `Clan of ${clan.tribe}` : 'Tribe';
+  const subtitle = clan 
+    ? `Clan${clan.tribes && clan.tribes.length > 0 ? ` of ${clan.tribes.join(', ')}` : ''}` 
+    : 'Tribe';
 
   return (
     <AnimatePresence>

@@ -5,9 +5,9 @@ import { Layout } from '../components/Layout';
 import { FolderTree } from '../components/communities/FolderTree';
 import { TribeDetailModal } from '../components/communities/TribeDetailModal';
 import { AboutContribute } from '../components/AboutContribute';
-import { API_ENDPOINTS, ANALYTICS_API_URL } from '../config/api';
-import type { Tribe, Clan, Sample } from '../types';
-import { cachedFetch, cachedFetchNormalized } from '../utils/apiCache';
+import { graphqlService } from '../services/graphqlService';
+import { ANALYTICS_API_URL } from '../config/api';
+import type { Tribe, Clan } from '../types';
 
 interface CountryHierarchy {
   country: string;
@@ -26,164 +26,31 @@ export const CommunitiesPage: React.FC = () => {
   const [selectedClan, setSelectedClan] = useState<Clan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch and organize data by Country -> Tribe -> Clan
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Fetch all data in parallel with page_size=all
-        const [samplesResponse, tribesData, clansData] = await Promise.all([
-          cachedFetchNormalized<Sample>(`${API_ENDPOINTS.samples}?page_size=all&has_y_dna=true`),
-          cachedFetch<Tribe[]>(API_ENDPOINTS.tribes),
-          cachedFetch<Clan[]>(API_ENDPOINTS.clans),
-        ]);
+        const data = await graphqlService.fetchCommunitiesHierarchy();
         
-        const samplesData = samplesResponse.results;
-
-        // Create maps for quick lookup
-        const tribesMap = new Map(tribesData.map(t => [t.name, t]));
-        const clansMap = new Map(clansData.map(c => [c.name, c]));
-
-        // Count samples for each entity
-        const countrySampleCounts = new Map<string, number>();
-        const tribeSampleCounts: Map<string, Map<string, number>> = new Map(); // country -> tribe -> count
-        const clanSampleCounts: Map<string, Map<string, Map<string, number>>> = new Map(); // country -> tribe -> clan -> count
-
-        // Process samples to build counts
-        samplesData.forEach((sample) => {
-          const country = sample.country || 'Unknown';
-          const tribe = sample.tribe;
-          const clan = sample.clan;
-          const count = sample.count || 1;
-
-          // Count by country
-          countrySampleCounts.set(country, (countrySampleCounts.get(country) || 0) + count);
-
-          // Count by country-tribe
-          if (tribe) {
-            if (!tribeSampleCounts.has(country)) {
-              tribeSampleCounts.set(country, new Map());
-            }
-            const countryTribes = tribeSampleCounts.get(country)!;
-            countryTribes.set(tribe, (countryTribes.get(tribe) || 0) + count);
-          }
-
-          // Count by country-tribe-clan
-          if (tribe && clan) {
-            if (!clanSampleCounts.has(country)) {
-              clanSampleCounts.set(country, new Map());
-            }
-            const countryClans = clanSampleCounts.get(country)!;
-            if (!countryClans.has(tribe)) {
-              countryClans.set(tribe, new Map());
-            }
-            const tribeClans = countryClans.get(tribe)!;
-            tribeClans.set(clan, (tribeClans.get(clan) || 0) + count);
-          }
-        });
-
-        // Build hierarchy
-        let hierarchyData: CountryHierarchy[] = [];
-
-        // Sort countries alphabetically
-        const countries = Array.from(tribeSampleCounts.keys()).sort();
-
-        if (countries.length > 0) {
-          // Build hierarchy from samples
-          countries.forEach((country) => {
-            const countryTribes: Map<string, number> = tribeSampleCounts.get(country) || new Map();
-            const countryClans: Map<string, Map<string, number>> = clanSampleCounts.get(country) || new Map();
-
-            const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
-
-            // Sort tribes by name
-            const tribeNames = Array.from(countryTribes.keys()).sort();
-
-            tribeNames.forEach((tribeName) => {
-              const tribeData = tribesMap.get(tribeName);
-              if (!tribeData) return;
-
-              const tribeWithCount: Tribe = {
-                ...tribeData,
-                sample_count: countryTribes.get(tribeName) || 0,
-              };
-
-              const tribeClansMap: Map<string, number> = countryClans.get(tribeName) || new Map();
-              const clans: Clan[] = [];
-
-              // Sort clans by name
-              const clanNames: string[] = Array.from(tribeClansMap.keys()).sort();
-
-              clanNames.forEach((clanName) => {
-                const clanData = clansMap.get(clanName);
-                if (!clanData) return;
-
-                const clanWithCount: Clan = {
-                  ...clanData,
-                  sample_count: tribeClansMap.get(clanName) || 0,
-                };
-
-                clans.push(clanWithCount);
-              });
-
-              tribes.push({
-                tribe: tribeWithCount,
-                clans,
-              });
-            });
-
-            if (tribes.length > 0) {
-              hierarchyData.push({
-                country,
-                tribes,
-              });
-            }
-          });
-        }
-        
-        // Fallback: If no tribes with samples found, show all tribes grouped by ethnicity
-        if (hierarchyData.length === 0 && tribesData.length > 0) {
-          console.log('No tribe data in samples, showing all tribes grouped by ethnicity');
-          
-          // Group tribes by their primary ethnicity
-          const tribesByEthnicity = new Map<string, Tribe[]>();
-          
-          tribesData.forEach((tribe) => {
-            const ethnicity = tribe.ethnicities && tribe.ethnicities.length > 0 
-              ? tribe.ethnicities[0] 
-              : 'Other';
-            
-            if (!tribesByEthnicity.has(ethnicity)) {
-              tribesByEthnicity.set(ethnicity, []);
-            }
-            tribesByEthnicity.get(ethnicity)!.push(tribe);
-          });
-
-          // Convert to hierarchy format
-          Array.from(tribesByEthnicity.keys()).sort().forEach((ethnicity) => {
-            const ethnicityTribes = tribesByEthnicity.get(ethnicity) || [];
-            const tribes: { tribe: Tribe; clans: Clan[] }[] = [];
-            
-            ethnicityTribes.forEach((tribe) => {
-              const tribeClans = clansData.filter((c: Clan) => c.tribe === tribe.name);
-              tribes.push({
-                tribe: { ...tribe, sample_count: 0 },
-                clans: tribeClans.map((c: Clan) => ({ ...c, sample_count: 0 })),
-              });
-            });
-
-            if (tribes.length > 0) {
-              hierarchyData.push({
-                country: `${ethnicity} Tribes`,
-                tribes,
-              });
-            }
-          });
-        }
-
-        setHierarchy(hierarchyData);
+        setHierarchy(data.map(item => ({
+          country: item.country,
+          tribes: item.tribes.map(t => ({
+            tribe: {
+              name: t.tribe.name,
+              ethnicities: t.tribe.ethnicities,
+              historical_note: t.tribe.historicalNote,
+              sample_count: t.tribe.sampleCount,
+            },
+            clans: t.clans.map(c => ({
+              name: c.name,
+              tribes: c.tribes,
+              common_ancestor: c.commonAncestor,
+              sample_count: c.sampleCount,
+            })),
+          })),
+        })));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load communities');
       } finally {
@@ -194,7 +61,6 @@ export const CommunitiesPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Calculate totals
   const totals = useMemo(() => {
     let totalTribes = 0;
     let totalClans = 0;
@@ -280,7 +146,6 @@ export const CommunitiesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Header Section */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -317,7 +182,6 @@ export const CommunitiesPage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* Main Content Area */}
       <AnimatePresence mode="wait">
         {!loading && hierarchy.length === 0 ? (
           <motion.div
@@ -363,7 +227,6 @@ export const CommunitiesPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Detail Modal */}
       <TribeDetailModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -372,7 +235,6 @@ export const CommunitiesPage: React.FC = () => {
         apiBase={ANALYTICS_API_URL}
       />
 
-      {/* About & Contribute Section */}
       <AboutContribute />
     </Layout>
   );

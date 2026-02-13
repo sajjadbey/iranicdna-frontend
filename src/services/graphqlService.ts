@@ -37,6 +37,32 @@ export interface BlogPost {
   tags: string;
 }
 
+export interface Tribe {
+  id: string;
+  name: string;
+  ethnicities: string[];
+  historicalNote: string;
+  sampleCount: number;
+}
+
+export interface Clan {
+  id: string;
+  name: string;
+  tribes: string[];
+  commonAncestor: string;
+  sampleCount: number;
+}
+
+export interface TribeWithClans {
+  tribe: Tribe;
+  clans: Clan[];
+}
+
+export interface CountryHierarchy {
+  country: string;
+  tribes: TribeWithClans[];
+}
+
 const FAMOUS_PEOPLE_QUERY = `
   query {
     famousPeople {
@@ -93,6 +119,30 @@ const BLOG_POSTS_QUERY = `
   }
 `;
 
+const COMMUNITIES_HIERARCHY_QUERY = `
+  query {
+    communitiesHierarchy {
+      country
+      tribes {
+        tribe {
+          id
+          name
+          ethnicities
+          historicalNote
+          sampleCount
+        }
+        clans {
+          id
+          name
+          tribes
+          commonAncestor
+          sampleCount
+        }
+      }
+    }
+  }
+`;
+
 async function graphqlRequest<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const response = await fetch(GRAPHQL_URL, {
     method: 'POST',
@@ -129,5 +179,10 @@ export const graphqlService = {
   fetchBlogPosts: async (tag?: string, search?: string): Promise<BlogPost[]> => {
     const data = await graphqlRequest<{ blogPosts: BlogPost[] }>(BLOG_POSTS_QUERY, { tag, search });
     return data.blogPosts;
+  },
+
+  fetchCommunitiesHierarchy: async (): Promise<CountryHierarchy[]> => {
+    const data = await graphqlRequest<{ communitiesHierarchy: CountryHierarchy[] }>(COMMUNITIES_HIERARCHY_QUERY);
+    return data.communitiesHierarchy;
   },
 };

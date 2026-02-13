@@ -69,7 +69,7 @@ export interface Tribe {
 
 export interface Clan {
     name: string;
-    tribe: string;
+    tribes: string[];
     common_ancestor: string;
     sample_count?: number;
 }

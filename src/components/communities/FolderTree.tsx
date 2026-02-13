@@ -545,6 +545,11 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
                                                         {clan.common_ancestor}
                                                       </div>
                                                     )}
+                                                    {clan.tribes && clan.tribes.length > 1 && (
+                                                      <div className="text-xs text-cyan-400/50 italic truncate">
+                                                        Also in: {clan.tribes.filter(t => t !== tribe.name).join(', ')}
+                                                      </div>
+                                                    )}
                                                   </div>
 
                                                   {/* Sample Count Badge */}
