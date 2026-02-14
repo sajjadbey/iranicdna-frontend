@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
-import { Activity, Globe, TrendingUp, Users, RefreshCw } from 'lucide-react';
+import { Activity, Globe, TrendingUp, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   Chart as ChartJS,
@@ -68,7 +68,7 @@ const ChartCard: React.FC<{
 
 export const VisitInsightsPage: React.FC = () => {
   const [days, setDays] = useState(30);
-  const { insights, loading, error, refresh } = useInsightsWebSocket(days);
+  const { insights, loading, error } = useInsightsWebSocket(days);
 
   if (loading) {
     return (
@@ -90,7 +90,7 @@ export const VisitInsightsPage: React.FC = () => {
           <div className="text-center">
             <p className="text-red-400 text-lg">{error}</p>
             <button
-              onClick={refresh}
+              onClick={() => window.location.reload()}
               className="mt-4 px-6 py-2 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-lg hover:opacity-90 transition-opacity"
             >
               Retry
@@ -258,14 +258,6 @@ export const VisitInsightsPage: React.FC = () => {
                 {d} days
               </button>
             ))}
-            <button
-              onClick={refresh}
-              className="ml-auto px-4 py-2 rounded-lg bg-[var(--color-card)] text-slate-400 hover:text-white transition-all flex items-center gap-2"
-              title="Refresh data"
-            >
-              <RefreshCw style={{ width: 16, height: 16 }} />
-              Refresh
-            </button>
           </div>
         </div>
 

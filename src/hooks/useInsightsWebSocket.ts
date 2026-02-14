@@ -16,6 +16,7 @@ export const useInsightsWebSocket = (days: number) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -27,6 +28,12 @@ export const useInsightsWebSocket = (days: number) => {
     ws.onopen = () => {
       setLoading(true);
       ws.send(JSON.stringify({ type: 'get_insights', days }));
+      
+      intervalRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'get_insights', days }));
+        }
+      }, 5000);
     };
 
     ws.onmessage = (event) => {
@@ -43,19 +50,18 @@ export const useInsightsWebSocket = (days: number) => {
 
     ws.onclose = () => {
       setLoading(false);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
 
     return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       ws.close();
     };
   }, [days]);
 
-  const refresh = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      setLoading(true);
-      wsRef.current.send(JSON.stringify({ type: 'get_insights', days }));
-    }
-  };
-
-  return { insights, loading, error, refresh };
+  return { insights, loading, error };
 };
