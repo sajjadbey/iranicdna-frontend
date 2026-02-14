@@ -63,6 +63,18 @@ export interface CountryHierarchy {
   tribes: TribeWithClans[];
 }
 
+export interface YDNATreeNode {
+  id: string;
+  name: string;
+  parent: { id: string; name: string } | null;
+  isoggyghg: string;
+  yfullHg: string;
+  tmrca: number | null;
+  paleoSamples: string[];
+  children: YDNATreeNode[];
+  sampleCount: number;
+}
+
 const FAMOUS_PEOPLE_QUERY = `
   query {
     famousPeople {
@@ -143,6 +155,59 @@ const COMMUNITIES_HIERARCHY_QUERY = `
   }
 `;
 
+const YDNA_TREE_QUERY = `
+  query($rootHaplogroup: String) {
+    ydnaTree(rootHaplogroup: $rootHaplogroup) {
+      id
+      name
+      parent {
+        id
+        name
+      }
+      isoggyghg: isoggYghg
+      yfullHg
+      tmrca
+      paleoSamples
+      sampleCount
+      children {
+        id
+        name
+        parent {
+          id
+          name
+        }
+        isoggyghg: isoggYghg
+        yfullHg
+        tmrca
+        paleoSamples
+        sampleCount
+        children {
+          id
+          name
+          parent {
+            id
+            name
+          }
+          isoggyghg: isoggYghg
+          yfullHg
+          tmrca
+          paleoSamples
+          sampleCount
+          children {
+            id
+            name
+            isoggyghg: isoggYghg
+            yfullHg
+            tmrca
+            paleoSamples
+            sampleCount
+          }
+        }
+      }
+    }
+  }
+`;
+
 async function graphqlRequest<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const response = await fetch(GRAPHQL_URL, {
     method: 'POST',
@@ -184,5 +249,10 @@ export const graphqlService = {
   fetchCommunitiesHierarchy: async (): Promise<CountryHierarchy[]> => {
     const data = await graphqlRequest<{ communitiesHierarchy: CountryHierarchy[] }>(COMMUNITIES_HIERARCHY_QUERY);
     return data.communitiesHierarchy;
+  },
+
+  fetchYDNATree: async (rootHaplogroup?: string): Promise<YDNATreeNode[]> => {
+    const data = await graphqlRequest<{ ydnaTree: YDNATreeNode[] }>(YDNA_TREE_QUERY, { rootHaplogroup });
+    return data.ydnaTree;
   },
 };

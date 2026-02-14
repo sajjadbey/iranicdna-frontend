@@ -10,6 +10,7 @@ import { DNAMatrixBackground } from './components/DNAMatrixBackground';
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
 const CommunitiesPage = lazy(() => import('./pages/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })));
+const YDNATreePage = lazy(() => import('./pages/YDNATreePage').then(m => ({ default: m.YDNATreePage })));
 const BlogPostsPage = lazy(() => import('./pages/BlogPostsPage').then(m => ({ default: m.BlogPostsPage })));
 const BlogPostDetailPage = lazy(() => import('./pages/BlogPostDetailPage').then(m => ({ default: m.BlogPostDetailPage })));
 const AdmixturePage = lazy(() => import('./pages/AdmixturePage').then(m => ({ default: m.AdmixturePage })));
@@ -50,6 +51,7 @@ const App: React.FC = () => {
               <Route path="/" element={<HomePage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/communities" element={<CommunitiesPage />} />
+              <Route path="/ydna-tree" element={<YDNATreePage />} />
               <Route path="/blog" element={<BlogPostsPage />} />
               <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
               <Route path="/contact" element={<ContactPage />} />
