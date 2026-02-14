@@ -70,14 +70,14 @@ export const HaplogroupDetailModal: React.FC<HaplogroupDetailModalProps> = ({
                       <div className="text-teal-200 font-semibold">{node.name}</div>
                     </div>
                     
-                    {node.isoggyghg && (
+                    {node.isoggyghg && node.isoggyghg !== node.name && (
                       <div className="p-4 rounded-lg bg-blue-900/20 border border-blue-700/30">
                         <div className="text-xs text-blue-400/70 mb-1">ISOGG Y-HG</div>
                         <div className="text-blue-200 font-semibold">{node.isoggyghg}</div>
                       </div>
                     )}
                     
-                    {node.yfullHg && (
+                    {node.yfullHg && node.yfullHg !== node.name && (
                       <div className="p-4 rounded-lg bg-purple-900/20 border border-purple-700/30">
                         <div className="text-xs text-purple-400/70 mb-1">YFull HG</div>
                         <div className="text-purple-200 font-semibold">{node.yfullHg}</div>
