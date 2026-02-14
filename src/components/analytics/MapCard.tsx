@@ -150,7 +150,18 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
         }));
         
         setProvinces(provincesFormatted);
-        setCities([]);
+        
+        if (selectedProvince) {
+          const citiesData = await graphqlService.fetchCities(selectedProvince);
+          setCities(citiesData.map(c => ({
+            name: c.name,
+            province: c.province,
+            is_capital: c.isCapital,
+            latitude: c.latitude,
+            longitude: c.longitude
+          })));
+        }
+        
         setError(null);
       } catch (err) {
         console.error('[DEBUG:MapCard] Error fetching data:', err);
@@ -161,7 +172,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
     };
 
     fetchData();
-  }, []);
+  }, [selectedProvince]);
 
   // Create province coordinates map from fetched data
   const provinceCoordinates = useMemo(() => {
@@ -359,7 +370,6 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
   }, [selectedCity, selectedProvince, cityCoordinates, provinceCoordinates]);
 
   // Check if we have cities available for the selected province
-  // IMPORTANT: This must be called BEFORE any early returns to avoid hook order issues
   const hasCitiesInProvince = useMemo(() => {
     if (!selectedProvince) return false;
     return cities.some(city => city.province === selectedProvince);

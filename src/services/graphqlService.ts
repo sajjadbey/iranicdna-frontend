@@ -24,6 +24,15 @@ export interface Province {
   longitude: number;
 }
 
+export interface City {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  province: string;
+  isCapital: boolean;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -85,6 +94,19 @@ const FAMOUS_PEOPLE_QUERY = `
       imageUrl
       years
       haplogroup
+    }
+  }
+`;
+
+const CITIES_QUERY = `
+  query($province: String) {
+    cities(province: $province) {
+      id
+      name
+      latitude
+      longitude
+      province
+      isCapital
     }
   }
 `;
@@ -229,6 +251,11 @@ export const graphqlService = {
   fetchProvinces: async (country?: string): Promise<Province[]> => {
     const data = await graphqlRequest<{ provinces: Province[] }>(PROVINCES_QUERY, { country });
     return data.provinces;
+  },
+
+  fetchCities: async (province?: string): Promise<City[]> => {
+    const data = await graphqlRequest<{ cities: City[] }>(CITIES_QUERY, { province });
+    return data.cities;
   },
 
   fetchBlogPosts: async (tag?: string, search?: string): Promise<BlogPost[]> => {
