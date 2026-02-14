@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, File, X} from 'lucide-react';
+import { Upload, File, X, Shield, Lock, AlertCircle } from 'lucide-react';
 import type { DNAFile } from '../../types/dnaFile';
 
 interface DNAFileUploadProps {
@@ -12,6 +12,8 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [sampleName, setSampleName] = useState('');
   const [description, setDescription] = useState('');
+  const [password, setPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
@@ -60,7 +62,12 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return;
+    if (!selectedFile || !agreedToTerms) return;
+
+    if (!password) {
+      onUploadError('Password is required for file encryption');
+      return;
+    }
 
     setUploading(true);
 
@@ -70,6 +77,7 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
         file: selectedFile,
         sample_name: sampleName,
         description: description,
+        password: password,
       });
 
       onUploadSuccess(uploadedFile);
@@ -78,6 +86,8 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
       setSelectedFile(null);
       setSampleName('');
       setDescription('');
+      setPassword('');
+      setAgreedToTerms(false);
     } catch (error) {
       onUploadError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
@@ -171,6 +181,44 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
           onSubmit={handleSubmit}
           className="space-y-4"
         >
+          {/* Security Notice */}
+          <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+              <div className="space-y-2">
+                <h4 className="text-white font-semibold flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Military-Grade Encryption
+                </h4>
+                <p className="text-gray-300 text-sm">
+                  Your DNA file will be encrypted using <strong>PBKDF2-SHA256</strong> with 480,000 iterations and <strong>AES-128</strong> encryption. 
+                  Only you can decrypt it with your account password. We cannot access your raw genetic data.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Password */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              Your Account Password <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password to encrypt the file"
+              required
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              disabled={uploading}
+            />
+            <p className="text-gray-400 text-xs mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Required for encrypting your DNA file
+            </p>
+          </div>
+
           {/* Sample Name */}
           <div>
             <label htmlFor="sample-name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -203,21 +251,41 @@ export const DNAFileUpload: React.FC<DNAFileUploadProps> = ({ onUploadSuccess, o
             />
           </div>
 
+          {/* Terms Agreement */}
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-gray-600 text-purple-600 focus:ring-purple-500 focus:ring-offset-0"
+                disabled={uploading}
+              />
+              <span className="text-sm text-gray-300">
+                I understand that my DNA file will be encrypted with my password and stored securely. 
+                I agree to use this service responsibly and acknowledge that the uploaded data is for personal analysis only.
+              </span>
+            </label>
+          </div>
+
           {/* Upload Button */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: agreedToTerms && !uploading ? 1.02 : 1 }}
+            whileTap={{ scale: agreedToTerms && !uploading ? 0.98 : 1 }}
             type="submit"
-            disabled={uploading}
+            disabled={uploading || !agreedToTerms}
             className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Uploading & Analyzing...
+                Encrypting & Uploading...
               </span>
             ) : (
-              'Upload DNA File'
+              <span className="flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4" />
+                Upload & Encrypt DNA File
+              </span>
             )}
           </motion.button>
         </motion.form>

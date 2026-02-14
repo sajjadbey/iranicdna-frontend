@@ -45,6 +45,7 @@ export const dnaFileService = {
   async uploadDNAFile(data: DNAFileUploadData): Promise<DNAFile> {
     const formData = new FormData();
     formData.append('file', data.file);
+    formData.append('password', data.password);
     if (data.sample_name) {
       formData.append('sample_name', data.sample_name);
     }

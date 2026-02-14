@@ -24,6 +24,7 @@ export interface DNAFile {
 
 export interface DNAFileUploadData {
   file: File;
+  password: string;
   sample_name?: string;
   description?: string;
 }
