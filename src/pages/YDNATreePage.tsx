@@ -5,7 +5,8 @@ import { Layout } from '../components/Layout';
 import { YDNATreeView } from '../components/ydna/YDNATreeView';
 import { HaplogroupDetailModal } from '../components/ydna/HaplogroupDetailModal';
 import { AboutContribute } from '../components/AboutContribute';
-import { graphqlService, YDNATreeNode } from '../services/graphqlService';
+import { graphqlService } from '../services/graphqlService';
+import type { YDNATreeNode } from '../services/graphqlService';
 
 export const YDNATreePage: React.FC = () => {
   const [treeData, setTreeData] = useState<YDNATreeNode[]>([]);
