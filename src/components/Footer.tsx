@@ -11,7 +11,7 @@ export const Footer: React.FC = () => {
           <p>
             Designed by{' '}
             <a
-              href="https://qizilbash.ir"
+              href="#"
               target="_blank"
               rel="noreferrer"
               className="font-bold underline"
