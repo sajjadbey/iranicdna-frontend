@@ -16,37 +16,21 @@ export const YDNATreeView: React.FC<YDNATreeViewProps> = ({ treeData, onNodeClic
 
   return (
     <div className="space-y-4">
-      {treeData.length > 3 ? (
-        <div className="relative">
-          <select
-            value={activeTab}
-            onChange={(e) => setActiveTab(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg font-medium bg-slate-800/60 text-teal-300 border border-teal-700/20 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-colors"
+      <div className="flex flex-wrap gap-2">
+        {treeData.map((node) => (
+          <button
+            key={node.id}
+            onClick={() => setActiveTab(node.name)}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === node.name
+                ? 'bg-teal-600 text-white'
+                : 'bg-slate-800/60 text-teal-300 hover:bg-slate-700/60'
+            }`}
           >
-            {treeData.map((node) => (
-              <option key={node.id} value={node.name}>
-                {node.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {treeData.map((node) => (
-            <button
-              key={node.id}
-              onClick={() => setActiveTab(node.name)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === node.name
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-slate-800/60 text-teal-300 hover:bg-slate-700/60'
-              }`}
-            >
-              {node.name}
-            </button>
-          ))}
-        </div>
-      )}
+            {node.name}
+          </button>
+        ))}
+      </div>
 
       <div className="flex gap-4 p-3 bg-slate-800/40 rounded-lg border border-teal-700/20">
         <label className="flex items-center gap-2 cursor-pointer">
@@ -93,7 +77,7 @@ interface TreeTableProps {
 }
 
 const TreeTable: React.FC<TreeTableProps> = ({ node, onNodeClick, showPaleoDNA, showTMRCA, level }) => {
-  const [isExpanded, setIsExpanded] = useState(level < 2);
+  const [isExpanded, setIsExpanded] = useState(true);
   const hasChildren = node.children && node.children.length > 0;
 
   return (
