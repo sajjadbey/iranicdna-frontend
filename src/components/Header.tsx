@@ -65,7 +65,7 @@ export const Header: React.FC = () => {
               <Users size={14} /> Communities
             </Link>
             <Link
-              to="/ydna-tree"
+              to="/#"
               className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                 isActive('/ydna-tree')
                   ? 'bg-white/10 text-white'
