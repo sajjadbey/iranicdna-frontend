@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
-import { Activity, Globe, TrendingUp, Users, MapPin } from 'lucide-react';
+import { Activity, Globe, TrendingUp, Users, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   Chart as ChartJS,
@@ -15,7 +15,7 @@ import {
   LineElement,
 } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
-import { GRAPHQL_URL } from '../config/api';
+import { useInsightsWebSocket } from '../hooks/useInsightsWebSocket';
 
 // Register ChartJS components
 ChartJS.register(
@@ -29,17 +29,6 @@ ChartJS.register(
   PointElement,
   LineElement
 );
-
-interface VisitInsights {
-  total_visits: number;
-  unique_ips: number;
-  ipv4_count: number;
-  ipv6_count: number;
-  top_isps: Array<{ isp: string; count: number; percentage: number }>;
-  top_paths: Array<{ path: string; count: number; percentage: number }>;
-  top_countries: Array<{ country: string; count: number; percentage: number }>;
-  visits_by_date: Array<{ date: string; count: number }>;
-}
 
 const StatCard: React.FC<{
   icon: React.ReactNode;
@@ -78,91 +67,8 @@ const ChartCard: React.FC<{
 );
 
 export const VisitInsightsPage: React.FC = () => {
-  const [insights, setInsights] = useState<VisitInsights | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
-
-  useEffect(() => {
-    fetchInsights();
-  }, [days]);
-
-  const fetchInsights = async () => {
-    try {
-      setLoading(true);
-
-      const query = `
-        query GetVisitInsights($days: Int!) {
-          visitInsights(days: $days) {
-            totalVisits
-            uniqueIps
-            ipv4Count
-            ipv6Count
-            topIsps {
-              isp
-              count
-              percentage
-            }
-            topPaths {
-              path
-              count
-              percentage
-            }
-            topCountries {
-              country
-              count
-              percentage
-            }
-            visitsByDate {
-              date
-              count
-            }
-          }
-        }
-      `;
-
-      const response = await fetch(GRAPHQL_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query,
-          variables: { days },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch insights');
-      }
-
-      const result = await response.json();
-      
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      // Transform GraphQL response to match the expected format
-      const graphqlData = result.data.visitInsights;
-      const transformedData = {
-        total_visits: graphqlData.totalVisits,
-        unique_ips: graphqlData.uniqueIps,
-        ipv4_count: graphqlData.ipv4Count,
-        ipv6_count: graphqlData.ipv6Count,
-        top_isps: graphqlData.topIsps,
-        top_paths: graphqlData.topPaths,
-        top_countries: graphqlData.topCountries,
-        visits_by_date: graphqlData.visitsByDate,
-      };
-
-      setInsights(transformedData);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { insights, loading, error, refresh } = useInsightsWebSocket(days);
 
   if (loading) {
     return (
@@ -184,7 +90,7 @@ export const VisitInsightsPage: React.FC = () => {
           <div className="text-center">
             <p className="text-red-400 text-lg">{error}</p>
             <button
-              onClick={fetchInsights}
+              onClick={refresh}
               className="mt-4 px-6 py-2 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-lg hover:opacity-90 transition-opacity"
             >
               Retry
@@ -352,6 +258,14 @@ export const VisitInsightsPage: React.FC = () => {
                 {d} days
               </button>
             ))}
+            <button
+              onClick={refresh}
+              className="ml-auto px-4 py-2 rounded-lg bg-[var(--color-card)] text-slate-400 hover:text-white transition-all flex items-center gap-2"
+              title="Refresh data"
+            >
+              <RefreshCw style={{ width: 16, height: 16 }} />
+              Refresh
+            </button>
           </div>
         </div>
 
@@ -457,7 +371,7 @@ export const VisitInsightsPage: React.FC = () => {
             className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-6"
           >
             <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <MapPin style={{ width: 20, height: 20 }} />
+              <Activity style={{ width: 20, height: 20 }} />
               Path Breakdown
             </h3>
             <div className="overflow-x-auto">
