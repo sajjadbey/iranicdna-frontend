@@ -158,53 +158,43 @@ const COMMUNITIES_HIERARCHY_QUERY = `
 const YDNA_TREE_QUERY = `
   query($rootHaplogroup: String) {
     ydnaTree(rootHaplogroup: $rootHaplogroup) {
-      id
-      name
-      parent {
-        id
-        name
-      }
-      isoggyghg: isoggYghg
-      yfullHg
-      tmrca
-      paleoSamples
-      sampleCount
+      ...TreeNodeFields
       children {
-        id
-        name
-        parent {
-          id
-          name
-        }
-        isoggyghg: isoggYghg
-        yfullHg
-        tmrca
-        paleoSamples
-        sampleCount
+        ...TreeNodeFields
         children {
-          id
-          name
-          parent {
-            id
-            name
-          }
-          isoggyghg: isoggYghg
-          yfullHg
-          tmrca
-          paleoSamples
-          sampleCount
+          ...TreeNodeFields
           children {
-            id
-            name
-            isoggyghg: isoggYghg
-            yfullHg
-            tmrca
-            paleoSamples
-            sampleCount
+            ...TreeNodeFields
+            children {
+              ...TreeNodeFields
+              children {
+                ...TreeNodeFields
+                children {
+                  ...TreeNodeFields
+                  children {
+                    ...TreeNodeFields
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
+  }
+  
+  fragment TreeNodeFields on YDNATreeType {
+    id
+    name
+    parent {
+      id
+      name
+    }
+    isoggyghg: isoggYghg
+    yfullHg
+    tmrca
+    paleoSamples
+    sampleCount
   }
 `;
 
