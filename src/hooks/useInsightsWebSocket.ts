@@ -19,7 +19,7 @@ export const useInsightsWebSocket = (days: number) => {
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port || (protocol === 'wss:' ? '443' : '80')}/ws/insights/`;
+    const wsUrl = `${protocol}//api.iranicdna.com/ws/insights/`;
     
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
