@@ -78,6 +78,7 @@ interface TreeTableProps {
 
 const TreeTable: React.FC<TreeTableProps> = ({ node, onNodeClick, showPaleoDNA, showTMRCA, level }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isPaleoExpanded, setIsPaleoExpanded] = useState(false);
   const hasChildren = node.children && node.children.length > 0;
 
   return (
@@ -117,12 +118,23 @@ const TreeTable: React.FC<TreeTableProps> = ({ node, onNodeClick, showPaleoDNA, 
           className="border-b border-teal-700/20 bg-amber-900/10"
           style={{ paddingLeft: `${level * 20 + 52}px` }}
         >
-          {node.paleoSamples.map((sample, idx) => (
-            <div key={idx} className="py-1.5 px-3 text-sm">
-              <span className="text-amber-400">✓</span>
-              <span className="ml-2 text-amber-300">{sample}</span>
+          <button
+            onClick={() => setIsPaleoExpanded(!isPaleoExpanded)}
+            className="py-2 px-3 text-sm text-amber-300 hover:text-amber-200 flex items-center gap-2 w-full"
+          >
+            {isPaleoExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            <span>PaleoDNA ({node.paleoSamples.length})</span>
+          </button>
+          {isPaleoExpanded && (
+            <div className="pb-2">
+              {node.paleoSamples.map((sample, idx) => (
+                <div key={idx} className="py-1 px-3 pl-10 text-sm">
+                  <span className="text-amber-400">✓</span>
+                  <span className="ml-2 text-amber-300">{sample}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
 
