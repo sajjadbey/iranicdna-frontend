@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from '../../config/api';
 export const FileToPlinkConverter: React.FC = () => {
   const { user } = useAuth();
   const [selectedDNAFileId, setSelectedDNAFileId] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
   const [sampleId, setSampleId] = useState('sample');
   const [converting, setConverting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +24,11 @@ export const FileToPlinkConverter: React.FC = () => {
       return;
     }
 
+    if (!password.trim()) {
+      setError('Please enter your password to decrypt the DNA file');
+      return;
+    }
+
     if (!sampleId.trim()) {
       setError('Please enter a sample ID');
       return;
@@ -33,6 +39,7 @@ export const FileToPlinkConverter: React.FC = () => {
 
     const formData = new FormData();
     formData.append('dna_file_id', selectedDNAFileId);
+    formData.append('password', password.trim());
     formData.append('sample_id', sampleId.trim());
 
     try {
@@ -71,6 +78,7 @@ export const FileToPlinkConverter: React.FC = () => {
       window.URL.revokeObjectURL(url);
 
       setSelectedDNAFileId(null);
+      setPassword('');
       setSampleId('sample');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Conversion failed');
@@ -157,10 +165,28 @@ export const FileToPlinkConverter: React.FC = () => {
             />
           </div>
 
+          {/* Password Input */}
+          {selectedDNAFileId && (
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-sm font-medium text-teal-200 mb-2">
+                Password *
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password to decrypt file"
+                className="w-full px-4 py-2 rounded-lg bg-slate-900/60 border border-teal-600/30 text-teal-100 placeholder-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <p className="text-xs text-teal-400 mt-1">Required to decrypt your DNA file</p>
+            </div>
+          )}
+
           {/* Convert Button */}
           <button
             onClick={handleConvert}
-            disabled={converting || !selectedDNAFileId || !sampleId.trim()}
+            disabled={converting || !selectedDNAFileId || !password.trim() || !sampleId.trim()}
             className="w-full px-6 py-3 rounded-lg bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
           >
             {converting ? (

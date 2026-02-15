@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, onUploadError }) => {
   const { user } = useAuth();
   const [selectedDNAFileId, setSelectedDNAFileId] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
   const [sampleId, setSampleId] = useState('');
   const [selectedModels, setSelectedModels] = useState<string[]>(['K12b']);
   const [tolerance, setTolerance] = useState(0.001);
@@ -26,6 +27,11 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       return;
     }
 
+    if (!password.trim()) {
+      onUploadError('Please enter your password to decrypt the DNA file');
+      return;
+    }
+
     if (!sampleId.trim()) {
       onUploadError('Please enter a sample ID');
       return;
@@ -36,6 +42,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
     try {
       const result = await uploadVCFFileWithDNAFile(
         selectedDNAFileId,
+        password.trim(),
         sampleId.trim(),
         selectedModels,
         tolerance
@@ -45,6 +52,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       
       // Reset form
       setSelectedDNAFileId(null);
+      setPassword('');
       setSampleId('');
       setSelectedModels(['K12b']);
       setTolerance(0.001);
@@ -90,6 +98,25 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
               onError={onUploadError}
             />
           </div>
+
+          {/* Password Input */}
+          {selectedDNAFileId && (
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-sm font-medium text-teal-200 mb-2">
+                Password *
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password to decrypt file"
+                className="w-full px-4 py-2 rounded-lg bg-slate-900/60 border border-teal-600/30 text-teal-100 placeholder-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                required
+              />
+              <p className="text-xs text-teal-400 mt-1">Required to decrypt your DNA file</p>
+            </div>
+          )}
         </>
       )}
 
@@ -148,7 +175,7 @@ export const VCFUploadForm: React.FC<VCFUploadFormProps> = ({ onUploadSuccess, o
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={!user || uploading || !selectedDNAFileId || !sampleId.trim()}
+        disabled={!user || uploading || !selectedDNAFileId || !password.trim() || !sampleId.trim()}
         className="w-full px-6 py-3 rounded-lg bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
       >
         {uploading ? (

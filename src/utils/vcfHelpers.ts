@@ -134,12 +134,14 @@ export const getAllAnalyses = async (): Promise<VCFAnalysisResponse[]> => {
 
 export const uploadVCFFileWithDNAFile = async (
   dnaFileId: string,
+  password: string,
   sampleId: string,
   models: string[],
   tolerance: number
 ): Promise<VCFAnalysisResponse> => {
   const formData = new FormData();
   formData.append('dna_file_id', dnaFileId);
+  formData.append('password', password);
   formData.append('sample_id', sampleId);
   formData.append('tolerance', tolerance.toString());
   
