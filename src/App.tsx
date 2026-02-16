@@ -50,7 +50,6 @@ const App: React.FC = () => {
               <Route path="/" element={<HomePage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/communities" element={<CommunitiesPage />} />
-              <Route path="/ydna-tree" element={<YDNATreePage />} />
               <Route path="/blog" element={<BlogPostsPage />} />
               <Route path="/blog/:slug" element={<BlogPostDetailPage />} />
               <Route path="/contact" element={<ContactPage />} />
