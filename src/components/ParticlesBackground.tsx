@@ -170,6 +170,9 @@ export const ParticlesBackground: React.FC<ParticlesBackgroundProps> = ({
         height: '100%',
         zIndex,
         pointerEvents: 'none',
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+        backfaceVisibility: 'hidden'
       }}
     />
   );

@@ -167,13 +167,12 @@ export const Header: React.FC = () => {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.nav
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ maxHeight: 0, opacity: 0 }}
+              animate={{ maxHeight: 1000, opacity: 1 }}
+              exit={{ maxHeight: 0, opacity: 0 }}
               transition={{ 
                 duration: 0.3,
-                ease: [0.4, 0, 0.2, 1],
-                delay: 0.25
+                ease: [0.4, 0, 0.2, 1]
               }}
               className="md:hidden overflow-hidden"
             >
@@ -185,15 +184,14 @@ export const Header: React.FC = () => {
                 variants={{
                   open: {
                     transition: {
-                      staggerChildren: 0.08,
-                      delayChildren: 0.1
+                      staggerChildren: 0.05,
+                      delayChildren: 0
                     }
                   },
                   closed: {
                     transition: {
-                      staggerChildren: 0.06,
-                      staggerDirection: -1,
-                      delayChildren: 0
+                      staggerChildren: 0.03,
+                      staggerDirection: -1
                     }
                   }
                 }}

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useMemo, useState, useEffect } from 'react';
+import React, { lazy, Suspense, useMemo, useState, useLayoutEffect } from 'react';
 import { useTheme } from './ThemeContext';
 import { prefersReducedMotion } from '../../utils/deviceDetection';
 import { Snowfall } from '../christmas/Snowfall';
@@ -28,13 +28,13 @@ export const ThemeBackground: React.FC = () => {
     return !reducedMotion;
   }, [themeConfig.name]);
 
-  // Update state after mount to avoid hydration issues
-  useEffect(() => {
+  // Update state synchronously before paint to avoid flicker
+  useLayoutEffect(() => {
     setShowAnimation(shouldShow);
   }, [shouldShow]);
 
   // Update body background for Christmas theme
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (themeConfig.name === 'christmas') {
       document.body.style.background = 'linear-gradient(to bottom, #0A1929 0%, #0D1B2A 50%, #1A2332 100%)';
     } else {

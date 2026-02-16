@@ -466,7 +466,7 @@ export const MapCard: React.FC<Props> = ({ samples, selectedProvince, selectedCi
         )}
       </div>
       
-      <div className="h-[400px] sm:h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
+      <div className="h-[400px] sm:h-[500px] rounded-xl overflow-hidden border border-teal-700/30" style={{ minHeight: '400px' }}>
         <MapContainer
           center={mapCenter}
           zoom={mapZoom}

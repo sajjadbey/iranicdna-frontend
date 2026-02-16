@@ -361,7 +361,7 @@ export const HeatmapCard: React.FC<Props> = ({
           </p>
         </div>
       ) : (
-        <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30">
+        <div className="h-[500px] rounded-xl overflow-hidden border border-teal-700/30" style={{ minHeight: '500px' }}>
           <MapContainer
             center={mapCenter}
             zoom={5}
