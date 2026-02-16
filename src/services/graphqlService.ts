@@ -165,49 +165,6 @@ const COMMUNITIES_HIERARCHY_QUERY = `
   }
 `;
 
-const YDNA_TREE_QUERY = `
-  query($rootHaplogroup: String) {
-    ydnaTree(rootHaplogroup: $rootHaplogroup) {
-      ...TreeNodeFields
-      children {
-        ...TreeNodeFields
-        children {
-          ...TreeNodeFields
-          children {
-            ...TreeNodeFields
-            children {
-              ...TreeNodeFields
-              children {
-                ...TreeNodeFields
-                children {
-                  ...TreeNodeFields
-                  children {
-                    ...TreeNodeFields
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  fragment TreeNodeFields on YDNATreeType {
-    id
-    name
-    parent {
-      id
-      name
-    }
-    isoggyghg: isoggYghg
-    yfullHg
-    tmrca
-    paleoSamples
-    sampleCount
-  }
-`;
-
 async function graphqlRequest<T>(query: string, variables?: Record<string, any>): Promise<T> {
   const response = await fetch(GRAPHQL_URL, {
     method: 'POST',
