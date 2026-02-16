@@ -72,18 +72,6 @@ export interface CountryHierarchy {
   tribes: TribeWithClans[];
 }
 
-export interface YDNATreeNode {
-  id: string;
-  name: string;
-  parent: { id: string; name: string } | null;
-  isoggyghg: string;
-  yfullHg: string;
-  tmrca: number | null;
-  paleoSamples: string[];
-  children: YDNATreeNode[];
-  sampleCount: number;
-}
-
 const FAMOUS_PEOPLE_QUERY = `
   query {
     famousPeople {
@@ -266,10 +254,5 @@ export const graphqlService = {
   fetchCommunitiesHierarchy: async (): Promise<CountryHierarchy[]> => {
     const data = await graphqlRequest<{ communitiesHierarchy: CountryHierarchy[] }>(COMMUNITIES_HIERARCHY_QUERY);
     return data.communitiesHierarchy;
-  },
-
-  fetchYDNATree: async (rootHaplogroup?: string): Promise<YDNATreeNode[]> => {
-    const data = await graphqlRequest<{ ydnaTree: YDNATreeNode[] }>(YDNA_TREE_QUERY, { rootHaplogroup });
-    return data.ydnaTree;
   },
 };

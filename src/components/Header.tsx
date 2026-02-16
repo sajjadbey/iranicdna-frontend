@@ -65,16 +65,6 @@ export const Header: React.FC = () => {
               <Users size={14} /> Communities
             </Link>
             <Link
-              to="/#"
-              className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
-                isActive('/ydna-tree')
-                  ? 'bg-white/10 text-white'
-                  : 'text-teal-100/90 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <GitBranch size={14} /> Y-DNA Tree
-            </Link>
-            <Link
               to="/blog"
               className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                 isActive('/blog') || location.pathname.startsWith('/blog/')
