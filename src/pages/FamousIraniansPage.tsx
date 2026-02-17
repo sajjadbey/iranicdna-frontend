@@ -9,6 +9,7 @@ export const FamousIraniansPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
     graphqlService.fetchFamousPeople()
@@ -51,16 +52,19 @@ export const FamousIraniansPage: React.FC = () => {
 
   const goToPrevious = () => {
     setIsAutoPlaying(false);
+    setImageLoading(true);
     setCurrentIndex((prev) => (prev - 1 + people.length) % people.length);
   };
 
   const goToNext = () => {
     setIsAutoPlaying(false);
+    setImageLoading(true);
     setCurrentIndex((prev) => (prev + 1) % people.length);
   };
 
   const goToSlide = (index: number) => {
     setIsAutoPlaying(false);
+    setImageLoading(true);
     setCurrentIndex(index);
   };
 
@@ -89,10 +93,16 @@ export const FamousIraniansPage: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative aspect-[4/5] md:aspect-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-amber-500/10"></div>
+                {imageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50">
+                    <div className="w-12 h-12 border-4 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <img
                   src={currentPerson.imageUrl ? `${API_BASE_URL}${currentPerson.imageUrl}` : `https://via.placeholder.com/600x750?text=${encodeURIComponent(currentPerson.name)}`}
                   alt={currentPerson.name}
                   className="w-full h-full object-cover"
+                  onLoad={() => setImageLoading(false)}
                 />
               </div>
 
