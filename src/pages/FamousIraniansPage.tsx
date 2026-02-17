@@ -10,10 +10,24 @@ export const FamousIraniansPage: React.FC = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
+  const [allImagesLoaded, setAllImagesLoaded] = useState(false);
 
   useEffect(() => {
     graphqlService.fetchFamousPeople()
-      .then(setPeople)
+      .then(async (data) => {
+        setPeople(data);
+        await Promise.all(
+          data.map((person) => 
+            new Promise((resolve) => {
+              const img = new Image();
+              img.onload = resolve;
+              img.onerror = resolve;
+              img.src = person.imageUrl ? `${API_BASE_URL}${person.imageUrl}` : `https://via.placeholder.com/600x750?text=${encodeURIComponent(person.name)}`;
+            })
+          )
+        );
+        setAllImagesLoaded(true);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -28,7 +42,7 @@ export const FamousIraniansPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [isAutoPlaying, people.length]);
 
-  if (loading) {
+  if (loading || !allImagesLoaded) {
     return (
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center">
