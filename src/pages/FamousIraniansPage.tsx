@@ -120,8 +120,8 @@ export const FamousIraniansPage: React.FC = () => {
                   
                   <div className="h-px bg-gradient-to-r from-teal-500/30 via-cyan-500/30 to-transparent"></div>
                   
-                  <p className="text-base md:text-lg text-slate-200/80 leading-relaxed">
-                    {boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}
+                  <p className="text-base md:text-lg text-slate-200/80 leading-relaxed italic">
+                    "{boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}"
                   </p>
                 </div>
 
