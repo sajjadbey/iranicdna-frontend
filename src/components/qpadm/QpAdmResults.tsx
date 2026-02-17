@@ -57,9 +57,10 @@ export const QpAdmResults: React.FC<QpAdmResultsProps> = ({ run }) => {
       });
 
       // Download the image
+      const sanitizedTarget = (target || 'result').replace(/[^a-zA-Z0-9_-]/g, '_');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `qpadm_${target}_${new Date().toISOString().split('T')[0]}.png`;
+      link.download = `qpadm_${sanitizedTarget}_${new Date().toISOString().split('T')[0]}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

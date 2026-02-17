@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Dna, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_ENDPOINTS } from '../../config/api';
 import { cachedFetch } from '../../utils/apiCache';
+import { sanitizeLog } from '../../utils/security';
 
 interface HaplogroupNode {
   name: string;
@@ -88,7 +89,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
               );
               return { name, count: countData };
             } catch (err) {
-              console.warn(`Failed to fetch count for ${name}:`, err);
+              console.warn('Failed to fetch count:', sanitizeLog(err));
               return null;
             }
           });
@@ -109,7 +110,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
         setHaplogroupTree(sortedData);
         setHaplogroupCounts(countsMap);
       } catch (err) {
-        console.error('Failed to fetch haplogroup tree:', err);
+        console.error('Failed to fetch haplogroup tree:', sanitizeLog(err));
         setHaplogroupTree([]);
       } finally {
         setLoading(false);
@@ -134,7 +135,7 @@ export const HaplogroupSelector: React.FC<Props> = ({ value, onChange }) => {
       );
       setHaplogroupCounts(prev => ({ ...prev, [name]: data }));
     } catch (err) {
-      console.error(`Failed to fetch count for ${name}:`, err);
+      console.error('Failed to fetch count:', sanitizeLog(err));
     }
   };
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { safeJsonParse } from '../utils/security';
 
 interface VisitInsights {
   total_visits: number;
@@ -37,10 +38,12 @@ export const useInsightsWebSocket = (days: number) => {
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setInsights(data);
-      setLoading(false);
-      setError(null);
+      const data = safeJsonParse<VisitInsights>(event.data);
+      if (data) {
+        setInsights(data);
+        setLoading(false);
+        setError(null);
+      }
     };
 
     ws.onerror = () => {

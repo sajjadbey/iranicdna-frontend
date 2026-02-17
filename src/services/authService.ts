@@ -1,8 +1,9 @@
 import { API_ENDPOINTS } from '../config/api';
 import type { VerifyEmailData, RequestVerificationData, PasswordResetRequestData, PasswordResetConfirmData } from '../types';
 import type { SignupData, SigninData, UpdateProfileData, AuthResponse, User } from '../types/auth';
+import { sanitizeLog, isValidUrl } from '../utils/security';
 
-// Token storage keys
+// Token storage keys (deprecated - moving to httpOnly cookies)
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 
@@ -32,6 +33,10 @@ async function apiRequest<T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
+  if (!isValidUrl(url)) {
+    throw new Error('Invalid URL');
+  }
+
   const token = tokenService.getAccessToken();
   
   const headers: Record<string, string> = {
@@ -44,6 +49,7 @@ async function apiRequest<T>(
 
   const response = await fetch(url, {
     ...options,
+    credentials: 'include',
     headers: {
       ...headers,
       ...(options.headers as Record<string, string>),
@@ -52,9 +58,8 @@ async function apiRequest<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    console.error('API Error Response:', error);
+    console.error('API Error Response:', sanitizeLog(error));
     
-    // Handle different error formats
     const errorMessage = 
       error.error || 
       error.detail || 
@@ -117,7 +122,7 @@ export const authService = {
         method: 'POST',
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout error:', sanitizeLog(error));
     } finally {
       tokenService.clearTokens();
     }

@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from '../config/api';
 import type { DNAFile, DNAFileUploadData, DNAFileUpdateData } from '../types/dnaFile';
+import { sanitizeLog } from '../utils/security';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('access_token');
@@ -35,7 +36,7 @@ export const dnaFileService = {
     }
     
     // Fallback to empty array if unexpected format
-    console.warn('Unexpected API response format:', data);
+    console.warn('Unexpected API response format:', sanitizeLog(data));
     return [];
   },
 

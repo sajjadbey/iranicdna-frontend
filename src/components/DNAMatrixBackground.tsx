@@ -47,7 +47,9 @@ export const DNAMatrixBackground: React.FC<DNAMatrixBackgroundProps> = ({
       const rows = Math.ceil(window.innerHeight / spacing);
       
       // DNA icon SVG as data URL (Firefox compatible)
-      const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${accentColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/></svg>`;
+      const sanitizedColor = accentColor.replace(/[^#a-fA-F0-9]/g, '') || '#d4af37';
+      const sanitizedIconSize = Math.max(1, Math.min(100, iconSize));
+      const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${sanitizedIconSize}" height="${sanitizedIconSize}" viewBox="0 0 24 24" fill="none" stroke="${sanitizedColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/></svg>`;
       const dataUrl = `data:image/svg+xml;base64,${btoa(svgStr)}`;
       
       const img = new Image();

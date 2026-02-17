@@ -1,4 +1,5 @@
 import { requestQueue, retryWithBackoff } from './requestQueue';
+import { isValidUrl } from './security';
 
 interface CacheEntry<T> {
   data: T;
@@ -146,6 +147,10 @@ export async function cachedFetch<T>(
   url: string,
   options?: RequestInit & { cacheOptions?: CacheOptions }
 ): Promise<T> {
+  if (!isValidUrl(url)) {
+    throw new Error('Invalid URL');
+  }
+
   const method = options?.method?.toUpperCase() || 'GET';
   
   // Only cache GET requests
