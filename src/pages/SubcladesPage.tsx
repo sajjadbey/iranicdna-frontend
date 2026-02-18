@@ -1,13 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Dna } from 'lucide-react';
 import { Layout } from '../components/Layout';
-import { ComparisonDonutChart } from '../components/analytics/ComparisonDonutChart';
 import { motion } from 'framer-motion';
 import { getAnimationConfig, fadeInVariants } from '../utils/deviceDetection';
 import { API_ENDPOINTS } from '../config/api';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { fmt, generateUniqueColors } from '../utils/colors';
+import { shouldReduceAnimations } from '../utils/deviceDetection';
+
+interface SubcladeItem {
+  subclade: string;
+  count: number;
+  ethnicity: string;
+}
 
 export const SubcladesPage: React.FC = () => {
-  const [subcladeData, setSubcladeData] = useState<Record<string, number>>({});
+  const [subcladeData, setSubcladeData] = useState<SubcladeItem[]>([]);
   const [allHaplogroups, setAllHaplogroups] = useState<string[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   const [selectedHaplogroup, setSelectedHaplogroup] = useState<string>('');
@@ -17,8 +25,8 @@ export const SubcladesPage: React.FC = () => {
   const [hasFiltered, setHasFiltered] = useState(false);
 
   const animConfig = getAnimationConfig();
+  const reduceAnimations = shouldReduceAnimations();
 
-  // Fetch root haplogroups and ethnicities
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -38,11 +46,9 @@ export const SubcladesPage: React.FC = () => {
     fetchOptions();
   }, []);
 
-  // Fetch subclade distribution
   useEffect(() => {
-    // Don't fetch if no filters selected
     if (!selectedHaplogroup && selectedEthnicities.length === 0) {
-      setSubcladeData({});
+      setSubcladeData([]);
       setHasFiltered(false);
       return;
     }
@@ -74,8 +80,22 @@ export const SubcladesPage: React.FC = () => {
     fetchData();
   }, [selectedEthnicities, selectedHaplogroup]);
 
+  const chartData = useMemo(() => {
+    return subcladeData.map(item => ({
+      name: `${item.subclade} : ${item.count} : ${item.ethnicity}`,
+      value: item.count,
+      ethnicity: item.ethnicity,
+      subclade: item.subclade
+    }));
+  }, [subcladeData]);
+
+  const colorMap = useMemo(() => {
+    const ethnicities = [...new Set(subcladeData.map(d => d.ethnicity))];
+    return generateUniqueColors(ethnicities);
+  }, [subcladeData]);
+
   const totalSamples = useMemo(() => {
-    return Object.values(subcladeData).reduce((sum, n) => sum + n, 0);
+    return subcladeData.reduce((sum, item) => sum + item.count, 0);
   }, [subcladeData]);
 
   const toggleEthnicity = (ethnicity: string) => {
@@ -83,6 +103,39 @@ export const SubcladesPage: React.FC = () => {
       prev.includes(ethnicity) ? prev.filter(e => e !== ethnicity) : [...prev, ethnicity]
     );
   };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-slate-700/95 border border-teal-500/50 rounded-lg px-3 py-2 shadow-lg">
+          <p className="text-teal-100 font-bold text-base">{data.subclade}</p>
+          <p className="text-teal-300 text-sm">
+            {fmt(data.value)} samples - {data.ethnicity}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const labelPositions = useMemo(() => {
+    const visibleLabels = chartData.filter(item => (item.value / totalSamples) * 100 >= 3.6);
+    
+    return visibleLabels.map(item => {
+      const index = chartData.findIndex(d => d.name === item.name);
+      let cumulativeValue = 0;
+      for (let i = 0; i < index; i++) {
+        cumulativeValue += chartData[i].value;
+      }
+      const midValue = cumulativeValue + chartData[index].value / 2;
+      const angleRadians = (midValue / totalSamples) * 2 * Math.PI;
+      const adjustedAngle = Math.PI / 2 - angleRadians;
+      const radiusPercent = 25;
+      
+      return { item, angle: adjustedAngle, radiusPercent };
+    });
+  }, [chartData, totalSamples]);
 
   if (error) {
     return (
@@ -130,7 +183,6 @@ export const SubcladesPage: React.FC = () => {
         </p>
       </motion.section>
 
-      {/* Filters */}
       <motion.section
         {...fadeInVariants}
         transition={{ duration: animConfig.duration, delay: 0.1 }}
@@ -139,7 +191,6 @@ export const SubcladesPage: React.FC = () => {
         <h3 className="text-xl font-bold text-teal-200 mb-4">Filters</h3>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Root Haplogroup Filter */}
           <div>
             <label className="block text-sm font-medium text-teal-300 mb-2">
               Root Haplogroup
@@ -156,7 +207,6 @@ export const SubcladesPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Ethnicity Filter */}
           <div>
             <label className="block text-sm font-medium text-teal-300 mb-2">
               Ethnicities ({selectedEthnicities.length} selected)
@@ -180,7 +230,6 @@ export const SubcladesPage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* Single Donut Chart */}
       {!hasFiltered ? (
         <motion.div
           {...fadeInVariants}
@@ -204,11 +253,99 @@ export const SubcladesPage: React.FC = () => {
           {...fadeInVariants}
           transition={{ duration: animConfig.duration }}
         >
-          <ComparisonDonutChart
-            title={selectedHaplogroup ? `${selectedHaplogroup} Subclades` : 'All Subclades'}
-            dataMap={subcladeData}
-            total={totalSamples}
-          />
+          <div className="bg-slate-800/60 rounded-2xl p-4 sm:p-6 border border-teal-700/30 flex flex-col select-none">
+            <h3 className="text-lg sm:text-xl font-bold text-teal-200 mb-3 sm:mb-4 flex items-center gap-2">
+              <Dna className="w-5 h-5 sm:w-6 sm:h-6" />
+              {selectedHaplogroup ? `${selectedHaplogroup} Subclades` : 'All Subclades'}
+            </h3>
+            
+            <div className="flex flex-col items-center gap-4 sm:gap-6">
+              <div className="relative w-full max-w-[320px] sm:max-w-[400px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none">
+                <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius="40%"
+                      innerRadius="28%"
+                      fill="#8884d8"
+                      dataKey="value"
+                      paddingAngle={2}
+                      animationBegin={0}
+                      animationDuration={reduceAnimations ? 0 : 800}
+                      isAnimationActive={!reduceAnimations}
+                      stroke="transparent"
+                      strokeWidth={0}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={colorMap[entry.ethnicity]}
+                          className="cursor-pointer"
+                          style={{ transition: reduceAnimations ? 'none' : 'opacity 0.2s' }}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      content={<CustomTooltip />} 
+                      animationDuration={0}
+                      isAnimationActive={false}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <div className="text-xl sm:text-2xl font-bold text-teal-100">
+                    {fmt(totalSamples)}
+                  </div>
+                  <div className="text-xs sm:text-sm text-teal-400">
+                    samples
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 pointer-events-none select-none">
+                  {labelPositions.map(({ item, angle, radiusPercent }) => {
+                    const x = Math.cos(angle) * radiusPercent;
+                    const y = -Math.sin(angle) * radiusPercent;
+                    const angleDeg = (angle * 180) / Math.PI;
+                    
+                    let transformX = '-50%';
+                    let transformY = '-50%';
+                    
+                    if (angleDeg > -45 && angleDeg < 45) {
+                      transformX = '0%';
+                    } else if (angleDeg > 135 || angleDeg < -135) {
+                      transformX = '-100%';
+                    }
+                    
+                    if (angleDeg > 0) {
+                      transformY = '-100%';
+                    } else {
+                      transformY = '0%';
+                    }
+                    
+                    return (
+                      <div
+                        key={item.name}
+                        className="absolute whitespace-nowrap text-[10px] sm:text-xs font-semibold"
+                        style={{
+                          left: `calc(50% + ${x}%)`,
+                          top: `calc(50% + ${y}%)`,
+                          transform: `translate(${transformX}, ${transformY})`,
+                        }}
+                      >
+                        <span className="text-teal-100">{item.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
       )}
     </Layout>
