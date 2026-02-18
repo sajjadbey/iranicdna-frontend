@@ -14,7 +14,6 @@ import { getAnimationConfig, fadeInVariants, slideInVariants, scaleVariants } fr
 import { API_ENDPOINTS } from '../config/api';
 import { cachedFetchNormalized } from '../utils/apiCache';
 import { buildSamplesUrl, FILTER_PRESETS } from '../utils/apiFilters';
-import { graphqlService } from '../services/graphqlService';
 
 interface ProvinceDTO { name: string; country: string }
 interface EthnicityDTO { name: string }
