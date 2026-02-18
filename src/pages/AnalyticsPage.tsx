@@ -43,8 +43,8 @@ const subMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, nu
 
 export const AnalyticsPage: React.FC = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
-  const [allCountries, setAllCountries] = useState<string[]>([]);
-  const [allProvinces, setAllProvinces] = useState<ProvinceDTO[]>([]);
+  const [allCountriesBase, setAllCountriesBase] = useState<string[]>([]);
+  const [allProvincesBase, setAllProvincesBase] = useState<ProvinceDTO[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -60,53 +60,28 @@ export const AnalyticsPage: React.FC = () => {
   // Get animation config based on device
   const animConfig = getAnimationConfig();
 
-  // Fetch countries based on selected ethnicity
+  // Fetch all countries and provinces on mount (base data)
   useEffect(() => {
-    const fetchCountries = async () => {
+    const fetchBaseData = async () => {
       try {
-        let url = API_ENDPOINTS.countries;
-        if (selectedEthnicity) {
-          url += `?ethnicity=${encodeURIComponent(selectedEthnicity)}`;
-        }
-        const response = await fetch(url);
-        const countriesData = await response.json();
-        setAllCountries(countriesData.map((c: { name: string }) => c.name).sort());
-      } catch (err) {
-        console.error('Failed to fetch countries:', err);
-        setAllCountries([]);
-      }
-    };
-    fetchCountries();
-  }, [selectedEthnicity]);
-
-  // Fetch provinces based on selected ethnicity and country
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        let url = API_ENDPOINTS.provinces;
-        const params = new URLSearchParams();
-        if (selectedEthnicity) {
-          params.append('ethnicity', selectedEthnicity);
-        }
-        if (selectedCountry) {
-          params.append('country', selectedCountry);
-        }
-        if (params.toString()) {
-          url += `?${params.toString()}`;
-        }
-        const response = await fetch(url);
-        const provincesData = await response.json();
-        setAllProvinces(provincesData.map((p: { name: string; country: { name: string } }) => ({ 
+        const [countriesRes, provincesRes] = await Promise.all([
+          fetch(API_ENDPOINTS.countries),
+          fetch(API_ENDPOINTS.provinces)
+        ]);
+        const countriesData = await countriesRes.json();
+        const provincesData = await provincesRes.json();
+        
+        setAllCountriesBase(countriesData.map((c: { name: string }) => c.name).sort());
+        setAllProvincesBase(provincesData.map((p: { name: string; country: { name: string } }) => ({ 
           name: p.name, 
           country: p.country.name 
         })));
       } catch (err) {
-        console.error('Failed to fetch provinces:', err);
-        setAllProvinces([]);
+        console.error('Failed to fetch base data:', err);
       }
     };
-    fetchProvinces();
-  }, [selectedEthnicity, selectedCountry]);
+    fetchBaseData();
+  }, []);
 
   // Fetch ethnicities based on selected location (hierarchical filtering)
   useEffect(() => {
@@ -133,20 +108,38 @@ export const AnalyticsPage: React.FC = () => {
     fetchEthnicities();
   }, [selectedCountry, selectedProvince]);
 
-  // Filter countries based on selected ethnicity (client-side optimization)
+  // Filter countries based on selected ethnicity from samples
   const filteredCountries = useMemo(() => {
-    return allCountries;
-  }, [allCountries]);
+    if (!selectedEthnicity) return allCountriesBase;
+    
+    // Get unique countries from samples with the selected ethnicity
+    const countriesWithEthnicity = new Set(
+      samples
+        .filter(s => s.ethnicity === selectedEthnicity && s.country)
+        .map(s => s.country as string)
+    );
+    
+    return allCountriesBase.filter(c => countriesWithEthnicity.has(c));
+  }, [allCountriesBase, selectedEthnicity, samples]);
 
-  // Filter provinces based on selected country
+  // Filter provinces based on selected country and ethnicity
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
-    return allProvinces
-      .filter(p => p.country === selectedCountry)
-      .map(p => p.name)
-      .sort();
-  }, [selectedCountry, allProvinces]);
+    let provinces = allProvincesBase.filter(p => p.country === selectedCountry);
+    
+    // If ethnicity is selected, filter provinces that have samples with that ethnicity
+    if (selectedEthnicity) {
+      const provincesWithEthnicity = new Set(
+        samples
+          .filter(s => s.ethnicity === selectedEthnicity && s.province && s.country === selectedCountry)
+          .map(s => s.province as string)
+      );
+      provinces = provinces.filter(p => provincesWithEthnicity.has(p.name));
+    }
+    
+    return provinces.map(p => p.name).sort();
+  }, [selectedCountry, allProvincesBase, selectedEthnicity, samples]);
 
   // Ethnicities are already filtered by the server based on location
   const filteredEthnicities = useMemo(() => {
@@ -155,8 +148,8 @@ export const AnalyticsPage: React.FC = () => {
 
   // Get unique province names for comparison modal
   const provinceNames = useMemo(() => {
-    return Array.from(new Set(allProvinces.map(p => p.name))).sort();
-  }, [allProvinces]);
+    return Array.from(new Set(allProvincesBase.map(p => p.name))).sort();
+  }, [allProvincesBase]);
 
   // Reset country if it's not in filtered list
   useEffect(() => {
@@ -193,7 +186,7 @@ export const AnalyticsPage: React.FC = () => {
     setSelectedProvince(provinceName);
 
     // Find the country for this province
-    const province = allProvinces.find(p => p.name === provinceName);
+    const province = allProvincesBase.find(p => p.name === provinceName);
     if (province) {
       setSelectedCountry(province.country);
     } else {
