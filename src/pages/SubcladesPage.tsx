@@ -284,7 +284,7 @@ export const SubcladesPage: React.FC = () => {
             </h3>
             
             <div className="flex flex-col items-center gap-4 sm:gap-6">
-              <div className="relative w-full max-w-[400px] aspect-square">
+              <div className="relative w-full max-w-[600px] aspect-square overflow-visible">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -292,7 +292,7 @@ export const SubcladesPage: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      outerRadius="45%"
+                      outerRadius="35%"
                       innerRadius="0%"
                       dataKey="value"
                       paddingAngle={0}
@@ -303,20 +303,21 @@ export const SubcladesPage: React.FC = () => {
                       strokeWidth={2}
                       startAngle={90}
                       endAngle={-270}
+                      style={{ outline: 'none' }}
                     >
                       {chartData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
                           fill={colorMap[entry.name]}
-                          style={{ filter: 'drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))' }}
+                          style={{ filter: 'drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))', outline: 'none' }}
                         />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                   </PieChart>
                 </ResponsiveContainer>
                 
-                <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 pointer-events-none overflow-visible">
                   {labelPositions.map(({ item, angle, radiusPercent }) => {
                     const x = Math.cos(angle) * radiusPercent;
                     const y = -Math.sin(angle) * radiusPercent;
