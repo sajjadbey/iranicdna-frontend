@@ -12,8 +12,9 @@ export const SubcladesPage: React.FC = () => {
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   const [selectedHaplogroup, setSelectedHaplogroup] = useState<string>('');
   const [selectedEthnicities, setSelectedEthnicities] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFiltered, setHasFiltered] = useState(false);
 
   const animConfig = getAnimationConfig();
 
@@ -39,9 +40,17 @@ export const SubcladesPage: React.FC = () => {
 
   // Fetch subclade distribution
   useEffect(() => {
+    // Don't fetch if no filters selected
+    if (!selectedHaplogroup && selectedEthnicities.length === 0) {
+      setSubcladeData({});
+      setHasFiltered(false);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+      setHasFiltered(true);
       
       try {
         let url = API_ENDPOINTS.subcladeDistribution;
@@ -172,7 +181,16 @@ export const SubcladesPage: React.FC = () => {
       </motion.section>
 
       {/* Single Donut Chart */}
-      {totalSamples === 0 ? (
+      {!hasFiltered ? (
+        <motion.div
+          {...fadeInVariants}
+          transition={{ duration: animConfig.duration }}
+          className="rounded-2xl p-8 bg-slate-800/60 text-center border border-teal-700/30"
+        >
+          <Dna className="mx-auto mb-3 text-teal-500" size={48} />
+          <p className="text-teal-400">Select a haplogroup or ethnicities to view distribution.</p>
+        </motion.div>
+      ) : totalSamples === 0 ? (
         <motion.div
           {...fadeInVariants}
           transition={{ duration: animConfig.duration }}
