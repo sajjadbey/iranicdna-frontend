@@ -122,11 +122,7 @@ export const SubcladesPage: React.FC = () => {
     return generateUniqueColors(names);
   }, [data]);
 
-  const subcladeColorMap = useMemo(() => {
-    if (!data) return {};
-    const subcladeNames = data.subclades.map(s => s.subclade);
-    return generateUniqueColors(subcladeNames);
-  }, [data]);
+
 
   const toggleEthnicity = (ethnicity: string) => {
     setSelectedEthnicities(prev =>
@@ -159,7 +155,7 @@ export const SubcladesPage: React.FC = () => {
       const total = chartData.reduce((sum, d) => sum + d.value, 0);
       const angleRadians = (midValue / total) * 2 * Math.PI;
       const adjustedAngle = Math.PI / 2 - angleRadians;
-      const radiusPercent = 28;
+      const radiusPercent = 35;
       
       return { item, angle: adjustedAngle, radiusPercent };
     });
@@ -312,6 +308,7 @@ export const SubcladesPage: React.FC = () => {
                         <Cell 
                           key={`cell-${index}`} 
                           fill={colorMap[entry.name]}
+                          style={{ filter: 'drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))' }}
                         />
                       ))}
                     </Pie>
@@ -350,14 +347,14 @@ export const SubcladesPage: React.FC = () => {
 
               {/* Legend */}
               <div className="w-full grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {data.subclades.map(subclade => (
-                  <div key={subclade.subclade} className="flex items-center gap-2 text-xs">
+                {data.ancient_people_summary.map(item => (
+                  <div key={item.name} className="flex items-center gap-2 text-xs">
                     <div 
                       className="w-4 h-4 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: subcladeColorMap[subclade.subclade] }}
+                      style={{ backgroundColor: colorMap[item.name] }}
                     />
                     <span className="text-teal-100 truncate">
-                      {subclade.subclade} : {subclade.count} : {subclade.ancient_people}
+                      {item.name}: {item.count} ({item.percentage}%)
                     </span>
                   </div>
                 ))}
