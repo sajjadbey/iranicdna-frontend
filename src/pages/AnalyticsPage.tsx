@@ -129,6 +129,12 @@ export const AnalyticsPage: React.FC = () => {
     // Start with provinces in the selected country
     let provinces = allProvincesBase.filter(p => p.country === selectedCountry);
     
+    console.log('DEBUG: selectedCountry:', selectedCountry);
+    console.log('DEBUG: selectedEthnicity:', selectedEthnicity);
+    console.log('DEBUG: provinces in country:', provinces.map(p => p.name));
+    console.log('DEBUG: samples count:', samples.length);
+    console.log('DEBUG: sample provinces:', samples.filter(s => s.province).map(s => ({ province: s.province, ethnicity: s.ethnicity, country: s.country })));
+    
     // If ethnicity is selected, filter provinces that have samples with that ethnicity
     if (selectedEthnicity) {
       const provincesWithEthnicity = new Set(
@@ -136,9 +142,11 @@ export const AnalyticsPage: React.FC = () => {
           .filter(s => s.ethnicity === selectedEthnicity && s.province)
           .map(s => s.province as string)
       );
+      console.log('DEBUG: provincesWithEthnicity:', Array.from(provincesWithEthnicity));
       provinces = provinces.filter(p => provincesWithEthnicity.has(p.name));
     }
     
+    console.log('DEBUG: final filtered provinces:', provinces.map(p => p.name));
     return provinces.map(p => p.name).sort();
   }, [selectedCountry, allProvincesBase, selectedEthnicity, samples]);
 
