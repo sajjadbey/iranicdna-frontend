@@ -126,14 +126,15 @@ export const AnalyticsPage: React.FC = () => {
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
+    console.log('DEBUG: allProvincesBase sample:', allProvincesBase.slice(0, 5));
+    console.log('DEBUG: selectedCountry:', selectedCountry);
+    console.log('DEBUG: selectedEthnicity:', selectedEthnicity);
+    
     // Start with provinces in the selected country
     let provinces = allProvincesBase.filter(p => p.country === selectedCountry);
     
-    console.log('DEBUG: selectedCountry:', selectedCountry);
-    console.log('DEBUG: selectedEthnicity:', selectedEthnicity);
     console.log('DEBUG: provinces in country:', provinces.map(p => p.name));
     console.log('DEBUG: samples count:', samples.length);
-    console.log('DEBUG: sample provinces:', samples.filter(s => s.province).map(s => ({ province: s.province, ethnicity: s.ethnicity, country: s.country })));
     
     // If ethnicity is selected, filter provinces that have samples with that ethnicity
     if (selectedEthnicity) {
