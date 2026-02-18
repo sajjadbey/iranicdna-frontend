@@ -126,22 +126,14 @@ export const AnalyticsPage: React.FC = () => {
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
-    // If ethnicity is selected, get provinces directly from filtered samples
-    if (selectedEthnicity) {
-      const provincesSet = new Set(
-        samples
-          .filter(s => s.province)
-          .map(s => s.province as string)
-      );
-      return Array.from(provincesSet).sort();
-    }
-    
-    // Otherwise, get all provinces for the selected country from base data
-    return allProvincesBase
-      .filter(p => p.country === selectedCountry)
-      .map(p => p.name)
-      .sort();
-  }, [selectedCountry, allProvincesBase, selectedEthnicity, samples]);
+    // Get provinces directly from filtered samples (works for both with/without ethnicity)
+    const provincesSet = new Set(
+      samples
+        .filter(s => s.province)
+        .map(s => s.province as string)
+    );
+    return Array.from(provincesSet).sort();
+  }, [selectedCountry, samples]);
 
   // Ethnicities are already filtered by the server based on location
   const filteredEthnicities = useMemo(() => {
