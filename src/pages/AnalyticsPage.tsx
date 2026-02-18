@@ -126,13 +126,14 @@ export const AnalyticsPage: React.FC = () => {
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
+    // Start with provinces in the selected country
     let provinces = allProvincesBase.filter(p => p.country === selectedCountry);
     
     // If ethnicity is selected, filter provinces that have samples with that ethnicity
     if (selectedEthnicity) {
       const provincesWithEthnicity = new Set(
         samples
-          .filter(s => s.ethnicity === selectedEthnicity && s.province && s.country === selectedCountry)
+          .filter(s => s.ethnicity === selectedEthnicity && s.province)
           .map(s => s.province as string)
       );
       provinces = provinces.filter(p => provincesWithEthnicity.has(p.name));
