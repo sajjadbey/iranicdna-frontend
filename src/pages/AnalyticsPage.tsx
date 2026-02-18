@@ -126,29 +126,21 @@ export const AnalyticsPage: React.FC = () => {
   const filteredProvinces = useMemo(() => {
     if (!selectedCountry) return [];
     
-    console.log('DEBUG: allProvincesBase sample:', allProvincesBase.slice(0, 5));
-    console.log('DEBUG: selectedCountry:', selectedCountry);
-    console.log('DEBUG: selectedEthnicity:', selectedEthnicity);
-    
-    // Start with provinces in the selected country
-    let provinces = allProvincesBase.filter(p => p.country === selectedCountry);
-    
-    console.log('DEBUG: provinces in country:', provinces.map(p => p.name));
-    console.log('DEBUG: samples count:', samples.length);
-    
-    // If ethnicity is selected, filter provinces that have samples with that ethnicity
+    // If ethnicity is selected, get provinces directly from filtered samples
     if (selectedEthnicity) {
-      const provincesWithEthnicity = new Set(
+      const provincesSet = new Set(
         samples
-          .filter(s => s.ethnicity === selectedEthnicity && s.province)
+          .filter(s => s.province)
           .map(s => s.province as string)
       );
-      console.log('DEBUG: provincesWithEthnicity:', Array.from(provincesWithEthnicity));
-      provinces = provinces.filter(p => provincesWithEthnicity.has(p.name));
+      return Array.from(provincesSet).sort();
     }
     
-    console.log('DEBUG: final filtered provinces:', provinces.map(p => p.name));
-    return provinces.map(p => p.name).sort();
+    // Otherwise, get all provinces for the selected country from base data
+    return allProvincesBase
+      .filter(p => p.country === selectedCountry)
+      .map(p => p.name)
+      .sort();
   }, [selectedCountry, allProvincesBase, selectedEthnicity, samples]);
 
   // Ethnicities are already filtered by the server based on location
