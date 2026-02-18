@@ -30,8 +30,8 @@ export const SubcladesPage: React.FC = () => {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [allHaplogroups, setAllHaplogroups] = useState<string[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
-  const [selectedHaplogroup, setSelectedHaplogroup] = useState<string>('');
   const [selectedEthnicities, setSelectedEthnicities] = useState<string[]>([]);
+  const [selectedHaplogroup, setSelectedHaplogroup] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasFiltered, setHasFiltered] = useState(false);
@@ -39,24 +39,39 @@ export const SubcladesPage: React.FC = () => {
   const animConfig = getAnimationConfig();
   const reduceAnimations = shouldReduceAnimations();
 
+  // Fetch ethnicities first
   useEffect(() => {
-    const fetchOptions = async () => {
+    const fetchEthnicities = async () => {
       try {
-        const [haplogroupsRes, ethnicitiesRes] = await Promise.all([
-          fetch(API_ENDPOINTS.subclades),
-          fetch(API_ENDPOINTS.ethnicities)
-        ]);
-        const haplogroupsData = await haplogroupsRes.json();
-        const ethnicitiesData = await ethnicitiesRes.json();
-        
-        setAllHaplogroups(haplogroupsData);
-        setAllEthnicities(ethnicitiesData.map((e: { name: string }) => e.name).sort());
+        const response = await fetch(API_ENDPOINTS.ethnicities);
+        const data = await response.json();
+        setAllEthnicities(data.map((e: { name: string }) => e.name).sort());
       } catch (err) {
-        console.error('Failed to fetch options:', err);
+        console.error('Failed to fetch ethnicities:', err);
       }
     };
-    fetchOptions();
+    fetchEthnicities();
   }, []);
+
+  // Fetch haplogroups based on selected ethnicities
+  useEffect(() => {
+    const fetchHaplogroups = async () => {
+      try {
+        let url = API_ENDPOINTS.subclades;
+        if (selectedEthnicities.length > 0) {
+          const params = new URLSearchParams();
+          selectedEthnicities.forEach(eth => params.append('ethnicity', eth));
+          url += `?${params.toString()}`;
+        }
+        const response = await fetch(url);
+        const data = await response.json();
+        setAllHaplogroups(data);
+      } catch (err) {
+        console.error('Failed to fetch haplogroups:', err);
+      }
+    };
+    fetchHaplogroups();
+  }, [selectedEthnicities]);
 
   useEffect(() => {
     if (!selectedHaplogroup && selectedEthnicities.length === 0) {
@@ -206,22 +221,6 @@ export const SubcladesPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-teal-300 mb-2">
-              Root Haplogroup
-            </label>
-            <select
-              value={selectedHaplogroup}
-              onChange={(e) => setSelectedHaplogroup(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700/50 border border-teal-700/30 rounded-lg text-teal-100 focus:outline-none focus:border-teal-500/50"
-            >
-              <option value="">All Haplogroups</option>
-              {allHaplogroups.map(hap => (
-                <option key={hap} value={hap}>{hap}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-teal-300 mb-2">
               Ethnicities ({selectedEthnicities.length} selected)
             </label>
             <div className="max-h-[280px] overflow-y-auto custom-scrollbar p-2 bg-slate-700/30 rounded-lg">
@@ -239,6 +238,22 @@ export const SubcladesPage: React.FC = () => {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-teal-300 mb-2">
+              Root Haplogroup
+            </label>
+            <select
+              value={selectedHaplogroup}
+              onChange={(e) => setSelectedHaplogroup(e.target.value)}
+              className="w-full px-4 py-2 bg-slate-700/50 border border-teal-700/30 rounded-lg text-teal-100 focus:outline-none focus:border-teal-500/50"
+            >
+              <option value="">All Haplogroups</option>
+              {allHaplogroups.map(hap => (
+                <option key={hap} value={hap}>{hap}</option>
+              ))}
+            </select>
           </div>
         </div>
       </motion.section>
