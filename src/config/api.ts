@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   haplogroup: `${ANALYTICS_API_URL}/genetics/haplogroup/`,
   haplogroupHeatmap: `${ANALYTICS_API_URL}/genetics/haplogroup/heatmap/`,
   subcladeDistribution: `${ANALYTICS_API_URL}/genetics/subclade-distribution/`,
+  subclades: `${ANALYTICS_API_URL}/genetics/subclades/`,
   
   // Export endpoints
   exportExcel: `${ANALYTICS_API_URL}/genetics/get_excel`,
