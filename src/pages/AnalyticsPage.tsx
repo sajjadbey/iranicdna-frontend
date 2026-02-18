@@ -61,23 +61,53 @@ export const AnalyticsPage: React.FC = () => {
   // Get animation config based on device
   const animConfig = getAnimationConfig();
 
-  // Fetch countries and provinces on mount
+  // Fetch countries based on selected ethnicity
   useEffect(() => {
-    const fetchFilterOptions = async () => {
+    const fetchCountries = async () => {
       try {
-        const [countriesData, provincesData] = await Promise.all([
-          graphqlService.fetchCountries(),
-          graphqlService.fetchProvinces(),
-        ]);
-        
-        setAllCountries(countriesData.map(c => c.name).sort());
-        setAllProvinces(provincesData.map(p => ({ name: p.name, country: p.country.name })));
+        let url = API_ENDPOINTS.countries;
+        if (selectedEthnicity) {
+          url += `?ethnicity=${encodeURIComponent(selectedEthnicity)}`;
+        }
+        const response = await fetch(url);
+        const countriesData = await response.json();
+        setAllCountries(countriesData.map((c: { name: string }) => c.name).sort());
       } catch (err) {
-        console.error('Failed to fetch filter options:', err);
+        console.error('Failed to fetch countries:', err);
+        setAllCountries([]);
       }
     };
-    fetchFilterOptions();
-  }, []);
+    fetchCountries();
+  }, [selectedEthnicity]);
+
+  // Fetch provinces based on selected ethnicity and country
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        let url = API_ENDPOINTS.provinces;
+        const params = new URLSearchParams();
+        if (selectedEthnicity) {
+          params.append('ethnicity', selectedEthnicity);
+        }
+        if (selectedCountry) {
+          params.append('country', selectedCountry);
+        }
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+        const response = await fetch(url);
+        const provincesData = await response.json();
+        setAllProvinces(provincesData.map((p: { name: string; country: { name: string } }) => ({ 
+          name: p.name, 
+          country: p.country.name 
+        })));
+      } catch (err) {
+        console.error('Failed to fetch provinces:', err);
+        setAllProvinces([]);
+      }
+    };
+    fetchProvinces();
+  }, [selectedEthnicity, selectedCountry]);
 
   // Fetch ethnicities based on selected location (hierarchical filtering)
   useEffect(() => {
