@@ -9,6 +9,7 @@ import { DNAMatrixBackground } from './components/DNAMatrixBackground';
 // Lazy load all page components for better code splitting
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })));
+const SubcladesPage = lazy(() => import('./pages/SubcladesPage').then(m => ({ default: m.SubcladesPage })));
 const CommunitiesPage = lazy(() => import('./pages/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })));
 const BlogPostsPage = lazy(() => import('./pages/BlogPostsPage').then(m => ({ default: m.BlogPostsPage })));
 const BlogPostDetailPage = lazy(() => import('./pages/BlogPostDetailPage').then(m => ({ default: m.BlogPostDetailPage })));
@@ -49,6 +50,7 @@ const App: React.FC = () => {
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/subclades" element={<SubcladesPage />} />
               <Route path="/communities" element={<CommunitiesPage />} />
               <Route path="/blog" element={<BlogPostsPage />} />
               <Route path="/blog/:slug" element={<BlogPostDetailPage />} />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut, Activity, Coffee, GitBranch } from 'lucide-react';
+import { Dna, Info, Mail, BarChart3, Users, BookOpen, Menu, X, Wrench, User, LogOut, Activity, Coffee, GitBranch, PieChart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mainLogo from '../assets/logo.png';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,6 +53,16 @@ export const Header: React.FC = () => {
               }`}
             >
               <BarChart3 size={14} /> Analytics
+            </Link>
+            <Link
+              to="/subclades"
+              className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                isActive('/subclades')
+                  ? 'bg-white/10 text-white'
+                  : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <PieChart size={14} /> Subclades
             </Link>
             <Link
               to="/communities"
@@ -214,6 +224,26 @@ export const Header: React.FC = () => {
                   >
                     <BarChart3 size={18} />
                     <span className="font-medium">Analytics</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    open: { x: 0, opacity: 1 },
+                    closed: { x: -100, opacity: 0 }
+                  }}
+                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <Link
+                    to="/subclades"
+                    onClick={closeMobileMenu}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-colors ${
+                      isActive('/subclades')
+                        ? 'bg-white/10 text-white'
+                        : 'text-teal-100/90 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <PieChart size={18} />
+                    <span className="font-medium">Subclades</span>
                   </Link>
                 </motion.div>
                 <motion.div
