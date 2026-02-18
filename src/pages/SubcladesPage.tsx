@@ -11,11 +11,23 @@ import { shouldReduceAnimations } from '../utils/deviceDetection';
 interface SubcladeItem {
   subclade: string;
   count: number;
-  ethnicity: string;
+  ancient_people: string;
+}
+
+interface AncientPeopleSummary {
+  name: string;
+  count: number;
+  percentage: number;
+}
+
+interface ApiResponse {
+  subclades: SubcladeItem[];
+  ancient_people_summary: AncientPeopleSummary[];
+  total: number;
 }
 
 export const SubcladesPage: React.FC = () => {
-  const [subcladeData, setSubcladeData] = useState<SubcladeItem[]>([]);
+  const [data, setData] = useState<ApiResponse | null>(null);
   const [allHaplogroups, setAllHaplogroups] = useState<string[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
   const [selectedHaplogroup, setSelectedHaplogroup] = useState<string>('');
@@ -48,7 +60,7 @@ export const SubcladesPage: React.FC = () => {
 
   useEffect(() => {
     if (!selectedHaplogroup && selectedEthnicities.length === 0) {
-      setSubcladeData([]);
+      setData(null);
       setHasFiltered(false);
       return;
     }
@@ -68,8 +80,8 @@ export const SubcladesPage: React.FC = () => {
         if (params.toString()) url += `?${params.toString()}`;
         
         const response = await fetch(url);
-        const data = await response.json();
-        setSubcladeData(data);
+        const responseData = await response.json();
+        setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
       } finally {
@@ -81,22 +93,25 @@ export const SubcladesPage: React.FC = () => {
   }, [selectedEthnicities, selectedHaplogroup]);
 
   const chartData = useMemo(() => {
-    return subcladeData.map(item => ({
-      name: `${item.subclade} : ${item.count} : ${item.ethnicity}`,
+    if (!data) return [];
+    return data.ancient_people_summary.map(item => ({
+      name: item.name,
       value: item.count,
-      ethnicity: item.ethnicity,
-      subclade: item.subclade
+      percentage: item.percentage
     }));
-  }, [subcladeData]);
+  }, [data]);
 
   const colorMap = useMemo(() => {
-    const ethnicities = [...new Set(subcladeData.map(d => d.ethnicity))];
-    return generateUniqueColors(ethnicities);
-  }, [subcladeData]);
+    if (!data) return {};
+    const names = data.ancient_people_summary.map(s => s.name);
+    return generateUniqueColors(names);
+  }, [data]);
 
-  const totalSamples = useMemo(() => {
-    return subcladeData.reduce((sum, item) => sum + item.count, 0);
-  }, [subcladeData]);
+  const subcladeColorMap = useMemo(() => {
+    if (!data) return {};
+    const subcladeNames = data.subclades.map(s => s.subclade);
+    return generateUniqueColors(subcladeNames);
+  }, [data]);
 
   const toggleEthnicity = (ethnicity: string) => {
     setSelectedEthnicities(prev =>
@@ -106,12 +121,12 @@ export const SubcladesPage: React.FC = () => {
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const item = payload[0].payload;
       return (
         <div className="bg-slate-700/95 border border-teal-500/50 rounded-lg px-3 py-2 shadow-lg">
-          <p className="text-teal-100 font-bold text-base">{data.subclade}</p>
+          <p className="text-teal-100 font-bold text-base">{item.name}</p>
           <p className="text-teal-300 text-sm">
-            {fmt(data.value)} samples - {data.ethnicity}
+            {fmt(item.value)} samples ({item.percentage}%)
           </p>
         </div>
       );
@@ -120,22 +135,20 @@ export const SubcladesPage: React.FC = () => {
   };
 
   const labelPositions = useMemo(() => {
-    const visibleLabels = chartData.filter(item => (item.value / totalSamples) * 100 >= 3.6);
-    
-    return visibleLabels.map(item => {
-      const index = chartData.findIndex(d => d.name === item.name);
+    return chartData.map((item, index) => {
       let cumulativeValue = 0;
       for (let i = 0; i < index; i++) {
         cumulativeValue += chartData[i].value;
       }
-      const midValue = cumulativeValue + chartData[index].value / 2;
-      const angleRadians = (midValue / totalSamples) * 2 * Math.PI;
+      const midValue = cumulativeValue + item.value / 2;
+      const total = chartData.reduce((sum, d) => sum + d.value, 0);
+      const angleRadians = (midValue / total) * 2 * Math.PI;
       const adjustedAngle = Math.PI / 2 - angleRadians;
-      const radiusPercent = 25;
+      const radiusPercent = 28;
       
       return { item, angle: adjustedAngle, radiusPercent };
     });
-  }, [chartData, totalSamples]);
+  }, [chartData]);
 
   if (error) {
     return (
@@ -239,7 +252,7 @@ export const SubcladesPage: React.FC = () => {
           <Dna className="mx-auto mb-3 text-teal-500" size={48} />
           <p className="text-teal-400">Select a haplogroup or ethnicities to view distribution.</p>
         </motion.div>
-      ) : totalSamples === 0 ? (
+      ) : !data || data.total === 0 ? (
         <motion.div
           {...fadeInVariants}
           transition={{ duration: animConfig.duration }}
@@ -260,89 +273,79 @@ export const SubcladesPage: React.FC = () => {
             </h3>
             
             <div className="flex flex-col items-center gap-4 sm:gap-6">
-              <div className="relative w-full max-w-[320px] sm:max-w-[400px] aspect-square [&_*]:outline-none [&_*]:focus:outline-none">
-                <ResponsiveContainer width="100%" height="100%" className="outline-none focus:outline-none">
+              <div className="relative w-full max-w-[400px] aspect-square">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={chartData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      outerRadius="40%"
-                      innerRadius="28%"
-                      fill="#8884d8"
+                      outerRadius="45%"
+                      innerRadius="0%"
                       dataKey="value"
-                      paddingAngle={2}
+                      paddingAngle={0}
                       animationBegin={0}
                       animationDuration={reduceAnimations ? 0 : 800}
                       isAnimationActive={!reduceAnimations}
-                      stroke="transparent"
-                      strokeWidth={0}
+                      stroke="#fff"
+                      strokeWidth={2}
                       startAngle={90}
                       endAngle={-270}
                     >
                       {chartData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
-                          fill={colorMap[entry.ethnicity]}
-                          className="cursor-pointer"
-                          style={{ transition: reduceAnimations ? 'none' : 'opacity 0.2s' }}
+                          fill={colorMap[entry.name]}
                         />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      content={<CustomTooltip />} 
-                      animationDuration={0}
-                      isAnimationActive={false}
-                    />
+                    <Tooltip content={<CustomTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
                 
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="text-xl sm:text-2xl font-bold text-teal-100">
-                    {fmt(totalSamples)}
-                  </div>
-                  <div className="text-xs sm:text-sm text-teal-400">
-                    samples
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 pointer-events-none select-none">
+                <div className="absolute inset-0 pointer-events-none">
                   {labelPositions.map(({ item, angle, radiusPercent }) => {
                     const x = Math.cos(angle) * radiusPercent;
                     const y = -Math.sin(angle) * radiusPercent;
                     const angleDeg = (angle * 180) / Math.PI;
                     
                     let transformX = '-50%';
-                    let transformY = '-50%';
-                    
-                    if (angleDeg > -45 && angleDeg < 45) {
-                      transformX = '0%';
-                    } else if (angleDeg > 135 || angleDeg < -135) {
-                      transformX = '-100%';
-                    }
-                    
-                    if (angleDeg > 0) {
-                      transformY = '-100%';
-                    } else {
-                      transformY = '0%';
-                    }
+                    if (angleDeg > -45 && angleDeg < 45) transformX = '0%';
+                    else if (angleDeg > 135 || angleDeg < -135) transformX = '-100%';
                     
                     return (
                       <div
                         key={item.name}
-                        className="absolute whitespace-nowrap text-[10px] sm:text-xs font-semibold"
+                        className="absolute whitespace-nowrap text-xs sm:text-sm font-bold"
                         style={{
                           left: `calc(50% + ${x}%)`,
                           top: `calc(50% + ${y}%)`,
-                          transform: `translate(${transformX}, ${transformY})`,
+                          transform: `translate(${transformX}, -50%)`,
                         }}
                       >
-                        <span className="text-teal-100">{item.name}</span>
+                        <span className="text-white drop-shadow-lg">
+                          {item.name}: {item.percentage}%
+                        </span>
                       </div>
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Legend */}
+              <div className="w-full grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {data.subclades.map(subclade => (
+                  <div key={subclade.subclade} className="flex items-center gap-2 text-xs">
+                    <div 
+                      className="w-4 h-4 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: subcladeColorMap[subclade.subclade] }}
+                    />
+                    <span className="text-teal-100 truncate">
+                      {subclade.subclade} : {subclade.count} : {subclade.ancient_people}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
