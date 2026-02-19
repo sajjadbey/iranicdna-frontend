@@ -55,16 +55,6 @@ export const Header: React.FC = () => {
               <BarChart3 size={14} /> Analytics
             </Link>
             <Link
-              to="/subclades"
-              className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
-                isActive('/subclades')
-                  ? 'bg-white/10 text-white'
-                  : 'text-teal-100/90 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <PieChart size={14} /> Subclades
-            </Link>
-            <Link
               to="/communities"
               className={`text-sm font-medium flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                 isActive('/communities')
