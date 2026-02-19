@@ -11,6 +11,8 @@ interface Props {
     placeholder?: string;
 }
 
+const PAMIRI_SUB_ETHNICITIES = ['Ishkahisimite', 'Rushan', 'Wakhi', 'Sarikoli', 'Shughni'];
+
 // Explicit list of locations to exclude from display
 const HIDDEN_LOCATIONS = ['türk'];
 
@@ -23,6 +25,7 @@ export const LocationSelector: React.FC<Props> = ({
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [pamiriOpen, setPamiriOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Filter out hidden locations from the options
@@ -71,9 +74,12 @@ export const LocationSelector: React.FC<Props> = ({
                 >
                     <option value="">{placeholder}</option>
                     {filteredOptions.map((option) => (
-                        <option key={option} value={option}>
-                            {option}
-                        </option>
+                        <React.Fragment key={option}>
+                            <option value={option}>{option}</option>
+                            {option === 'Pamiri' && PAMIRI_SUB_ETHNICITIES.map(sub => (
+                                <option key={sub} value={sub}>  {sub}</option>
+                            ))}
+                        </React.Fragment>
                     ))}
                 </select>
             ) : (
@@ -115,22 +121,37 @@ export const LocationSelector: React.FC<Props> = ({
                                 </motion.button>
                                 
                                 {filteredOptions.map((option, index) => (
-                                    <motion.button
-                                        key={option}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ 
-                                            delay: 0.05 + (index + 1) * 0.03,
-                                            duration: 0.2 
-                                        }}
-                                        onClick={() => handleSelect(option)}
-                                        className={`text-sm rounded-md px-3 py-2 w-full text-left truncate transition-colors ${
-                                            value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
-                                        }`}
-                                        title={option}
-                                    >
-                                        {option}
-                                    </motion.button>
+                                    <React.Fragment key={option}>
+                                        <motion.button
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ 
+                                                delay: 0.05 + (index + 1) * 0.03,
+                                                duration: 0.2 
+                                            }}
+                                            onClick={() => option === 'Pamiri' ? setPamiriOpen(!pamiriOpen) : handleSelect(option)}
+                                            className={`text-sm rounded-md px-3 py-2 w-full text-left truncate transition-colors ${
+                                                value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
+                                            }`}
+                                            title={option}
+                                        >
+                                            {option} {option === 'Pamiri' && <ChevronDown size={14} className={`inline ml-1 transition-transform ${pamiriOpen ? 'rotate-180' : ''}`} />}
+                                        </motion.button>
+                                        {option === 'Pamiri' && pamiriOpen && PAMIRI_SUB_ETHNICITIES.map(sub => (
+                                            <motion.button
+                                                key={sub}
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                onClick={() => handleSelect(sub)}
+                                                className={`text-sm rounded-md px-3 py-2 pl-6 w-full text-left truncate transition-colors ${
+                                                    value === sub ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/40 text-teal-100 hover:bg-teal-700/60'
+                                                }`}
+                                            >
+                                                {sub}
+                                            </motion.button>
+                                        ))}
+                                    </React.Fragment>
                                 ))}
                             </motion.div>
                         )}
