@@ -98,7 +98,14 @@ export const AnalyticsPage: React.FC = () => {
         
         const response = await fetch(url);
         const ethnicitiesData: EthnicityDTO[] = await response.json();
-        setAllEthnicities(ethnicitiesData.map((e: EthnicityDTO) => e.name).sort());
+        const ethnicities = ethnicitiesData.map((e: EthnicityDTO) => e.name);
+        
+        // Add Pamiri if not present
+        if (!ethnicities.includes('Pamiri')) {
+          ethnicities.push('Pamiri');
+        }
+        
+        setAllEthnicities(ethnicities.sort());
       } catch (err) {
         console.error('Failed to fetch ethnicities:', err);
         setAllEthnicities([]);
