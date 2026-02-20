@@ -11,6 +11,7 @@ export const FamousIraniansPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
   const [allImagesLoaded, setAllImagesLoaded] = useState(false);
+  const [expandedQuote, setExpandedQuote] = useState(false);
 
   useEffect(() => {
     graphqlService.fetchFamousPeople()
@@ -80,6 +81,7 @@ export const FamousIraniansPage: React.FC = () => {
     setIsAutoPlaying(false);
     setImageLoading(true);
     setCurrentIndex(index);
+    setExpandedQuote(false);
   };
 
   const boldHaplogroup = (text: string, haplogroup: string) => {
@@ -139,14 +141,21 @@ export const FamousIraniansPage: React.FC = () => {
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                       {currentPerson.name}
                     </h2>
-                    <p className="text-xl text-amber-300/90 font-medium">{currentPerson.title}</p>
+                    <div 
+                      onClick={() => setExpandedQuote(!expandedQuote)}
+                      className="cursor-pointer bg-teal-900/30 border-l-4 border-teal-500 rounded-lg p-4 transition-all hover:bg-teal-900/40"
+                    >
+                      <p className="text-lg text-amber-300/90 font-medium mb-2">{currentPerson.title}</p>
+                      <p className={`text-base text-slate-300/90 leading-relaxed italic transition-all ${expandedQuote ? '' : 'line-clamp-2'}`}>
+                        "{boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}"
+                      </p>
+                      {!expandedQuote && currentPerson.description.length > 100 && (
+                        <span className="text-teal-400 text-sm mt-1 inline-block">Show more...</span>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="h-px bg-gradient-to-r from-teal-500/30 via-cyan-500/30 to-transparent"></div>
-                  
-                  <p className="text-base md:text-lg text-slate-200/80 leading-relaxed italic">
-                    "{boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}"
-                  </p>
                 </div>
 
                 <div className="space-y-6 mt-8">
