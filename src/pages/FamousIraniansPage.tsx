@@ -122,7 +122,7 @@ export const FamousIraniansPage: React.FC = () => {
                 />
               </div>
 
-              <div className="p-8 md:p-12 flex flex-col justify-between">
+              <div className="p-4 md:p-8 lg:p-12 flex flex-col justify-between">
                 <div className="space-y-6">
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 ring-1 ring-teal-500/20">
