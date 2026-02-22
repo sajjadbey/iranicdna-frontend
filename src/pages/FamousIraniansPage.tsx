@@ -104,8 +104,8 @@ export const FamousIraniansPage: React.FC = () => {
           <p className="text-teal-300/70 text-lg">Discover the legends who shaped history</p>
         </div>
 
-        <div className="relative max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-900/50 via-teal-900/30 to-slate-900/50 backdrop-blur-2xl rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+        <div className="relative max-w-6xl mx-auto px-2 sm:px-0">
+          <div className="bg-gradient-to-br from-slate-900/50 via-teal-900/30 to-slate-900/50 backdrop-blur-2xl rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative aspect-[4/5] md:aspect-auto">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-amber-500/10"></div>
@@ -122,8 +122,8 @@ export const FamousIraniansPage: React.FC = () => {
                 />
               </div>
 
-              <div className="p-4 md:p-8 lg:p-12 flex flex-col justify-between">
-                <div className="space-y-6">
+              <div className="p-3 sm:p-4 md:p-8 lg:p-12 flex flex-col justify-between min-h-[300px] sm:min-h-[400px]">
+                <div className="space-y-3 sm:space-y-4 md:space-y-6">
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 ring-1 ring-teal-500/20">
                       <Calendar size={16} className="text-teal-400" />
@@ -158,7 +158,7 @@ export const FamousIraniansPage: React.FC = () => {
                   <div className="h-px bg-gradient-to-r from-teal-500/30 via-cyan-500/30 to-transparent"></div>
                 </div>
 
-                <div className="space-y-6 mt-8">
+                <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
                   <div className="flex items-center justify-between gap-4">
                     <button
                       onClick={goToPrevious}
