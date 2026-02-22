@@ -124,33 +124,33 @@ export const FamousIraniansPage: React.FC = () => {
 
               <div className="p-3 sm:p-4 md:p-8 lg:p-12 flex flex-col justify-between min-h-[300px] sm:min-h-[400px]">
                 <div className="space-y-3 sm:space-y-4 md:space-y-6">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 ring-1 ring-teal-500/20">
-                      <Calendar size={16} className="text-teal-400" />
-                      <span className="text-teal-300 text-sm font-medium">{currentPerson.years}</span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-teal-500/10 ring-1 ring-teal-500/20">
+                      <Calendar size={14} className="text-teal-400 sm:w-4 sm:h-4" />
+                      <span className="text-teal-300 text-xs sm:text-sm font-medium">{currentPerson.years}</span>
                     </div>
                     {currentPerson.haplogroup && (
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 ring-1 ring-amber-500/20">
-                        <Dna size={16} className="text-amber-400" />
-                        <span className="text-amber-300 text-sm font-bold">{currentPerson.haplogroup}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-500/10 ring-1 ring-amber-500/20">
+                        <Dna size={14} className="text-amber-400 sm:w-4 sm:h-4" />
+                        <span className="text-amber-300 text-xs sm:text-sm font-bold">{currentPerson.haplogroup}</span>
                       </div>
                     )}
                   </div>
                   
                   <div>
-                    <h2 className="text-2xl md:text-4xl font-bold text-white mb-3">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3">
                       {currentPerson.name}
                     </h2>
                     <div 
                       onClick={() => setExpandedQuote(!expandedQuote)}
-                      className="cursor-pointer bg-teal-900/30 border-l-4 border-teal-500 rounded-lg p-3 md:p-4 transition-all hover:bg-teal-900/40"
+                      className="cursor-pointer bg-teal-900/30 border-l-2 sm:border-l-4 border-teal-500 rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 transition-all hover:bg-teal-900/40"
                     >
-                      <p className="text-base md:text-lg text-amber-300/90 font-medium mb-2">{currentPerson.title}</p>
-                      <p className={`text-sm md:text-base text-slate-300/90 leading-relaxed italic transition-all ${expandedQuote ? '' : 'line-clamp-2'}`}>
+                      <p className="text-sm sm:text-base md:text-lg text-amber-300/90 font-medium mb-1.5 sm:mb-2">{currentPerson.title}</p>
+                      <p className={`text-xs sm:text-sm md:text-base text-slate-300/90 leading-relaxed italic transition-all ${expandedQuote ? '' : 'line-clamp-2'}`}>
                         "{boldHaplogroup(currentPerson.description, currentPerson.haplogroup)}"
                       </p>
                       {!expandedQuote && currentPerson.description.length > 100 && (
-                        <span className="text-teal-400 text-xs md:text-sm mt-1 inline-block">Show more...</span>
+                        <span className="text-teal-400 text-[10px] sm:text-xs md:text-sm mt-1 inline-block">Show more...</span>
                       )}
                     </div>
                   </div>
@@ -159,24 +159,24 @@ export const FamousIraniansPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4 sm:space-y-6 mt-6 sm:mt-8">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4">
                     <button
                       onClick={goToPrevious}
-                      className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
+                      className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
                       aria-label="Previous"
                     >
-                      <ChevronLeft size={24} />
+                      <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
                     </button>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5 sm:gap-2">
                       {people.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => goToSlide(index)}
-                          className={`h-2 rounded-full transition-all ${
+                          className={`h-1.5 sm:h-2 rounded-full transition-all ${
                             index === currentIndex
-                              ? 'w-8 bg-gradient-to-r from-teal-400 to-cyan-400'
-                              : 'w-2 bg-white/20 hover:bg-white/30'
+                              ? 'w-6 sm:w-8 bg-gradient-to-r from-teal-400 to-cyan-400'
+                              : 'w-1.5 sm:w-2 bg-white/20 hover:bg-white/30'
                           }`}
                           aria-label={`Slide ${index + 1}`}
                         />
@@ -185,21 +185,21 @@ export const FamousIraniansPage: React.FC = () => {
 
                     <button
                       onClick={goToNext}
-                      className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
+                      className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white/5 hover:bg-white/10 text-teal-300 transition-all ring-1 ring-white/10 hover:ring-white/20"
                       aria-label="Next"
                     >
-                      <ChevronRight size={24} />
+                      <ChevronRight size={20} className="sm:w-6 sm:h-6" />
                     </button>
                   </div>
 
                   <button
                     onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600/20 to-cyan-600/20 hover:from-teal-600/30 hover:to-cyan-600/30 text-teal-200 font-medium transition-all ring-1 ring-teal-500/20"
+                    className="w-full py-2 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-600/20 to-cyan-600/20 hover:from-teal-600/30 hover:to-cyan-600/30 text-teal-200 text-sm sm:text-base font-medium transition-all ring-1 ring-teal-500/20"
                   >
                     {isAutoPlaying ? '⏸ Pause' : '▶ Play'} Slideshow
                   </button>
 
-                  <div className="text-center text-sm text-slate-400">
+                  <div className="text-center text-xs sm:text-sm text-slate-400">
                     {currentIndex + 1} of {people.length}
                   </div>
                 </div>
