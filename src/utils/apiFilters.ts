@@ -14,6 +14,8 @@ export interface SampleFilters {
   // Cultural filters
   ethnicity?: string;
   ethnicity_contains?: string;
+  sub_ethnicity?: string;
+  sub_ethnicity_contains?: string;
   tribe?: string;
   tribe_contains?: string;
   clan?: string;

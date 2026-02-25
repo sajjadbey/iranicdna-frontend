@@ -46,10 +46,12 @@ export const AnalyticsPage: React.FC = () => {
   const [allCountriesBase, setAllCountriesBase] = useState<string[]>([]);
   const [allProvincesBase, setAllProvincesBase] = useState<ProvinceDTO[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
+  const [allSubEthnicities, setAllSubEthnicities] = useState<string[]>([]);
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedEthnicity, setSelectedEthnicity] = useState<string | null>(null);
+  const [selectedSubEthnicity, setSelectedSubEthnicity] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +117,28 @@ export const AnalyticsPage: React.FC = () => {
     fetchEthnicities();
   }, [selectedCountry, selectedProvince]);
 
+  // Fetch sub-ethnicities based on selected ethnicity
+  useEffect(() => {
+    const fetchSubEthnicities = async () => {
+      try {
+        let url = API_ENDPOINTS.subEthnicities;
+        
+        if (selectedEthnicity) {
+          url += `?ethnicity=${encodeURIComponent(selectedEthnicity)}`;
+        }
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        setAllSubEthnicities(data.map((se: EthnicityDTO) => se.name).sort());
+      } catch (err) {
+        console.error('Failed to fetch sub-ethnicities:', err);
+        setAllSubEthnicities([]);
+      }
+    };
+    
+    fetchSubEthnicities();
+  }, [selectedEthnicity]);
+
   // Filter countries based on selected ethnicity from samples
   const filteredCountries = useMemo(() => {
     if (!selectedEthnicity) return allCountriesBase;
@@ -174,6 +198,13 @@ export const AnalyticsPage: React.FC = () => {
     }
   }, [filteredEthnicities, selectedEthnicity]);
 
+  // Reset sub-ethnicity if it's not in the newly filtered list
+  useEffect(() => {
+    if (selectedSubEthnicity && !allSubEthnicities.includes(selectedSubEthnicity)) {
+      setSelectedSubEthnicity(null);
+    }
+  }, [allSubEthnicities, selectedSubEthnicity]);
+
   // Handler function to sync map click with filters
   const handleProvinceClick = (provinceName: string) => {
     // If clicking the currently selected province, unselect it
@@ -209,6 +240,7 @@ export const AnalyticsPage: React.FC = () => {
           ...(selectedCountry && { country: selectedCountry }),
           ...(selectedProvince && { province: selectedProvince }),
           ...(selectedEthnicity && { ethnicity: selectedEthnicity }),
+          ...(selectedSubEthnicity && { sub_ethnicity: selectedSubEthnicity }),
         };
         
         const url = buildSamplesUrl(API_ENDPOINTS.samples, filters);
@@ -235,7 +267,7 @@ export const AnalyticsPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [selectedCountry, selectedProvince, selectedEthnicity]);
+  }, [selectedCountry, selectedProvince, selectedEthnicity, selectedSubEthnicity]);
 
   // Y-DNA calculations
   const yRoot = useMemo(() => countMap(samples, 'y_dna'), [samples]);
@@ -357,6 +389,13 @@ export const AnalyticsPage: React.FC = () => {
               value={selectedEthnicity}
               onChange={setSelectedEthnicity}
               placeholder="All Ethnicities"
+            />
+            <LocationSelector
+              label="Sub-Ethnicity"
+              options={allSubEthnicities}
+              value={selectedSubEthnicity}
+              onChange={setSelectedSubEthnicity}
+              placeholder="All Sub-Ethnicities"
             />
             <LocationSelector
               label="Country"

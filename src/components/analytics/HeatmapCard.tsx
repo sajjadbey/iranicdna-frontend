@@ -26,6 +26,7 @@ interface HeatmapPoint {
 interface Props {
   selectedCountry?: string | null;
   selectedEthnicity?: string | null;
+  selectedSubEthnicity?: string | null;
 }
 
 // Component to handle map view updates
@@ -57,7 +58,8 @@ const getColor = (shrunkFreq: number): string => {
 
 export const HeatmapCard: React.FC<Props> = ({ 
   selectedCountry, 
-  selectedEthnicity 
+  selectedEthnicity,
+  selectedSubEthnicity 
 }) => {
   const [selectedHaplogroup, setSelectedHaplogroup] = useState<string | null>(null);
   const [heatmapData, setHeatmapData] = useState<HeatmapPoint[]>([]);
@@ -80,6 +82,7 @@ export const HeatmapCard: React.FC<Props> = ({
         }
         if (selectedCountry) haplogroupParams.append('country', selectedCountry);
         if (selectedEthnicity) haplogroupParams.append('ethnicity', selectedEthnicity);
+        if (selectedSubEthnicity) haplogroupParams.append('sub_ethnicity', selectedSubEthnicity);
         
         const haplogroupUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${haplogroupParams.toString()}`;
         console.log('[DEBUG:HeatmapCard] Fetching haplogroup data from:', haplogroupUrl);
@@ -97,6 +100,7 @@ export const HeatmapCard: React.FC<Props> = ({
         const totalParams = new URLSearchParams();
         if (selectedCountry) totalParams.append('country', selectedCountry);
         if (selectedEthnicity) totalParams.append('ethnicity', selectedEthnicity);
+        if (selectedSubEthnicity) totalParams.append('sub_ethnicity', selectedSubEthnicity);
         
         const totalUrl = `${API_ENDPOINTS.haplogroupHeatmap}?${totalParams.toString()}`;
         console.log('[DEBUG:HeatmapCard] Fetching total data from:', totalUrl);
@@ -123,7 +127,7 @@ export const HeatmapCard: React.FC<Props> = ({
     };
     
     fetchData();
-  }, [selectedHaplogroup, selectedCountry, selectedEthnicity]);
+  }, [selectedHaplogroup, selectedCountry, selectedEthnicity, selectedSubEthnicity]);
 
   // Calculate Empirical Bayes shrunk frequencies and statistics
   const statisticalData = useMemo(() => {
@@ -398,7 +402,7 @@ export const HeatmapCard: React.FC<Props> = ({
                   pValue: point.pValue,
                   isSignificant: point.isSignificant
                 },
-                geometry: point.geometry as any
+                geometry: point.geometry as import('geojson').Geometry
               };
               
               return (

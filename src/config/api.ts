@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
   provinces: `${ANALYTICS_API_URL}/genetics/provinces/`,
   cities: `${ANALYTICS_API_URL}/genetics/cities/`,
   ethnicities: `${ANALYTICS_API_URL}/genetics/ethnicities/`,
+  subEthnicities: `${ANALYTICS_API_URL}/genetics/sub-ethnicities/`,
   tribes: `${ANALYTICS_API_URL}/genetics/tribes/`,
   clans: `${ANALYTICS_API_URL}/genetics/clans/`,
   
