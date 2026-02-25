@@ -6,26 +6,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Props {
     label: string;
     options: string[];
+    subOptionsMap?: Record<string, string[]>;
     value: string | null;
+    subValue?: string | null;
     onChange: (value: string | null) => void;
+    onSubChange?: (sub: string | null, parent: string | null) => void;
     placeholder?: string;
 }
-
-const PAMIRI_SUB_ETHNICITIES = ['Ishkahisimite', 'Rushan', 'Wakhi', 'Sarikoli', 'Shughni'];
 
 // Explicit list of locations to exclude from display
 const HIDDEN_LOCATIONS = ['türk'];
 
 export const LocationSelector: React.FC<Props> = ({ 
     label, 
-    options, 
-    value, 
-    onChange, 
+    options,
+    subOptionsMap,
+    value,
+    subValue,
+    onChange,
+    onSubChange,
     placeholder = 'All' 
 }) => {
     const [isMobile, setIsMobile] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [pamiriOpen, setPamiriOpen] = useState(false);
+    const [openSubGroup, setOpenSubGroup] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Filter out hidden locations from the options
@@ -53,31 +57,44 @@ export const LocationSelector: React.FC<Props> = ({
         };
     }, [dropdownRef, isMobile]);
     
-    const handleSelect = (optionValue: string | null) => {
+    const handleSelect = (optionValue: string | null, preventClose = false) => {
         onChange(optionValue);
-        if (!isMobile) {
+        if (!isMobile && !preventClose) {
             setIsOpen(false);
         }
     }
 
     return (
         <div className="w-full">
-            <label className="block text-sm font-medium text-teal-200 mb-2 flex items-center gap-1">
+            <label className="flex text-sm font-medium text-teal-200 mb-2 items-center gap-1">
                 <Filter size={14} /> {label}
             </label>
             {isMobile ? (
 
                 <select
-                    value={value ?? ''}
-                    onChange={(e) => onChange(e.target.value || null)}
+                    value={subValue ? `${value}::::${subValue}` : (value ?? '')}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val) {
+                            onChange(null);
+                            onSubChange?.(null, null);
+                        } else if (val.includes('::::')) {
+                            const [parent, sub] = val.split('::::');
+                            onChange(parent);
+                            onSubChange?.(sub, parent);
+                        } else {
+                            onChange(val);
+                            onSubChange?.(null, val);
+                        }
+                    }}
                     className="w-full rounded-lg bg-teal-900/70 text-teal-100 px-4 py-2 border border-teal-600 focus:ring-2 focus:ring-amber-500"
                 >
                     <option value="">{placeholder}</option>
                     {filteredOptions.map((option) => (
                         <React.Fragment key={option}>
                             <option value={option}>{option}</option>
-                            {option === 'Pamiri' && PAMIRI_SUB_ETHNICITIES.map(sub => (
-                                <option key={sub} value={sub}>  {sub}</option>
+                            {subOptionsMap?.[option] && subOptionsMap[option].map(sub => (
+                                <option key={sub} value={`${option}::::${sub}`}>  {sub}</option>
                             ))}
                         </React.Fragment>
                     ))}
@@ -90,7 +107,7 @@ export const LocationSelector: React.FC<Props> = ({
                         onClick={() => setIsOpen(!isOpen)}
                         className="w-full text-left rounded-lg px-4 py-3 bg-teal-900/70 text-teal-100 flex justify-between items-center ring-1 ring-teal-600 hover:ring-teal-500 transition-shadow"
                     >
-                        <span>{value ?? placeholder}</span>
+                        <span>{subValue ?? value ?? placeholder}</span>
                         <ChevronDown 
                             size={16} 
                             className={`text-teal-300 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
@@ -129,23 +146,33 @@ export const LocationSelector: React.FC<Props> = ({
                                                 delay: 0.05 + (index + 1) * 0.03,
                                                 duration: 0.2 
                                             }}
-                                            onClick={() => option === 'Pamiri' ? setPamiriOpen(!pamiriOpen) : handleSelect(option)}
+                                            onClick={() => {
+                                                const hasSub = !!subOptionsMap?.[option];
+                                                handleSelect(option, hasSub);
+                                                onSubChange?.(null, option);
+                                                if (hasSub) {
+                                                    setOpenSubGroup(openSubGroup === option ? null : option);
+                                                }
+                                            }}
                                             className={`text-sm rounded-md px-3 py-2 w-full text-left truncate transition-colors ${
-                                                value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
+                                                value === option && !subValue ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/60 text-teal-100 hover:bg-teal-700/80'
                                             }`}
                                             title={option}
                                         >
-                                            {option} {option === 'Pamiri' && <ChevronDown size={14} className={`inline ml-1 transition-transform ${pamiriOpen ? 'rotate-180' : ''}`} />}
+                                            {option} {subOptionsMap?.[option] && <ChevronDown size={14} className={`inline ml-1 transition-transform ${openSubGroup === option ? 'rotate-180' : ''}`} />}
                                         </motion.button>
-                                        {option === 'Pamiri' && pamiriOpen && PAMIRI_SUB_ETHNICITIES.map(sub => (
+                                        {subOptionsMap?.[option] && openSubGroup === option && subOptionsMap[option].map(sub => (
                                             <motion.button
                                                 key={sub}
                                                 initial={{ opacity: 0, x: -10 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ duration: 0.2 }}
-                                                onClick={() => handleSelect(sub)}
+                                                onClick={() => {
+                                                    handleSelect(option);
+                                                    onSubChange?.(sub, option);
+                                                }}
                                                 className={`text-sm rounded-md px-3 py-2 pl-6 w-full text-left truncate transition-colors ${
-                                                    value === sub ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/40 text-teal-100 hover:bg-teal-700/60'
+                                                    subValue === sub && value === option ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-teal-800/40 text-teal-100 hover:bg-teal-700/60'
                                                 }`}
                                             >
                                                 {sub}

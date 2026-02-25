@@ -18,6 +18,11 @@ import { buildSamplesUrl, FILTER_PRESETS } from '../utils/apiFilters';
 interface ProvinceDTO { name: string; country: string }
 interface EthnicityDTO { name: string }
 
+interface SubEthnicityDTO { 
+  name: string;
+  ethnicity: string;
+}
+
 // Helper functions
 const countMap = (samples: Sample[], field: 'y_dna' | 'mt_dna'): Record<string, number> => {
   return samples.reduce((acc: Record<string, number>, s) => {
@@ -46,7 +51,7 @@ export const AnalyticsPage: React.FC = () => {
   const [allCountriesBase, setAllCountriesBase] = useState<string[]>([]);
   const [allProvincesBase, setAllProvincesBase] = useState<ProvinceDTO[]>([]);
   const [allEthnicities, setAllEthnicities] = useState<string[]>([]);
-  const [allSubEthnicities, setAllSubEthnicities] = useState<string[]>([]);
+  const [subEthnicitiesMap, setSubEthnicitiesMap] = useState<Record<string, string[]>>({});
   
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
@@ -102,11 +107,6 @@ export const AnalyticsPage: React.FC = () => {
         const ethnicitiesData: EthnicityDTO[] = await response.json();
         const ethnicities = ethnicitiesData.map((e: EthnicityDTO) => e.name);
         
-        // Add Pamiri if not present
-        if (!ethnicities.includes('Pamiri')) {
-          ethnicities.push('Pamiri');
-        }
-        
         setAllEthnicities(ethnicities.sort());
       } catch (err) {
         console.error('Failed to fetch ethnicities:', err);
@@ -117,27 +117,32 @@ export const AnalyticsPage: React.FC = () => {
     fetchEthnicities();
   }, [selectedCountry, selectedProvince]);
 
-  // Fetch sub-ethnicities based on selected ethnicity
+  // Fetch all sub-ethnicities once and map them to their parent ethnicities
   useEffect(() => {
-    const fetchSubEthnicities = async () => {
+    const fetchAllSubEthnicities = async () => {
       try {
-        let url = API_ENDPOINTS.subEthnicities;
+        const response = await fetch(API_ENDPOINTS.subEthnicities);
+        const data: SubEthnicityDTO[] = await response.json();
         
-        if (selectedEthnicity) {
-          url += `?ethnicity=${encodeURIComponent(selectedEthnicity)}`;
-        }
+        const map: Record<string, string[]> = {};
+        data.forEach((se) => {
+          if (se.ethnicity) {
+            if (!map[se.ethnicity]) map[se.ethnicity] = [];
+            map[se.ethnicity].push(se.name);
+          }
+        });
         
-        const response = await fetch(url);
-        const data = await response.json();
-        setAllSubEthnicities(data.map((se: EthnicityDTO) => se.name).sort());
+        // sort arrays
+        Object.keys(map).forEach(k => map[k].sort());
+        setSubEthnicitiesMap(map);
       } catch (err) {
         console.error('Failed to fetch sub-ethnicities:', err);
-        setAllSubEthnicities([]);
+        setSubEthnicitiesMap({});
       }
     };
     
-    fetchSubEthnicities();
-  }, [selectedEthnicity]);
+    fetchAllSubEthnicities();
+  }, []);
 
   // If the user un-selects the main ethnicity, immediately reset the sub_ethnicity too
   useEffect(() => {
@@ -221,10 +226,13 @@ export const AnalyticsPage: React.FC = () => {
 
   // Reset sub-ethnicity if it's not in the newly filtered list
   useEffect(() => {
-    if (selectedSubEthnicity && !allSubEthnicities.includes(selectedSubEthnicity)) {
-      setSelectedSubEthnicity(null);
+    if (selectedEthnicity && selectedSubEthnicity) {
+      const validSubs = subEthnicitiesMap[selectedEthnicity] || [];
+      if (!validSubs.includes(selectedSubEthnicity)) {
+        setSelectedSubEthnicity(null);
+      }
     }
-  }, [allSubEthnicities, selectedSubEthnicity]);
+  }, [subEthnicitiesMap, selectedEthnicity, selectedSubEthnicity]);
 
   // Handler function to sync map click with filters
   const handleProvinceClick = (provinceName: string) => {
@@ -407,16 +415,12 @@ export const AnalyticsPage: React.FC = () => {
             <LocationSelector
               label="Ethnicity"
               options={filteredEthnicities}
+              subOptionsMap={subEthnicitiesMap}
               value={selectedEthnicity}
+              subValue={selectedSubEthnicity}
               onChange={setSelectedEthnicity}
+              onSubChange={(sub) => setSelectedSubEthnicity(sub)}
               placeholder="All Ethnicities"
-            />
-            <LocationSelector
-              label="Sub-Ethnicity"
-              options={allSubEthnicities}
-              value={selectedSubEthnicity}
-              onChange={setSelectedSubEthnicity}
-              placeholder="All Sub-Ethnicities"
             />
             <LocationSelector
               label="Country"
