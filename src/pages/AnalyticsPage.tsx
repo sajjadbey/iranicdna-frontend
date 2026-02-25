@@ -139,6 +139,13 @@ export const AnalyticsPage: React.FC = () => {
     fetchSubEthnicities();
   }, [selectedEthnicity]);
 
+  // If the user un-selects the main ethnicity, immediately reset the sub_ethnicity too
+  useEffect(() => {
+    if (!selectedEthnicity && selectedSubEthnicity) {
+      setSelectedSubEthnicity(null);
+    }
+  }, [selectedEthnicity, selectedSubEthnicity]);
+
   // Filter countries based on selected ethnicity from samples
   const filteredCountries = useMemo(() => {
     if (!selectedEthnicity) return allCountriesBase;
@@ -146,12 +153,17 @@ export const AnalyticsPage: React.FC = () => {
     // Get unique countries from samples with the selected ethnicity
     const countriesWithEthnicity = new Set(
       samples
-        .filter(s => s.ethnicity === selectedEthnicity && s.country)
+        .filter(s => {
+          if (selectedSubEthnicity) {
+            return s.ethnicity === selectedEthnicity && s.sub_ethnicity === selectedSubEthnicity && s.country;
+          }
+          return s.ethnicity === selectedEthnicity && s.country;
+        })
         .map(s => s.country as string)
     );
     
     return allCountriesBase.filter(c => countriesWithEthnicity.has(c));
-  }, [allCountriesBase, selectedEthnicity, samples]);
+  }, [allCountriesBase, selectedEthnicity, selectedSubEthnicity, samples]);
 
   // Filter provinces based on selected country and ethnicity
   const filteredProvinces = useMemo(() => {
@@ -160,11 +172,20 @@ export const AnalyticsPage: React.FC = () => {
     // Get provinces directly from filtered samples (works for both with/without ethnicity)
     const provincesSet = new Set(
       samples
-        .filter(s => s.province)
+        .filter(s => {
+          if (!s.province) return false;
+          if (selectedSubEthnicity) {
+             return s.ethnicity === selectedEthnicity && s.sub_ethnicity === selectedSubEthnicity;
+          }
+          if (selectedEthnicity) {
+             return s.ethnicity === selectedEthnicity;
+          }
+          return true;
+        })
         .map(s => s.province as string)
     );
     return Array.from(provincesSet).sort();
-  }, [selectedCountry, samples]);
+  }, [selectedCountry, selectedEthnicity, selectedSubEthnicity, samples]);
 
   // Ethnicities are already filtered by the server based on location
   const filteredEthnicities = useMemo(() => {
@@ -453,6 +474,7 @@ export const AnalyticsPage: React.FC = () => {
               <HeatmapCard
                 selectedCountry={selectedCountry}
                 selectedEthnicity={selectedEthnicity}
+                selectedSubEthnicity={selectedSubEthnicity}
               />
             </div>
           </motion.div>
